@@ -20,6 +20,26 @@ const sellerSchema = mongoose.Schema({
     address: {
         type: String,
         require: true
+    },
+    otp: {
+        type: String,
+        default: null
+    },
+    otpExpireAt: {
+        type: Date,
+        default: null
+    },
+    resetToken: {
+        type: String,
+        default: null
+    },
+    resetTokenExpireAt: {
+        type: Date,
+        default: null
+    },
+    isVerify: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
