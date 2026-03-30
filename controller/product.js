@@ -5,10 +5,10 @@ import fs from 'fs';
 export const createProduct = async (req, res) => {
     try {
 
-        const { name, price, brand, stock } = req.body;
+        const { name, price, brand, stock, categoryId } = req.body;
         console.log(req.file.filename, "fle");
         const image = req.file.filename;
-        if (!name || !price || !brand || !image || !stock) {
+        if (!name || !price || !brand || !image || !stock || !categoryId) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"
@@ -16,7 +16,7 @@ export const createProduct = async (req, res) => {
         }
 
         const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename
+            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId
         }
         await Product.create(payload);
         return res.status(201).json({
@@ -92,7 +92,7 @@ export const deleteproduct = async (req, res) => {
 
 export const updateproduct = async (req, res) => {
     try {
-        console.log(req.file,"file")
+        console.log(req.file, "file")
         const { name, price, brand, stock, image } = req.body;
 
         const payload = {

@@ -10,6 +10,7 @@ const port = process.env.PORT;
 app.use('/api',router);
 
 app.use("/image", express.static("public/product"));    
+app.use("/category_Image", express.static("public/category"));    
 app.listen(port, () => {
     console.log("server running",port);
 })
