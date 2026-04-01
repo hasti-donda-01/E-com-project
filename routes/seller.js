@@ -1,14 +1,18 @@
 
 
 import express from 'express';
-import { login, registerSeller, verifyEmail, verifyOTP } from '../controller/seller.js';
+import { changePassword, login, logout, registerSeller, resetPassword, verifyEmail, verifyOTP } from '../auth/seller.js';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.post('/create', registerSeller);
 router.post('/verifyOTP', verifyOTP);
 router.post('/login', login);
+router.post('/logout/:id', logout);
 router.post('/verifyEmail', verifyEmail);
+router.post('/resetPassword', resetPassword);
+router.post('/changePassword', auth(["seller"]), changePassword);
 
 
 

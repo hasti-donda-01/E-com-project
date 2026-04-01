@@ -12,10 +12,10 @@ export const auth = (role) => (req, res, next) => {
         }
         const token = a.split(' ')[1];
         console.log(token, "token");
-        const decode = jwt.verify(token, 'abcdefghijklmnop');
+        const decode = jwt.verify(token, process.env.PRIVATEKEY);
         req.user = decode
-
-        // console.log(decode.role, "decode");
+        console.log(decode,"decode")
+        console.log(decode.role, "decode");
         if (!role.includes(decode.role))
 
             return res.status(400).json({

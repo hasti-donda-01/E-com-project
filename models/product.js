@@ -25,11 +25,6 @@ const productSchema = mongoose.Schema({
         type: String,
         require: true,
     },
-    role: {
-        type: String,
-        enum: ["admin", "seller", "customer"],
-        default: 'customer'
-    },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'

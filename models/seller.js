@@ -1,48 +1,39 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+
 
 const sellerSchema = mongoose.Schema({
-    name: {
-        type: String,
-        require: true
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
-    email: {
+    storeName: {
         type: String,
-        require: true
+        required: true
     },
-    password: {
+    storeDesc: {
         type: String,
-        require: true
+        required: true
     },
-    phone: {
+    category: {
         type: String,
-        require: true
+        required: true
+    },
+    businessType: {
+        type: String,
+        required: true
+    },
+    gstin: {
+        type: String,
+        required: true
+    },
+    panNumber: {
+        type: String,
+        required: true
     },
     address: {
         type: String,
-        require: true
-    },
-    otp: {
-        type: String,
-        default: null
-    },
-    otpExpireAt: {
-        type: Date,
-        default: null
-    },
-    resetToken: {
-        type: String,
-        default: null
-    },
-    resetTokenExpireAt: {
-        type: Date,
-        default: null
-    },
-    isVerify: {
-        type: Boolean,
-        default: false
+        required: true
     }
-}, {
-    timestamps: true
-})
+});
 
-export const Seller = mongoose.model('Seller', sellerSchema);
+export const Seller = mongoose.model('Seller', sellerSchema)

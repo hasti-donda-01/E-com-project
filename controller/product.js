@@ -1,4 +1,3 @@
-import { assert } from "node:console";
 import { Product } from "../models/product.js";
 import fs from 'fs';
 
@@ -106,6 +105,24 @@ export const updateproduct = async (req, res) => {
             success: true,
             data: product
         })
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+export const totalProduct = async (req, res) => {
+
+    try {
+        const product = await Product.find();
+        return res.status(200).json({
+            message: "get successfully",
+            data: product.length + " " + "product",
+            success: true
+        })
+
     } catch (error) {
         return res.status(500).json({
             message: error.message,
