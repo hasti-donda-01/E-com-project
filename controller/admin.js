@@ -139,4 +139,41 @@ export const getallproducts = async (req, res) => {
     }
 }
 
-// export const getall
+export const accountstatus = async (req, res) => {
+    try {
+        const user = await User.findOne({ _id: req.params.id });
+        console.log(user);
+        if (!user) {
+            return res.status(404).json({
+                messsage: "user ot found",
+                success: false
+            })
+        }
+
+        if (user.role == 'Admin') {
+            return res.status(400).json({
+                message: 'You can not block or unblock admin',
+                success: false
+            })
+        }
+        if (user.status == 'blocked') {
+            user.status = "unblocked";
+            user.save()
+        }
+        else {
+            user.status = "blocked";
+            user.save()
+        }
+
+        return res.status(200).json({
+            message: "done",
+            success: true
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}

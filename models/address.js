@@ -13,6 +13,10 @@ const addressSchema = mongoose.Schema({
         type: String,
         require: true
     },
+    pincode: {
+        type: String,
+        require: true
+    },
     country: {
         type: String,
         require: true
@@ -22,6 +26,13 @@ const addressSchema = mongoose.Schema({
         enum: ['home', 'work', 'other'],
         default: 'home'
     },
+    addressline: {
+        type: String,
+        require: true
+    },
+    addressline2: {
+        type: String,
+    },
 
 });
-// export const 
+export const Address = mongoose.model('Address', addressSchema)

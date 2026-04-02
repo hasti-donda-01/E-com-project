@@ -1,0 +1,5 @@
+$kind: http-request
+name: update product
+url: ""
+method: GET
+order: 3236531402558151

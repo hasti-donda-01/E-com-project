@@ -53,6 +53,11 @@ const userSchema = mongoose.Schema({
     isActive: {
         type: Boolean,
         default: false
+    },
+    status: {
+        type: String,
+        enum: ["blocked", "unblocked"],
+        default: "unblocked"
     }
 }, {
     timestamps: true

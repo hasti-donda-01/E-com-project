@@ -1,0 +1,5 @@
+$kind: http-request
+name: update quantity
+url: ""
+method: GET
+order: 1775139244868

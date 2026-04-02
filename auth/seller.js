@@ -86,7 +86,6 @@ export const registerSeller = async (req, res) => {
             const payloadseller = {
                 userId: createduser._id,
                 storeName,
-
                 storeDesc,
                 category,
                 businessType,

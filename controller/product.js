@@ -4,10 +4,10 @@ import fs from 'fs';
 export const createProduct = async (req, res) => {
     try {
 
-        const { name, price, brand, stock, categoryId } = req.body;
+        const { name, price, brand, stock, categoryId, user } = req.body;
         console.log(req.file.filename, "fle");
         const image = req.file.filename;
-        if (!name || !price || !brand || !image || !stock || !categoryId) {
+        if (!name || !price || !brand || !image || !stock || !categoryId || !user) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"
@@ -15,7 +15,7 @@ export const createProduct = async (req, res) => {
         }
 
         const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId
+            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId, user
         }
         await Product.create(payload);
         return res.status(201).json({
@@ -105,10 +105,10 @@ export const deleteproduct = async (req, res) => {
 export const updateproduct = async (req, res) => {
     try {
         console.log(req.file, "file")
-        const { name, price, brand, stock, image } = req.body;
+        const { name, price, brand, stock, image, user } = req.body;
 
         const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename
+            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, user, stock, imagename: req.file.filename
         }
 
         const product = await Product.findOneAndUpdate({ _id: req.params.id }, { $set: payload });
@@ -160,7 +160,7 @@ export const productbycategory = async (req, res) => {
         const products = await Product.find({ categoryId: req.params.id }).skip((page - 1) * perPage).limit(perPage).exec();;
         return res.status(200).json({
             messsage: "done",
-            data: [products, "totalpage : " + totalpage, "count : " + products.length, "page no.: "  + page],
+            data: [products, "totalpage : " + totalpage, "count : " + products.length, "page no.: " + page],
             success: true
         })
 
