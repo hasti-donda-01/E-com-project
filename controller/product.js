@@ -32,11 +32,24 @@ export const createProduct = async (req, res) => {
 
 export const getproducts = async (req, res) => {
     try {
-        const products = await Product.find();
+
+
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 3;
+        const totlaPost = await Product.countDocuments();
+        const totalpage = Math.ceil(totlaPost / perPage);
+        if (page > totalpage) {
+            return res.status(404).json({
+                message: "page not found",
+                success: false
+            })
+        }
+
+        const products = await Product.find().skip((page - 1) * perPage).limit(perPage).exec();
         console.log(products)
         return res.status(200).json({
             message: "products get successfully",
-            data: products,
+            data: [products, totalpage, page],
             success: true
         })
     } catch (error) {
@@ -120,6 +133,34 @@ export const totalProduct = async (req, res) => {
         return res.status(200).json({
             message: "get successfully",
             data: product.length + " " + "product",
+            success: true
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+export const productbycategory = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 3;
+        const totlaPost = await Product.countDocuments();
+        const totalpage = Math.ceil(totlaPost / perPage);
+        if (page > totalpage) {
+            return res.status(404).json({
+                message: "page not found",
+                success: false
+            })
+        }
+
+        const products = await Product.find({ categoryId: req.params.id }).skip((page - 1) * perPage).limit(perPage).exec();;
+        return res.status(200).json({
+            messsage: "done",
+            data: [products, "totalpage : " + totalpage, "count : " + products.length, "page no.: "  + page],
             success: true
         })
 

@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt';
 
 console.log(path.extname('index.html'))
 import fs from 'fs';
+import { Admin } from "../models/admin.js";
 const hello = fs.readFileSync('./index.html', 'utf8')
 
 const transporter = nodemailer.createTransport({
@@ -33,10 +34,6 @@ export const registerSeller = async (req, res) => {
                 success: false
             })
         }
-
-
-
-
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
@@ -81,6 +78,7 @@ export const registerSeller = async (req, res) => {
 
         const createduser = await User.create(payload);
         console.log("createduser", createduser)
+
         if (role == "seller") {
             const { storeName, storeDesc, category, businessType, gstin, panNumber } = req.body
             const a = await User.findOne({ _id: createduser._id });
@@ -88,6 +86,7 @@ export const registerSeller = async (req, res) => {
             const payloadseller = {
                 userId: createduser._id,
                 storeName,
+
                 storeDesc,
                 category,
                 businessType,
@@ -103,6 +102,33 @@ export const registerSeller = async (req, res) => {
             return res.status(201).json({
                 message: "done",
                 data: sellerWithUser,
+                success: true
+            })
+        }
+
+
+        if (role == "Admin") {
+            const admin = await Admin.find();
+            console.log(admin, "admin");
+
+
+            if (admin.length == 1) {
+                return res.status(400).json({
+                    message: "You can not register as an admin",
+                    success: false
+                })
+            }
+
+            if (password !== confirm_password) {
+                return res.status(400).json({
+                    message: "password does not match! ",
+                    success: false
+                })
+            }
+            const hashpassword = await bcrypt.hash(password, 10)
+            await Admin.create({ name, email, phone, password: hashpassword, confirm_password });
+            return res.status(200).json({
+                message: "done",
                 success: true
             })
         }
@@ -337,6 +363,9 @@ export const changePassword = async (req, res) => {
         })
     }
 }
+
+
+
 
 
 // .cookie('AccessToken', token, {

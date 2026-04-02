@@ -17,10 +17,6 @@ const userSchema = mongoose.Schema({
         type: String,
         require: true
     },
-    address: {
-        type: String,
-        require: true
-    },
     otp: {
         type: String,
         default: null
@@ -51,8 +47,12 @@ const userSchema = mongoose.Schema({
     // },
     role: {
         type: String,
-        enum: ["admin", "customer", "seller"],
+        enum: ["Admin", "customer", "seller"],
         default: "customer"
+    },
+    isActive: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

@@ -29,10 +29,6 @@ const sellerSchema = mongoose.Schema({
     panNumber: {
         type: String,
         required: true
-    },
-    address: {
-        type: String,
-        required: true
     }
 });
 
