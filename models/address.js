@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const addressSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,6 +34,10 @@ const addressSchema = mongoose.Schema({
     addressline2: {
         type: String,
     },
+    isDefault: {
+        type: Boolean,
+        default: false
+    }
 
 });
 export const Address = mongoose.model('Address', addressSchema)

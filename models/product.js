@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 const productSchema = mongoose.Schema({
     name: {
@@ -29,8 +28,12 @@ const productSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     },
-    user:{
-         type: mongoose.Schema.Types.ObjectId,
+    subcategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'subCategory'
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
 
