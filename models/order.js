@@ -1,25 +1,83 @@
 import mongoose from "mongoose";
-const orderSchema = mongoose.Schema({
-    productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    },
+const orderSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: "User",
+        // required: true
     },
-    total: {
-        type: String,
-        require: true
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'delivered', 'canceled', 'return'],
-    },
+    // products: [
+    //     {
+    //         product: {
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: "Product",
+    //             required: true
+    //         },
+    //         quantity: {
+    //             type: Number,
+    //             required: true,
+    //             min: 1
+    //         },
+    //         price: {
+    //             type: Number,
+    //             required: true
+    //         }
+    //     }
+    // ],
     quantity: {
         type: Number,
         default: 1
+    },
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        // required: true
+    },
+
+    address: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Address",
+        // required: true
+    },
+
+    paymentMethod: {
+        type: String,
+        enum: ["COD", "online", "wallet"],
+        // required: true
+    },
+
+    paymentStatus: {
+        type: String,
+        enum: ["pending", "paid", "failed"],
+        default: "pending"
+    },
+
+    orderStatus: {
+        type: String,
+        enum: ["placed", "confirmed", "shipped", "delivered", "cancelled"],
+        default: "placed"
+    },
+
+    totalAmount: {
+        type: Number,
+        // required: true
+    },
+
+    placedAt: {
+        type: Date,
+        default: Date.now
+    },
+
+    cancelledAt: {
+        type: Date,
+        default: null
+    },
+
+    deliveredAt: {
+        type: Date,
+        default: null
     }
-});
+
+}, { timestamps: true });
+
 
 export const Order = mongoose.model('Order', orderSchema);

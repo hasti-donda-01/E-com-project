@@ -13,7 +13,25 @@ export const addtocart = async (req, res) => {
 
         const products = await Product.findOne({ _id: product })
         console.log(products, "product")
+
+        const productFind = await Cart.findOne({ user: req.body.user, product: req.body.product });
+        console.log(productFind, "p");
+        if (productFind) {
+            return res.status(400).json({
+                message: "product is already in your cart",
+                success: false
+            })
+        }
+        // if(products)
+        // {
+        //     return res.status(400).json({
+        //         message:"product alreadyin your cart",
+        //         success:false
+        //     })
+        // }
         const total = products.price * quantity;
+
+
         const payload = {
             user, product, quantity, total
         }
@@ -71,7 +89,7 @@ export const getcartofuser = async (req, res) => {
 
         const cart = await Cart.find({ user: req.params.id }).skip((page - 1) * perPage).limit(perPage).exec();
         const cartproduct = await Cart.find({ user: req.params.id });
-        console.log(cartproduct,"cartproduct")
+        console.log(cartproduct, "cartproduct")
         const totalbill = await cartproduct.reduce((sum, item) => sum + parseInt(item.total), 0);
         return res.status(200).json({
             data: [cart, "totalpages : " + totalpage, "page no : " + page, "totalBill : " + totalbill]
@@ -108,6 +126,27 @@ export const updatequantity = async (req, res) => {
 
         return res.status(200).json({
             message: "product quntity updated successfully",
+            success: true
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+export const clearcart = async (req, res) => {
+    try {
+        const user = await Cart.deleteMany({ user: req.params.id });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not Found",
+                success: false
+            })
+        }
+        return res.status(200).json({
+            message: "clear cart",
             success: true
         })
     } catch (error) {

@@ -6,6 +6,10 @@ const sellerSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    isApproved: {
+        type: Boolean,
+        default: false
+    },
     storeName: {
         type: String,
         required: true

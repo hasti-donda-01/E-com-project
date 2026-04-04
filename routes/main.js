@@ -7,7 +7,8 @@ import cart from './cart.js';
 import user from './user.js';
 import address from './address.js';
 import subcategory from './subcategory.js';
-import wish from './wishlist.js'
+import wish from './wishlist.js';
+import order from './order.js'
 
 const router = express.Router();
 router.use('/product', product);
@@ -18,7 +19,8 @@ router.use('/cart', cart);
 router.use('/user', user);
 router.use('/address', address)
 router.use('/subcat', subcategory)
-router.use('/wish', wish)
+router.use('/wish', wish);
+router.use('/order', order)
 
 
 export default router;

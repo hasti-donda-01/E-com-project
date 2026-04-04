@@ -83,6 +83,8 @@ export const registerSeller = async (req, res) => {
             const { storeName, storeDesc, category, businessType, gstin, panNumber } = req.body
             const a = await User.findOne({ _id: createduser._id });
             console.log(a, "a")
+
+
             const payloadseller = {
                 userId: createduser._id,
                 storeName,
@@ -94,7 +96,7 @@ export const registerSeller = async (req, res) => {
                 address
             }
             const b = await Seller.create(payloadseller);
-            console.log(b.userId, "b")
+            console.log(b, "b")
             const sellerWithUser = await Seller.findOne({ _id: b._id })
                 .populate('userId', 'name email phone role');
             console.log("sellerWithUser", sellerWithUser);
@@ -188,6 +190,19 @@ export const login = async (req, res) => {
         const seller = await User.findOne({
             email
         });
+        console.log(seller, "seller")
+        if (seller.role == "seller") {
+
+            const sel = await Seller.findOne({ userId: seller._id });
+            console.log(sel, "sel")
+            if (sel.isApproved == false) {
+
+                return res.status(400).json({
+                    message: "user not approved",
+                    success: false
+                })
+            }
+        }
         const isMatch = await bcrypt.compare(password, seller.password);
         if (!isMatch) {
             return res.status(400).json({
@@ -201,7 +216,6 @@ export const login = async (req, res) => {
                 success: false
             })
         }
-
         const token = jwt.sign({
             email, id: seller._id, name: seller.name, role: seller.role
         }, process.env.PRIVATEKEY, { expiresIn: '1d' });
