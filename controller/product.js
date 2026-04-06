@@ -171,3 +171,44 @@ export const productbycategory = async (req, res) => {
         })
     }
 }
+
+// export const setProductPricing = async (req, res) => {
+//     try {
+//         const { productId } = req.params;
+//         const { price, discountPrice } = req.body;
+
+//         // calculate discount percent automatically
+//         const discountPercent = discountPrice
+//             ? (((price - discountPrice) / price) * 100).toFixed(2)
+//             : null;
+
+//         const product = await Product.findByIdAndUpdate(
+//             productId,
+//             {
+//                 price,
+//                 discountPrice,
+//                 discountPercent
+//             },
+//             { new: true }
+//         );
+
+//         if (!product) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Product not found"
+//             });
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Pricing updated successfully",
+//             data: product
+//         });
+
+//     } catch (error) {
+//         return res.status(500).json({
+//             message: error.message,
+//             success: false
+//         });
+//     }
+// };

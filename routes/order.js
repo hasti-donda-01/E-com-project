@@ -1,13 +1,18 @@
 import express from 'express';
-import { cancelOrder, createOrder, trackOrder, vieworderhistory } from '../controller/order.js';
+import { cancelOrder, createOrder, revenue, trackOrder, trackpayment, updatepaymentstatus, vieworderhistory } from '../controller/order.js';
+import { auth } from '../middleware/auth.js';
 
 
 const router = express.Router();
 router.post('/place', createOrder);
 router.delete('/cancel/:id', cancelOrder)
-router.get('/track/:id',trackOrder);
-router.get('/viewhistory/:id',vieworderhistory)
+router.get('/track/:id', trackOrder);
+router.get('/viewhistory/:id', vieworderhistory)
 
 
+router.post('/updatepaymentstatus',auth(["Admin"]), updatepaymentstatus)
+router.post('/trackpayment/:id',auth(["Admin"]), trackpayment);
+router.get('/revenue',auth(["Admin"]),revenue)
 
+//manage revenue
 export default router;

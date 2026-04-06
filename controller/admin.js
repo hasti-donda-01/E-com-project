@@ -3,6 +3,7 @@ import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { Seller } from "../models/seller.js"
 import { User } from "../models/user.js";
+import { Payment } from "../models/payment.js";
 
 export const getallseller = async (req, res) => {
     try {
@@ -234,6 +235,7 @@ export const updateorderstatus = async (req, res) => {
     }
 }
 //monitor seller activity
+
 export const getCustomerDetails = async (req, res) => {
     try {
         const { id } = req.params;
@@ -260,7 +262,6 @@ export const getCustomerDetails = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-
 
 export const approveSeller = async (req, res) => {
     try {
@@ -337,3 +338,128 @@ export const verifySeller = async (req, res) => {
         })
     }
 }
+
+
+export const adminDashboard = async (req, res) => {
+    try {
+
+        // ─── USERS & SELLERS ─────────────────────────────
+        const totalUsers    = await User.countDocuments({ role: "customer" });
+        const totalSellers  = await User.countDocuments({ role: "seller" });
+        const totalAdmins   = await User.countDocuments({ role: "Admin" });
+        const blockedUsers  = await User.countDocuments({ status: "blocked" });
+        const activeUsers   = await User.countDocuments({ isActive: true });
+
+        const approvedSellers  = await Seller.countDocuments({ isApproved: true });
+        const pendingSellers   = await Seller.countDocuments({ isApproved: false });
+
+        // ─── ORDERS ──────────────────────────────────────
+        const orders = await Order.find();
+
+        const totalOrders     = orders.length;
+        const placedOrders    = orders.filter(o => o.orderStatus === "placed").length;
+        const confirmedOrders = orders.filter(o => o.orderStatus === "confirmed").length;
+        const shippedOrders   = orders.filter(o => o.orderStatus === "shipped").length;
+        const deliveredOrders = orders.filter(o => o.orderStatus === "delivered").length;
+        const cancelledOrders = orders.filter(o => o.orderStatus === "cancelled").length;
+
+        // ─── REVENUE ANALYTICS ───────────────────────────
+        const payments = await Payment.find();
+
+        const totalRevenue = payments
+            .filter(p => p.status === "success")
+            .reduce((sum, p) => sum + p.amount, 0);
+
+        const pendingRevenue = payments
+            .filter(p => p.status === "pending")
+            .reduce((sum, p) => sum + p.amount, 0);
+
+        const refundedRevenue = payments
+            .filter(p => p.status === "refunded")
+            .reduce((sum, p) => sum + p.amount, 0);
+
+        const netRevenue = totalRevenue - refundedRevenue;
+
+        const revenueByMethod = payments
+            .filter(p => p.status === "success")
+            .reduce((acc, p) => {
+                acc[p.paymentMethod] = (acc[p.paymentMethod] || 0) + p.amount;
+                return acc;
+            }, {});
+
+        // ─── PLATFORM STATISTICS ─────────────────────────
+        const totalProducts = await Product.countDocuments();
+        const totalPayments = payments.length;
+
+        const successPayments  = payments.filter(p => p.status === "success").length;
+        const pendingPayments  = payments.filter(p => p.status === "pending").length;
+        const failedPayments   = payments.filter(p => p.status === "failed").length;
+        const refundedPayments = payments.filter(p => p.status === "refunded").length;
+
+        const successRate = totalPayments
+            ? ((successPayments / totalPayments) * 100).toFixed(2) + "%"
+            : "0%";
+
+        const averageOrderValue = successPayments
+            ? (totalRevenue / successPayments).toFixed(2)
+            : 0;
+
+        const orderCompletionRate = totalOrders
+            ? ((deliveredOrders / totalOrders) * 100).toFixed(2) + "%"
+            : "0%";
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                usersAndSellers: {
+                    totalUsers,
+                    activeUsers,
+                    blockedUsers,
+                    totalSellers,
+                    approvedSellers,
+                    pendingSellers,
+                    totalAdmins
+                },
+                orders: {
+                    totalOrders,
+                    placedOrders,
+                    confirmedOrders,
+                    shippedOrders,
+                    deliveredOrders,
+                    cancelledOrders,
+                    orderCompletionRate
+                },
+
+                revenueAnalytics: {
+                    totalRevenue,
+                    pendingRevenue,
+                    refundedRevenue,
+                    netRevenue,
+                    revenueByMethod: {
+                        COD:           revenueByMethod["COD"]           || 0,
+                        upi:           revenueByMethod["upi"]           || 0,
+                        bank_transfer: revenueByMethod["bank_transfer"] || 0,
+                    }
+                },
+
+                // 4. Platform Statistics
+                platformStatistics: {
+                    totalProducts,
+                    totalPayments,
+                    successPayments,
+                    pendingPayments,
+                    failedPayments,
+                    refundedPayments,
+                    successRate,
+                    averageOrderValue
+                }
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};
