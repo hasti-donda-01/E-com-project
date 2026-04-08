@@ -136,7 +136,7 @@ export const registerSeller = async (req, res) => {
 
 
         return res.status(201).json({
-            message: "Seller Registered Sucessfully",
+            message: "Registered Sucessfully",
             success: true
         });
     }

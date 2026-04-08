@@ -21,7 +21,7 @@ const router = express.Router();
 
 router.post('/create', auth(["Admin"]), upload.single('category_Image'), createCategory);
 router.post('/update/:id', auth(["Admin"]), upload.single('category_Image'), updatecategory);
-router.get('/get', auth(["Admin"]), getcategory)
+router.get('/get',auth(["Admin","seller","customer"]), getcategory)
 router.get('/get/:id', auth(["Admin"]), getcategorybyid);
 router.delete('/delete/:id', auth(["Admin"]), deletecategory)
 

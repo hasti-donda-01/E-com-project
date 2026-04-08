@@ -39,6 +39,7 @@ export const createsubCategory = async (req, res) => {
 
 export const getsubcategory = async (req, res) => {
     try {
+        console.log(req.user,"req.user")
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
         const totlaPost = await subCategory.countDocuments();
@@ -51,6 +52,15 @@ export const getsubcategory = async (req, res) => {
         }
 
 
+        if (req.user.role == "seller" || req.user.role == "customer") {
+            const subcategory = await subCategory.find({ isActive: true }).skip((page - 1) * perPage).limit(perPage).exec();;
+            console.log(subcategory)
+            return res.status(200).json({
+                message: "categories get successfully",
+                data: [subcategory, "totalpages : " + totalpage, "page : " + page],
+                success: true
+            })
+        }
         const subcategory = await subCategory.find().skip((page - 1) * perPage).limit(perPage).exec();;
         console.log(subcategory)
         return res.status(200).json({

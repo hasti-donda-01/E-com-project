@@ -7,7 +7,7 @@ export const createProduct = async (req, res) => {
         const { name, price, brand, stock, categoryId, user } = req.body;
         console.log(req.file.filename, "fle");
         const image = req.file.filename;
-        if (!name || !price || !brand || !image || !stock || !categoryId || !user) {
+        if (!name || !price || !brand || !image || !stock || !categoryId) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"
@@ -15,7 +15,7 @@ export const createProduct = async (req, res) => {
         }
 
         const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId, user
+            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId, user: req.user.id
         }
         await Product.create(payload);
         return res.status(201).json({
@@ -63,7 +63,7 @@ export const getproducts = async (req, res) => {
 export const getproductsbyid = async (req, res) => {
     try {
 
-        const product = await Product.findOne({ _id: req.params.id });
+        const product = await Product.findOne({ _id: req.user._id });
         if (!product) {
             return res.status(400).json({
                 message: "product not found",
@@ -172,43 +172,43 @@ export const productbycategory = async (req, res) => {
     }
 }
 
-// export const setProductPricing = async (req, res) => {
-//     try {
-//         const { productId } = req.params;
-//         const { price, discountPrice } = req.body;
+export const setProductPricing = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { price, discountPrice } = req.body;
 
-//         // calculate discount percent automatically
-//         const discountPercent = discountPrice
-//             ? (((price - discountPrice) / price) * 100).toFixed(2)
-//             : null;
+        // calculate discount percent automatically
+        const discountPercent = discountPrice
+            ? (((price - discountPrice) / price) * 100).toFixed(2)
+            : null;
 
-//         const product = await Product.findByIdAndUpdate(
-//             productId,
-//             {
-//                 price,
-//                 discountPrice,
-//                 discountPercent
-//             },
-//             { new: true }
-//         );
+        const product = await Product.findByIdAndUpdate(
+            id,
+            {
+                price,
+                discountPrice,
+                discountPercent
+            },
+            { new: true }
+        );
 
-//         if (!product) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Product not found"
-//             });
-//         }
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
 
-//         return res.status(200).json({
-//             success: true,
-//             message: "Pricing updated successfully",
-//             data: product
-//         });
+        return res.status(200).json({
+            success: true,
+            message: "Pricing updated successfully",
+            data: product
+        });
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             message: error.message,
-//             success: false
-//         });
-//     }
-// };
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};

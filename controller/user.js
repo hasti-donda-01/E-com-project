@@ -1,13 +1,18 @@
+import { Order } from "../models/order.js";
 import { Seller } from "../models/seller.js";
 import { User } from "../models/user.js";
 
 export const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params.id });
+        console.log(req.user, "req.user");
+        const user = await User.findOne({ _id: req.user._id }).select('-password -otp -otpExpireAt -resetToken -resetTokenExpireAt -__v');
+        const orders = await Order.find({ userId: req.user._id }).select('-__v -cancelledAt -deliveredAt')
+            .sort({ createdAt: -1 });
+        console.log(orders, "orders");
         return res.status(200).json({
             message: "User get Successfully",
             success: true,
-            data: user
+            data: [user, orders]
         })
     } catch (error) {
         return res.status(500).json({

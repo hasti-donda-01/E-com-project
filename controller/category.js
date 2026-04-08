@@ -5,7 +5,7 @@ export const createCategory = async (req, res) => {
 
         console.log(req.file, "reqfile");
         const category_Image = req.file.filename
-        const { category_name } = req.body;
+        const { category_name, description } = req.body;
 
 
         if (!category_name || !category_Image) {
@@ -23,7 +23,7 @@ export const createCategory = async (req, res) => {
             })
         }
 
-        const payload = { category_name, category_Image: `http://localhost:7000/category_Image/${req.file.filename}`, imagename: req.file.filename }
+        const payload = { category_name, description, category_Image: `http://localhost:7000/category_Image/${req.file.filename}`, imagename: req.file.filename }
         await Category.create(payload);
         return res.status(201).json({
             message: "Category Created successfully",
@@ -39,6 +39,7 @@ export const createCategory = async (req, res) => {
 
 export const getcategory = async (req, res) => {
     try {
+        console.log(req.user, "req,user")
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
         const totlaPost = await Category.countDocuments();
@@ -50,12 +51,21 @@ export const getcategory = async (req, res) => {
             })
         }
 
+        if (req.user.role == 'customer' || req.user.role == 'seller') {
+            const category = await Category.find({ isActive: true }).skip((page - 1) * perPage).limit(perPage).exec();
+            return res.status(200).json({
+                message: "categories get successfully",
+                data: [category, "totalpages : " + totalpage, "page : " + page],
+                success: true
+            })
+        }
 
-        const category = await Category.find().skip((page - 1) * perPage).limit(perPage).exec();;
+        const category = await Category.find().skip((page - 1) * perPage).limit(perPage).exec();
         console.log(category)
+
         return res.status(200).json({
             message: "categories get successfully",
-            data: [category, "totalpages : " +  totalpage, "page : " +  page],
+            data: [category, "totalpages : " + totalpage, "page : " + page],
             success: true
         })
     } catch (error) {

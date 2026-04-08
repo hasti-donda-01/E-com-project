@@ -17,7 +17,7 @@ const productSchema = mongoose.Schema({
         require: true,
     },
     stock: {
-        type: String,
+        type: Number,
         require: true,
     },
     imagename: {
@@ -35,7 +35,15 @@ const productSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    discountPrice: {
+        type: Number,
+        default: null       
+    },
+    discountPercent: {
+        type: Number,
+        default: null       
+    },
 
 }, {
     timestamps: true

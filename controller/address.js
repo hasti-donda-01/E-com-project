@@ -120,9 +120,6 @@ export const setdefaultAddress = async (req, res) => {
         if (!finuser) {
             return res.status(404).json({ message: "User not found" });
         }
-
-
-
         const a = await Address.findOneAndUpdate({ _id: addressId, user: userId }, { $set: { isDefault: true } }, { new: true });
         console.log(a)
         return res.status(200).json({

@@ -1,19 +1,26 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const categorySchema = mongoose.Schema({
     category_name: {
         type: String,
-        require: true
+        required: true,
+        unique: true   
     },
     category_Image: {
         type: String,
-        require: true
+        required: true
     },
     imagename: {
         type: String,
-        require: true
+    },
+    description: {
+        type: String,
+        default: null      
+    },
+    isActive: {
+        type: Boolean,
+        default: true       
     }
-});
+}, { timestamps: true });   
 
-export const Category = mongoose.model('Category', categorySchema)
+export const Category = mongoose.model("Category", categorySchema);
