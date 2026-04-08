@@ -3,8 +3,8 @@ import { User } from "../models/user.js";
 
 export const add_address = async (req, res) => {
     try {
-        const { user, city, pincode, state, country, addressline, type } = req.body;
-        if (!user || !city || !pincode || !state || !country || !addressline) {
+        const { city, pincode, state, country, addressline, type } = req.body;
+        if (!city || !pincode || !state || !country || !addressline) {
             return res.status(400).json({
                 message: "please fill all the fields",
                 success: false
@@ -12,7 +12,7 @@ export const add_address = async (req, res) => {
         }
 
         const payload = {
-            user, city, pincode, state, country, addressline, type
+            user: req.user.id, city, pincode, state, country, addressline, type
         }
         await Address.create(payload);
         return res.status(201).json({

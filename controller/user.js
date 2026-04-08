@@ -9,6 +9,18 @@ export const getUserProfile = async (req, res) => {
         const orders = await Order.find({ userId: req.user._id }).select('-__v -cancelledAt -deliveredAt')
             .sort({ createdAt: -1 });
         console.log(orders, "orders");
+        if (orders.length ==0) {
+            return res.status(200).json({
+            message: "User get Successfully",
+            success: true,
+            data: [user]
+        })
+        }
+        // if (orders.length == 0) {
+        //     return res.status(200).json({
+        //         message: "there is no order of this id"
+        //     })
+        // }
         return res.status(200).json({
             message: "User get Successfully",
             success: true,

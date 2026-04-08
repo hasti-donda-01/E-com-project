@@ -8,7 +8,7 @@ import { getalluser } from '../controller/dashboards.js';
 
 const router = express.Router();
 
-router.get('/getUserProfile', auth(["customer"]), getUserProfile);
+router.get('/getUserProfile', auth(["customer", "Admin", "seller"]), getUserProfile);
 router.delete('/deleteUser/:id', deleteUser);
 // router.update('/update/:id')
 

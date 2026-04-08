@@ -5,7 +5,7 @@ import { adjustPaymentRecord, approvereq, requestReturn, trackrefund } from '../
 
 
 const router = express.Router();
-router.post('/place', createOrder);
+router.post('/place',auth(["customer"]), createOrder);
 router.delete('/cancel/:id', cancelOrder)
 router.get('/track/:id', trackOrder);
 router.get('/viewhistory/:id', vieworderhistory)

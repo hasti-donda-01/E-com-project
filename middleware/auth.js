@@ -24,6 +24,10 @@ export const auth = (role) => async (req, res, next) => {
                 success: false
             })
         }
+        if(user.isActive == false)
+        {
+            
+        }
         req.user = user
         if (!role.includes(decode.role)) {
             return res.status(400).json({

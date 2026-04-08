@@ -46,10 +46,10 @@ export const getproducts = async (req, res) => {
         }
 
         const products = await Product.find().skip((page - 1) * perPage).limit(perPage).exec();
-        console.log(products)
+        console.log(products, "products")
         return res.status(200).json({
             message: "products get successfully",
-            data: [products, totalpage, page],
+            data: [products, "totalpages : " + totalpage, "page : " + page],
             success: true
         })
     } catch (error) {
@@ -63,7 +63,7 @@ export const getproducts = async (req, res) => {
 export const getproductsbyid = async (req, res) => {
     try {
 
-        const product = await Product.findOne({ _id: req.user._id });
+        const product = await Product.findOne({ _id: req.params.id});
         if (!product) {
             return res.status(400).json({
                 message: "product not found",
@@ -86,7 +86,7 @@ export const getproductsbyid = async (req, res) => {
 export const deleteproduct = async (req, res) => {
     try {
 
-        const product = await Product.findOneAndDelete({ _id: req.params.id });
+        const product = await Product.findOneAndDelete({ _id: req.params.id, user: req.user.id });
         // console.log(product)
         await fs.unlinkSync(`./public/product/${product.imagename}`)
         return res.status(200).json({
@@ -111,7 +111,7 @@ export const updateproduct = async (req, res) => {
             name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, user, stock, imagename: req.file.filename
         }
 
-        const product = await Product.findOneAndUpdate({ _id: req.params.id }, { $set: payload });
+        const product = await Product.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { $set: payload });
         await fs.unlinkSync(`./public/product/${product.imagename}`)
         return res.status(200).json({
             message: "product update successfully",

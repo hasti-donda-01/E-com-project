@@ -12,8 +12,8 @@ export const getSellerPayments = async (req, res) => {
         const orders = await Order.find({ product: { $in: productIds } });
         const orderIds = orders.map(o => o._id);
         const payments = await Payment.find({ order: { $in: orderIds } })
-            .populate("order",  "totalAmount orderStatus paymentStatus")
-            .populate("user",   "name email phone");
+            .populate("order", "totalAmount orderStatus paymentStatus")
+            .populate("user", "name email phone");
 
         return res.status(200).json({
             success: true,
@@ -209,8 +209,8 @@ export const trackSellerEarnings = async (req, res) => {
                 refundedEarnings,
                 netEarnings,
                 earningsByMethod: {
-                    COD:           earningsByMethod["COD"]           || 0,
-                    upi:           earningsByMethod["upi"]           || 0,
+                    COD: earningsByMethod["COD"] || 0,
+                    upi: earningsByMethod["upi"] || 0,
                     bank_transfer: earningsByMethod["bank_transfer"] || 0,
                 }
             }
@@ -239,14 +239,14 @@ export const monitorPayoutStatus = async (req, res) => {
         // ─── GET PAYMENTS ─────────────────────────────────
         const payments = await Payment.find({ order: { $in: orderIds } })
             .populate("order", "totalAmount orderStatus")
-            .populate("user",  "name email");
+            .populate("user", "name email");
 
-        const success  = payments.filter(p => p.status === "success");
-        const pending  = payments.filter(p => p.status === "pending");
-        const failed   = payments.filter(p => p.status === "failed");
+        const success = payments.filter(p => p.status === "success");
+        const pending = payments.filter(p => p.status === "pending");
+        const failed = payments.filter(p => p.status === "failed");
         const refunded = payments.filter(p => p.status === "refunded");
 
-        const totalTransactions   = payments.length;
+        const totalTransactions = payments.length;
         const successTransactions = success.length;
 
         const successRate = totalTransactions
@@ -259,8 +259,8 @@ export const monitorPayoutStatus = async (req, res) => {
                 summary: {
                     totalTransactions,
                     successTransactions,
-                    pendingTransactions:  pending.length,
-                    failedTransactions:   failed.length,
+                    pendingTransactions: pending.length,
+                    failedTransactions: failed.length,
                     refundedTransactions: refunded.length,
                     successRate
                 },
@@ -280,3 +280,34 @@ export const monitorPayoutStatus = async (req, res) => {
         });
     }
 };
+
+
+export const getmyproducts = async (req, res) => {
+    try {
+
+
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 3;
+        const totlaPost = await Product.countDocuments();
+        const totalpage = Math.ceil(totlaPost / perPage);
+        if (page > totalpage) {
+            return res.status(404).json({
+                message: "page not found",
+                success: false
+            })
+        }
+
+        const products = await Product.find({ user: req.user.id }).skip((page - 1) * perPage).limit(perPage).exec();
+        console.log(products, "products")
+        return res.status(200).json({
+            message: "products get successfully",
+            data: [products, "totalpages : " + totalpage, "page : " + page],
+            success: true
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}

@@ -9,7 +9,7 @@ export const requestReturn = async (req, res) => {
         console.log(req.params, "p")
         const { reason } = req.body;
         console.log(id, "req.user")
-        const userId = req.user._id;
+        const userId = req.user.id;
 
         const order = await Order.findOne({ _id: id, userId });
         console.log(order, "order")

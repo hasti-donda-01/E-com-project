@@ -7,12 +7,12 @@ import { updateorderstatus } from '../controller/admin.js';
 
 const router = express.Router();
 
-router.get('/add', add_address);
+router.get('/add', auth(["Admin", "seller", "customer"]), add_address);
 router.delete('/remove/:id', remove_address);
 router.post('/update/:id', update_address)
 router.get('/getaddressofuser/:id', getaddressofuser)
 router.get('/setdefaultAddress', setdefaultAddress);
-router.post('/updateorderstatus',updateorderstatus)
+router.post('/updateorderstatus', updateorderstatus)
 
 
 export default router;

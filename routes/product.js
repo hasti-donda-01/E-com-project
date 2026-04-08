@@ -22,15 +22,14 @@ const router = express.Router();
 
 router.post('/create', auth(["seller"]), upload.single('image'), createProduct);
 router.post('/update/:id', auth(["seller"]), upload.single('image'), updateproduct);
-router.get('/get', getproducts);    
-router.get('/getp',auth(["seller"]), getproductsbyid);
+router.get('/get', getproducts);
+router.get('/getp', getproductsbyid);
 router.delete('/delete/:id', auth(["seller"]), deleteproduct);
 router.get('/count', auth(["seller"]), totalProduct);
 router.get('/productbycategory/:id', productbycategory)
 router.get('/filterProducts', filterProducts)
 router.get('/categorybasedbrowse/:name', categorybasedbrowse)
-
-router.post('/setProductPricing/:id',setProductPricing)
+router.post('/setProductPricing/:id', setProductPricing)
 
 
 export default router;

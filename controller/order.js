@@ -7,9 +7,9 @@ import { User } from "../models/user.js";
 
 export const createOrder = async (req, res) => {
     try {
-        const { product, userId, quantity, paymentMethod, paymentStatus, orderStatus, buyNow, address } = req.body;
-
-        // ─── VALIDATE USER ────────────────────────────────
+        // console.log(req.user, "req.user")
+        const { product, paymentMethod, quantity, paymentStatus, orderStatus, buyNow, address } = req.body;
+        const userId = req.user.id;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
@@ -18,7 +18,6 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // ─── VALIDATE ADDRESS ─────────────────────────────
         let deliveryAddress;
         if (address) {
             deliveryAddress = await Address.findOne({ _id: address, user: userId });
@@ -33,7 +32,6 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // ─── BUY NOW ──────────────────────────────────────
         if (buyNow) {
             const products = await Product.findById(product);
             if (!products) {
@@ -43,11 +41,11 @@ export const createOrder = async (req, res) => {
                 });
             }
 
-            const totalAmount = quantity * products.price;
-
+            const totalAmount = parseInt(quantity) * products.price;
+            console.log(quantity, "totalAmount")
             const order = await Order.create({
                 product,
-                userId,
+                userId: req.user.id,
                 totalAmount,
                 quantity,
                 address: deliveryAddress._id,
@@ -69,35 +67,34 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // ─── CART ORDER ───────────────────────────────────
         else {
-            const cartItems = await Cart.find({ user: userId });
-
+            console.log(req.user, "req.user")
+            const cartItems = await Cart.find({ user: req.user.id });
+            console.log(cartItems, "cartItems")
             if (cartItems.length === 0) {
                 return res.status(400).json({
                     message: "Cart is empty",
                     success: false
                 });
             }
-
-            // use Promise.all instead of forEach ✅
             const orders = await Promise.all(
                 cartItems.map(async (item) => {
                     const order = await Order.create({
-                        product:     item.product,
+                        product: item.product,
                         userId,
-                        quantity:    item.quantity,
+                        quantity: item.quantity,
                         totalAmount: item.total,
-                        address:     deliveryAddress._id,
+                        address: deliveryAddress._id,
                         paymentMethod,
                         paymentStatus,
                         orderStatus
                     });
 
-                    // create payment for each cart item ✅
+
+
                     await Payment.create({
-                        order:  order._id,
-                        user:   user._id,
+                        order: order._id,
+                        user: user._id,
                         amount: item.total,
                         paymentMethod,
                     });
@@ -106,7 +103,6 @@ export const createOrder = async (req, res) => {
                 })
             );
 
-            // delete cart after all orders are created ✅
             await Cart.deleteMany({ user: userId });
 
             return res.status(201).json({
@@ -341,7 +337,7 @@ export const revenue = async (req, res) => {
             }, {});
 
         // ─── REVENUE STATISTICS ───────────────────────
-        const totalTransactions   = payments.length;
+        const totalTransactions = payments.length;
         const successTransactions = payments.filter(p => p.status === "success").length;
 
         const successRate = totalTransactions
@@ -362,8 +358,8 @@ export const revenue = async (req, res) => {
                     netRevenue,
                 },
                 revenueByMethod: {
-                    COD:           revenueByMethod["COD"]           || 0,
-                    upi:           revenueByMethod["upi"]           || 0,
+                    COD: revenueByMethod["COD"] || 0,
+                    upi: revenueByMethod["upi"] || 0,
                     bank_transfer: revenueByMethod["bank_transfer"] || 0,
                 },
                 statistics: {

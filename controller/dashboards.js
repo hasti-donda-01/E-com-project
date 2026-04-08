@@ -15,13 +15,10 @@ export const getalluser = async (req, res) => {
         console.log(payments)
 
         const totalOrders = orders.length;
-        // console.log(totalOrders,orders)
         const completedOrders = orders.filter(o => o.orderStatus === "delivered").length;
         const pendingOrders = orders.filter(o => o.orderStatus === "pending").length;
         console.log(completedOrders, "pendingOrders");
         const cancelledOrders = orders.filter(o => o.orderStatus === "cancelled").length;
-
-        // ─── EARNINGS OVERVIEW ───────────────────────────
         const totalEarnings = payments
             .filter(p => p.status === "paid")
             .reduce((sum, p) => sum + p.amount, 0);
@@ -38,7 +35,6 @@ export const getalluser = async (req, res) => {
                 return acc;
             }, {});
 
-        // ─── ORDER STATISTICS ────────────────────────────
         const totalProducts = await Product.countDocuments({ seller: sellerId });
 
         const orderStats = {
