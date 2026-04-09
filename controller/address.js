@@ -109,13 +109,15 @@ export const getaddressofuser = async (req, res) => {
 
 export const setdefaultAddress = async (req, res) => {
     try {
-        const { userId, addressId } = req.body;
-        if (!addressId || !userId) {
+        const { addressId } = req.body;
+        if (!addressId) {
             return res.status(400).json({
-                message: "please fill all the fields",
+                message: "please enter addressId",
                 success: true
             })
         }
+
+        const userId = req.user.id;
         const finuser = await User.findById(userId);
         if (!finuser) {
             return res.status(404).json({ message: "User not found" });
@@ -123,7 +125,7 @@ export const setdefaultAddress = async (req, res) => {
         const a = await Address.findOneAndUpdate({ _id: addressId, user: userId }, { $set: { isDefault: true } }, { new: true });
         console.log(a)
         return res.status(200).json({
-            message: `${a.type} address set as default`,
+            message: `${a.type} address set as default address`,
             success: true
         })
     } catch (error) {

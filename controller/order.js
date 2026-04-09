@@ -5,11 +5,131 @@ import { Payment } from "../models/payment.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 
+// export const createOrder = async (req, res) => {
+
+//     try {
+//         // console.log(req.user, "req.user")
+//         const { product, paymentMethod, quantity, paymentStatus, orderStatus, buyNow, address } = req.body;
+//         const userId = req.user.id;
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             return res.status(404).json({
+//                 message: "User not found",
+//                 success: false
+//             });
+//         }
+
+//         let deliveryAddress;
+//         if (address) {
+//             deliveryAddress = await Address.findOne({ _id: address, user: userId });
+//         } else {
+//             deliveryAddress = await Address.findOne({ isDefault: true, user: userId });
+//         }
+
+//         if (!deliveryAddress) {
+//             return res.status(404).json({
+//                 message: "Address not found",
+//                 success: false
+//             });
+//         }
+
+//         if (buyNow) {
+//             const products = await Product.findById(product);
+//             if (!products) {
+//                 return res.status(404).json({
+//                     message: "Product not found",
+//                     success: false
+//                 });
+//             }
+
+//             const totalAmount = parseInt(quantity) * products.price;
+//             console.log(quantity, "totalAmount")
+//             const order = await Order.create({
+//                 product,
+//                 userId: req.user.id,
+//                 sellerId: product.user._id,
+//                 totalAmount,
+//                 quantity,
+//                 address: deliveryAddress._id,
+//                 paymentMethod,
+//                 paymentStatus,
+//                 orderStatus
+//             });
+
+//             await Payment.create({
+//                 order: order._id,
+//                 user: user._id,
+//                 amount: totalAmount,
+//                 paymentMethod,
+//             });
+
+//             return res.status(201).json({
+//                 message: "Order placed successfully",
+//                 success: true
+//             });
+//         }
+
+//         else {
+//             console.log(req.user, "req.user")
+//             const cartItems = await Cart.find({ user: req.user.id });
+//             console.log(cartItems, "cartItems")
+//             if (cartItems.length === 0) {
+//                 return res.status(400).json({
+//                     message: "Cart is empty",
+//                     success: false
+//                 });
+//             }
+//             const orders = await Promise.all(
+//                 cartItems.map(async (item) => {
+//                     const order = await Order.create({
+//                         product: item.product,
+//                         userId,
+//                         quantity: item.quantity,
+//                         totalAmount: item.total,
+//                         address: deliveryAddress._id,
+//                         paymentMethod,
+//                         paymentStatus,
+//                         orderStatus
+//                     });
+
+
+
+//                     await Payment.create({
+//                         order: order._id,
+//                         user: user._id,
+//                         amount: item.total,
+//                         paymentMethod,
+//                     });
+
+//                     return order;
+//                 })
+//             );
+
+//             await Cart.deleteMany({ user: userId });
+
+//             return res.status(201).json({
+//                 message: "Orders placed successfully",
+//                 success: true,
+//                 totalOrders: orders.length
+//             });
+//         }
+
+//     } catch (error) {
+//         return res.status(500).json({
+//             message: error.message,
+//             success: false
+//         });
+//     }
+// };
+
+// update payment status
+
+
 export const createOrder = async (req, res) => {
     try {
-        // console.log(req.user, "req.user")
         const { product, paymentMethod, quantity, paymentStatus, orderStatus, buyNow, address } = req.body;
         const userId = req.user.id;
+
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
@@ -32,20 +152,22 @@ export const createOrder = async (req, res) => {
             });
         }
 
+        // ─── BUY NOW ───────────────────────────────────────────
         if (buyNow) {
-            const products = await Product.findById(product);
-            if (!products) {
+            const productDoc = await Product.findById(product);
+            if (!productDoc) {
                 return res.status(404).json({
                     message: "Product not found",
                     success: false
                 });
             }
 
-            const totalAmount = parseInt(quantity) * products.price;
-            console.log(quantity, "totalAmount")
+            const totalAmount = parseInt(quantity) * productDoc.price;
+
             const order = await Order.create({
-                product,
-                userId: req.user.id,
+                product: productDoc._id,
+                userId: userId,
+                sellerId: productDoc.user,  // ✅ fixed — was product.user._id (wrong)
                 totalAmount,
                 quantity,
                 address: deliveryAddress._id,
@@ -56,32 +178,36 @@ export const createOrder = async (req, res) => {
 
             await Payment.create({
                 order: order._id,
-                user: user._id,
+                user: userId,
                 amount: totalAmount,
                 paymentMethod,
             });
 
             return res.status(201).json({
                 message: "Order placed successfully",
-                success: true
+                success: true,
+                order
             });
         }
 
+        // ─── CART CHECKOUT ─────────────────────────────────────
         else {
-            console.log(req.user, "req.user")
-            const cartItems = await Cart.find({ user: req.user.id });
-            console.log(cartItems, "cartItems")
+            const cartItems = await Cart.find({ user: userId }).populate('product');
+            //                                                    ✅ populate to get sellerId
+
             if (cartItems.length === 0) {
                 return res.status(400).json({
                     message: "Cart is empty",
                     success: false
                 });
             }
+
             const orders = await Promise.all(
                 cartItems.map(async (item) => {
                     const order = await Order.create({
-                        product: item.product,
-                        userId,
+                        product: item.product._id,
+                        userId: userId,
+                        sellerId: item.product.user,  // ✅ fixed — now possible after populate
                         quantity: item.quantity,
                         totalAmount: item.total,
                         address: deliveryAddress._id,
@@ -90,11 +216,9 @@ export const createOrder = async (req, res) => {
                         orderStatus
                     });
 
-
-
                     await Payment.create({
                         order: order._id,
-                        user: user._id,
+                        user: userId,
                         amount: item.total,
                         paymentMethod,
                     });
@@ -108,7 +232,8 @@ export const createOrder = async (req, res) => {
             return res.status(201).json({
                 message: "Orders placed successfully",
                 success: true,
-                totalOrders: orders.length
+                totalOrders: orders.length,
+                orders
             });
         }
 
@@ -120,36 +245,102 @@ export const createOrder = async (req, res) => {
     }
 };
 
-// update payment status
+// export const updatepaymentstatus = async (req, res) => {
+//     try {
+//         const { orderId, status, transactionId } = req.body;
+
+//         const payment = Payment.findOne({ order: orderId });
+//         if (!payment) {
+//             return res.status(404).json({
+//                 message: "payment not found",
+//                 success: false
+//             })
+//         }
+//         // payment.status = "paid";
+//         // payment.transactionId = transactionId;
+//         // await payment.save();
+//         await payment.updateOne({
+//             status: "paid", transactionId
+//         })
+
+//         return res.status(200).json({
+//             message: "done"
+//         })
+//     } catch (error) {
+//         return res.status(500).json({
+//             message: error.message,
+//             success: false
+//         })
+//     }
+// }
+
+// export const updatepaymentstatus = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { paymentStatus } = req.body;
+
+//     const order = await Order.findById(id);
+
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Order not found"
+//       });
+//     }
+
+//     // update status
+//     order.paymentStatus = paymentStatus;
+
+//     await order.save();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Payment status updated",
+//       data: order
+//     });
+
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
+
 
 export const updatepaymentstatus = async (req, res) => {
-    try {
-        const { orderId, status, transactionId } = req.body;
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
 
-        const payment = Payment.findOne({ order: orderId });
-        if (!payment) {
-            return res.status(404).json({
-                message: "payment not found",
-                success: false
-            })
-        }
-        // payment.status = "paid";
-        // payment.transactionId = transactionId;
-        // await payment.save();
-        await payment.updateOne({
-            status: "paid", transactionId
-        })
+    // find payment using orderId
+    const payment = await Payment.findOne({ orderId });
 
-        return res.status(200).json({
-            message: "done"
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: error.message,
-            success: false
-        })
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Payment not found"
+      });
     }
-}
+
+    // update status
+    payment.status = status;
+
+    await payment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment status updated",
+      data: payment
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 export const trackOrder = async (req, res) => {
     try {
@@ -375,3 +566,4 @@ export const revenue = async (req, res) => {
         return res.status(500).json({ message: error.message, success: false });
     }
 };
+

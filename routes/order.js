@@ -11,7 +11,7 @@ router.get('/track/:id', trackOrder);
 router.get('/viewhistory/:id', vieworderhistory)
 
 
-router.post('/updatepaymentstatus', auth(["Admin"]), updatepaymentstatus)
+router.post('/updatepaymentstatu/:id', auth(["Admin"]), updatepaymentstatus)
 router.post('/trackpayment/:id', auth(["Admin"]), trackpayment);
 router.get('/revenue', auth(["Admin"]), revenue)
 

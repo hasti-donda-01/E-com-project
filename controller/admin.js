@@ -141,7 +141,7 @@ export const getallproducts = async (req, res) => {
         })
     }
 }
-
+//block - unblock user
 export const accountstatus = async (req, res) => {
     try {
         const user = await User.findOne({ _id: req.params.id });
@@ -181,32 +181,69 @@ export const accountstatus = async (req, res) => {
     }
 }
 
+// export const monitorallorder = async (req, res) => {
+//     try {
+//         const page = parseInt(req.query.page) || 1;
+//         const perPage = 3;
+//         const totlaPost = await Order.countDocuments();
+//         const totalpage = Math.ceil(totlaPost / perPage);
+//         if (page > totalpage) {
+//             return res.status(404).json({
+//                 message: "page not found",
+//                 success: false
+//             })
+//         }
+
+//         const orders = await Order.find().skip((page - 1) * perPage).limit(perPage).exec();
+//         return res.status(200).json({
+//             message: "get orders successfully",
+//             success: true,
+//             data: [orders, "totalpages : " + totalpage, "page : " + page]
+//         })
+//     } catch (error) {
+//         return res.status(500).json({
+//             message: error.message,
+//             success: false
+//         })
+//     }
+// }
 export const monitorallorder = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Order.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
-            return res.status(404).json({
-                message: "page not found",
-                success: false
-            })
-        }
+        const { orderStatus, paymentStatus, paymentMethod, page = 1, limit = 1 } = req.query;
 
-        const orders = await Order.find().skip((page - 1) * perPage).limit(perPage).exec();
+        const filter = {};
+
+        // apply filters only if provided
+        if (orderStatus)   filter.orderStatus   = orderStatus;
+        if (paymentStatus) filter.paymentStatus = paymentStatus;
+        if (paymentMethod) filter.paymentMethod = paymentMethod;
+
+        const totalOrders = await Order.countDocuments(filter);
+
+        const orders = await Order.find(filter)
+            .populate('userId',   'name email -_id')   // buyer details
+            .populate('sellerId', 'name email -_id')   // seller details
+            .populate('product',  'name price -_id')   // product details
+            .populate('address')                  // delivery address
+            .sort({ createdAt: -1 })              // latest first
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
         return res.status(200).json({
-            message: "get orders successfully",
             success: true,
-            data: [orders, "totalpages : " + totalpage, "page : " + page]
-        })
+            totalOrders,
+            currentPage: page,
+            totalPages: Math.ceil(totalOrders / limit),
+            orders
+        });
+
     } catch (error) {
         return res.status(500).json({
-            message: error.message,
-            success: false
-        })
+            success: false,
+            message: error.message
+        });
     }
-}
+};
 
 export const updateorderstatus = async (req, res) => {
     try {
@@ -234,14 +271,20 @@ export const updateorderstatus = async (req, res) => {
         })
     }
 }
-//monitor seller activity
-
+//monitor customer activity
 export const getCustomerDetails = async (req, res) => {
     try {
         const { id } = req.params;
 
         const user = await User.findById(id);
 
+        console.log(user, "user")
+        if (user.role != 'customer') {
+
+            return res.status(400).json({
+                message: "User is not Customer"
+            })
+        }
         const orders = await Order.find({ userId: id });
 
         const totalOrders = orders.length;
@@ -340,3 +383,52 @@ export const verifySeller = async (req, res) => {
 }
 
 
+//monitor seller activity
+
+export const getSellerReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const orders = await Order.find({ sellerId: id });
+        console.log(await Order.find(), "o");
+        console.log(orders, "orders")
+        const totalOrders = orders.length;
+
+        const deliveredOrders = orders.filter(
+            (o) => o.orderStatus === "delivered"
+        ).length;
+
+        const cancelledOrders = orders.filter(
+            (o) => o.orderStatus === "cancelled"
+        ).length;
+
+        const pendingOrders = orders.filter(
+            (o) => o.orderStatus === "pending"
+        ).length;
+
+        const revenue = orders
+            .filter((o) => o.orderStatus === "delivered")
+            .reduce((sum, o) => sum + o.totalAmount, 0);
+
+        const totalProducts = await Product.countDocuments({ user: id });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                totalProducts,
+                totalOrders,
+                deliveredOrders,
+                cancelledOrders,
+                pendingOrders,
+                revenue
+            }
+        });
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

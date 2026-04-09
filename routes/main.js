@@ -9,7 +9,8 @@ import address from './address.js';
 import subcategory from './subcategory.js';
 import wish from './wishlist.js';
 import order from './order.js'
-import sellerp from './sellerp.js'
+import sellerp from './sellerp.js';
+import despute from './dispute.js'
 
 const router = express.Router();
 router.use('/product', product);
@@ -22,7 +23,8 @@ router.use('/address', address)
 router.use('/subcat', subcategory)
 router.use('/wish', wish);
 router.use('/order', order)
-router.use('/sellerp',sellerp)
+router.use('/sellerp', sellerp);
+router.use('/despute', despute)
 
 
 export default router;

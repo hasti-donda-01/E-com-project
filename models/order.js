@@ -15,6 +15,10 @@ const orderSchema = new mongoose.Schema({
         ref: "Product",
         // required: true
     },
+    sellerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 
     address: {
         type: mongoose.Schema.Types.ObjectId,
