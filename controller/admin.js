@@ -145,7 +145,7 @@ export const getallproducts = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     try {
-        const product = await Product.fondOneAndDelete({ _id: req.params.id });
+        const product = await Product.findOneAndDelete({ _id: req.params.id });
         if (!product) {
             return res.status(404).json({
                 message: "product not found",

@@ -14,5 +14,8 @@ router.post('/trackSellerEarnings', auth(['seller']), trackSellerEarnings);
 router.post('/monitorPayoutStatus', auth(['seller']), monitorPayoutStatus);
 router.post('/getmyproducts', auth(['seller']), getmyproducts);
 
+router.get('/refundrequests', auth(["seller"]), getSellerRefundRequests);
+router.post('/handlerefund/:id', auth(["seller"]), sellerHandleRefund);
+
 
 export default router;

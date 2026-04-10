@@ -34,6 +34,31 @@ export const registerSeller = async (req, res) => {
                 success: false
             })
         }
+        if (role == "Admin") {
+            const admin = await Admin.find();
+            console.log(admin, "admin");
+
+
+            if (admin.length == 1) {
+                return res.status(400).json({
+                    message: "You can not register as an admin",
+                    success: false
+                })
+            }
+
+            if (password !== confirm_password) {
+                return res.status(400).json({
+                    message: "password does not match! ",
+                    success: false
+                })
+            }
+            const hashpassword = await bcrypt.hash(password, 10)
+            await Admin.create({ name, email, phone, password: hashpassword, confirm_password });
+            return res.status(200).json({
+                message: "done",
+                success: true
+            })
+        }
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
@@ -108,31 +133,7 @@ export const registerSeller = async (req, res) => {
         }
 
 
-        if (role == "Admin") {
-            const admin = await Admin.find();
-            console.log(admin, "admin");
 
-
-            if (admin.length == 1) {
-                return res.status(400).json({
-                    message: "You can not register as an admin",
-                    success: false
-                })
-            }
-
-            if (password !== confirm_password) {
-                return res.status(400).json({
-                    message: "password does not match! ",
-                    success: false
-                })
-            }
-            const hashpassword = await bcrypt.hash(password, 10)
-            await Admin.create({ name, email, phone, password: hashpassword, confirm_password });
-            return res.status(200).json({
-                message: "done",
-                success: true
-            })
-        }
 
 
         return res.status(201).json({
@@ -371,12 +372,12 @@ export const changePassword = async (req, res) => {
             })
         }
 
-            // if (password === newpassword) {
-            //     return res.status(400).json({
-            //         message: "Please Enter Another Password",
-            //         success: false
-            //     })
-            // }
+        // if (password === newpassword) {
+        //     return res.status(400).json({
+        //         message: "Please Enter Another Password",
+        //         success: false
+        //     })
+        // }
 
         if (seller.resetTokenExpireAt < Date.now()) {
             return res.status(400).json({
