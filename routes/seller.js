@@ -13,7 +13,7 @@ router.post('/login', login);
 router.post('/logout/:id', logout);
 router.post('/verifyEmail', verifyEmail);
 router.post('/resetPassword', resetPassword);
-router.post('/changePassword', auth(["seller"]), changePassword);
+router.post('/changePassword', auth(["seller","customer","Admin"]), changePassword);
 
 
 

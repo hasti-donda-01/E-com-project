@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const categorySchema = mongoose.Schema({
     category_name: {
         type: String,
-        required: true,
+        requiredd: true,
         unique: true   
     },
     category_Image: {
         type: String,
-        required: true
+        requiredd: true
     },
     imagename: {
         type: String,

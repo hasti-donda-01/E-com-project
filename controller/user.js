@@ -66,28 +66,42 @@ export const deleteUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     try {
+        const allowedFields = ['name', 'phone'];
+        const updates = {};
+        allowedFields.forEach(field => {
+            if (req.body[field]) updates[field] = req.body[field];
+        });
 
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                message: "Please provide name or phone to update",
+                success: false
+            });
+        }
 
+        const user = await User.findOneAndUpdate(
+            { _id: req.params.id },
+            { $set: updates },
+            { new: true }  
+        ).select('-password -otp -otpExpireAt -resetToken -resetTokenExpireAt -__v');
 
-        const user = await User.findOneAndUpdate({ _id: req.params.id }, { $set: req.body });
         if (!user) {
             return res.status(404).json({
-                messsage: "User not found",
+                message: "User not found",
                 success: false
-            })
+            });
         }
 
-        if (user.role == 'seller') {
-            const inSeller = await Seller.findOneAndUpdate({ userId: req.params.id }, { $set: req.body });
-        }
         return res.status(200).json({
-            message: "deleted successfully",
-            success: true
-        })
+            message: "Profile updated successfully", 
+            success: true,
+            data: user
+        });
+
     } catch (error) {
         return res.status(500).json({
             message: error.message,
             success: false
-        })
+        });
     }
 }

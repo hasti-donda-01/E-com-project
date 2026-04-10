@@ -9,7 +9,7 @@ export const getalluser = async (req, res) => {
     try {
         const sellerId = req.params.id;
 
-        const orders = await Order.find({ userId: sellerId });
+        const orders = await Order.find({ sellerId:sellerId });
 
         const payments = await Payment.find({ user: sellerId });
         console.log(payments)

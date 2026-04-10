@@ -8,19 +8,19 @@ const addressSchema = mongoose.Schema({
     },
     city: {
         type: String,
-        require: true
+        required: true
     },
     state: {
         type: String,
-        require: true
+        required: true
     },
     pincode: {
         type: String,
-        require: true
+        required: true
     },
     country: {
         type: String,
-        require: true
+        required: true
     },
     type: {
         type: String,
@@ -29,7 +29,7 @@ const addressSchema = mongoose.Schema({
     },
     addressline: {
         type: String,
-        require: true
+        required: true
     },
     addressline2: {
         type: String,

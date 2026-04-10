@@ -56,7 +56,7 @@ export const addtocart = async (req, res) => {
 
 export const removeproductfromcart = async (req, res) => {
     try {
-        const product = Cart.findOne({ _id: req.params.id });
+        const product = await Cart.findOne({ _id: req.params.id, user: req.user.id });
 
         if (!product) {
             return res.status(404).json({
@@ -84,7 +84,7 @@ export const getcartofuser = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
-        const totlaPost = await Product.countDocuments();
+        const totlaPost = await Cart.countDocuments({ user: req.user.id });
         const totalpage = Math.ceil(totlaPost / perPage);
         if (page > totalpage) {
             return res.status(404).json({
@@ -96,7 +96,8 @@ export const getcartofuser = async (req, res) => {
         const cart = await Cart.find({ user: req.user.id }).skip((page - 1) * perPage).limit(perPage).exec();
         const cartproduct = await Cart.find({ user: req.params.id });
         console.log(cartproduct, "cartproduct")
-        const totalbill = await cartproduct.reduce((sum, item) => sum + parseInt(item.total), 0);
+
+        const totalBill = cartItems.reduce((sum, item) => sum + item.total, 0)
         return res.status(200).json({
             data: [cart, "totalpages : " + totalpage, "page no : " + page, "totalBill : " + totalbill]
         })
@@ -144,7 +145,7 @@ export const updatequantity = async (req, res) => {
 
 export const clearcart = async (req, res) => {
     try {
-        const user = await Cart.deleteMany({ user: req.params.id });
+        const user = await Cart.deleteMany({ user: req.user.id });
         if (!user) {
             return res.status(404).json({
                 message: "User not Found",

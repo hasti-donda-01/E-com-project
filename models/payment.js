@@ -11,7 +11,7 @@ const paymentSchema = mongoose.Schema({
     paymentMethod:
     {
         type: String,
-        enum: ['COD', 'upi', 'bank_transfer']
+        enum: ["COD", "online", "wallet"]
     },
     status: {
         type: String,

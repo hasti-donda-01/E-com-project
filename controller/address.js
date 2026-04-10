@@ -29,7 +29,10 @@ export const add_address = async (req, res) => {
 
 export const remove_address = async (req, res) => {
     try {
-        const address = await Address.findOneAndDelete({ _id: req.params.id });
+        const address = await Address.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user.id
+        });
         if (!address) {
             return res.status(400).json({
                 message: "not found",
@@ -38,7 +41,7 @@ export const remove_address = async (req, res) => {
         }
         return res.status(200).json({
             message: "Address Removed",
-            success: false
+            success: true
         })
     } catch (error) {
         return res.status(500).json({
@@ -50,7 +53,7 @@ export const remove_address = async (req, res) => {
 
 export const update_address = async (req, res) => {
     try {
-        await Address.findOneAndUpdate({ _id: req.params.id }, { $set: req.body });
+        await Address.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { $set: req.body });
         return res.status(200).json({
             message: "address Updated ",
             success: true
@@ -67,6 +70,11 @@ export const update_address = async (req, res) => {
 export const getaddressofuser = async (req, res) => {
     try {
         const hello = await Address.aggregate([
+            {
+                $match: {
+                    user: new mongoose.Types.ObjectId(userId)
+                }
+            },
             {
                 $lookup: {
                     from: "users",

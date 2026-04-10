@@ -14,7 +14,8 @@ const cartSchema = mongoose.Schema({
         default: 1
     },
     total: {
-        type: String
+        type: Number,
+         default: 0
     },
 });
 export const Cart = mongoose.model('Cart',cartSchema)

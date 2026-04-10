@@ -3,6 +3,7 @@ import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { Seller } from "../models/seller.js"
 import { User } from "../models/user.js";
+import fs from 'fs'
 import { Payment } from "../models/payment.js";
 
 export const getallseller = async (req, res) => {
@@ -141,6 +142,31 @@ export const getallproducts = async (req, res) => {
         })
     }
 }
+
+export const deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.fondOneAndDelete({ _id: req.params.id });
+        if (!product) {
+            return res.status(404).json({
+                message: "product not found",
+                success: false
+            })
+        }
+        fs.unlinkSync(`./public/product/${product.imagename}`);
+
+        return res.status(200).json({
+            message: "Product deleted successfully",
+            success: true
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+
 //block - unblock user
 export const accountstatus = async (req, res) => {
     try {
@@ -214,16 +240,16 @@ export const monitorallorder = async (req, res) => {
         const filter = {};
 
         // apply filters only if provided
-        if (orderStatus)   filter.orderStatus   = orderStatus;
+        if (orderStatus) filter.orderStatus = orderStatus;
         if (paymentStatus) filter.paymentStatus = paymentStatus;
         if (paymentMethod) filter.paymentMethod = paymentMethod;
 
         const totalOrders = await Order.countDocuments(filter);
 
         const orders = await Order.find(filter)
-            .populate('userId',   'name email -_id')   // buyer details
+            .populate('userId', 'name email -_id')   // buyer details
             .populate('sellerId', 'name email -_id')   // seller details
-            .populate('product',  'name price -_id')   // product details
+            .populate('product', 'name price -_id')   // product details
             .populate('address')                  // delivery address
             .sort({ createdAt: -1 })              // latest first
             .skip((page - 1) * limit)
@@ -312,20 +338,96 @@ export const approveSeller = async (req, res) => {
 
         if (!seller) {
             return res.status(404).json({
-                message: "Seller not found"
+                message: "Seller not found",
+                success: false
+            });
+        }
+
+        if (seller.isApproved) {
+            return res.status(400).json({
+                message: "Seller is already approved",
+                success: false
+            });
+        }
+
+        if (seller.isRejected) {
+            return res.status(400).json({
+                message: "Seller was rejected. Reset their status before approving.",
+                success: false
             });
         }
 
         seller.isApproved = true;
+        seller.isRejected = false;
+        seller.rejectionReason = null;
         await seller.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "Seller approved successfully",
             success: true
         });
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};
+
+export const rejectSeller = async (req, res) => {
+    try {
+        const { reason } = req.body;
+
+        if (!reason) {
+            return res.status(400).json({
+                message: "Please provide a rejection reason",
+                success: false
+            });
+        }
+
+        const seller = await Seller.findOne({ userId: req.params.id });
+
+        if (!seller) {
+            return res.status(404).json({
+                message: "Seller not found",
+                success: false
+            });
+        }
+
+        if (seller.isApproved) {
+            return res.status(400).json({
+                message: "Seller is already approved. Revoke approval before rejecting.",
+                success: false
+            });
+        }
+
+        if (seller.isRejected) {
+            return res.status(400).json({
+                message: "Seller is already rejected",
+                success: false
+            });
+        }
+
+        seller.isApproved = false;
+        seller.isRejected = true;
+        seller.rejectionReason = reason;
+        await seller.save();
+
+        return res.status(200).json({
+            message: "Seller rejected successfully",
+            success: true,
+            data: {
+                sellerId: seller._id,
+                rejectionReason: seller.rejectionReason
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
     }
 };
 
@@ -334,10 +436,8 @@ export const verifySeller = async (req, res) => {
         const seller = await Seller.aggregate([
             {
                 $match: {
-                    _id: new mongoose.Types.ObjectId
-                        (
-                            "69d11eceaf742096317e0a21"
-                        )
+                    _id: new mongoose.Types.ObjectId(req.params.id)
+
                 }
             },
             {

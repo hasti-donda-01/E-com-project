@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const subcategorySchema = mongoose.Schema({
     name: {
         type: String,
-        require: true
+        required: true
     },
     image: {
         type: String,
-        require: true
+        required: true
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,

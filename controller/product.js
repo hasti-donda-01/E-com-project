@@ -63,7 +63,7 @@ export const getproducts = async (req, res) => {
 export const getproductsbyid = async (req, res) => {
     try {
 
-        const product = await Product.findOne({ _id: req.params.id});
+        const product = await Product.findOne({ _id: req.params.id });
         if (!product) {
             return res.status(400).json({
                 message: "product not found",
@@ -87,7 +87,6 @@ export const deleteproduct = async (req, res) => {
     try {
 
         const product = await Product.findOneAndDelete({ _id: req.params.id, user: req.user.id });
-        // console.log(product)
         await fs.unlinkSync(`./public/product/${product.imagename}`)
         return res.status(200).json({
             message: " product deleted successfully",
@@ -97,7 +96,7 @@ export const deleteproduct = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message: error.message,
-            success: false
+            success: true
         })
     }
 }
@@ -203,6 +202,64 @@ export const setProductPricing = async (req, res) => {
             success: true,
             message: "Pricing updated successfully",
             data: product
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};
+
+
+export const updateStock = async (req, res) => {
+    try {
+        const { stock } = req.body;
+        const { id } = req.params;
+
+        if (stock === undefined || stock === null) {
+            return res.status(400).json({
+                message: "Please provide stock value",
+                success: false
+            });
+        }
+
+        if (stock < 0) {
+            return res.status(400).json({
+                message: "Stock cannot be negative",
+                success: false
+            });
+        }
+
+       
+        const product = await Product.findOne({
+            _id: id,
+            user: req.user.id
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found or you are not authorized",
+                success: false
+            });
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { $set: { stock } },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: "Stock updated successfully",
+            success: true,
+            data: {
+                productId: updatedProduct._id,
+                name: updatedProduct.name,
+                previousStock: product.stock,  
+                updatedStock: updatedProduct.stock
+            }
         });
 
     } catch (error) {

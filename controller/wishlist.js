@@ -15,8 +15,8 @@ export const addtowish = async (req, res) => {
         }
 
         const newWishlist = await Wishlist.create({
-            user: req.body.user,
-            product: req.body.product
+            user: req.user.id,
+            product
         });
 
         return res.status(201).json({
@@ -24,7 +24,7 @@ export const addtowish = async (req, res) => {
             data: newWishlist
         });
 
-       
+
 
     } catch (error) {
         return res.status(500).json({
@@ -36,7 +36,10 @@ export const addtowish = async (req, res) => {
 
 export const removefromwishlist = async (req, res) => {
     try {
-        await Wishlist.findOneAndDelete({ _id: req.params.id });
+        await Wishlist.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user.id
+        });
         return res.status(200).json({
             message: "product removed from your wishlist",
             success: true
@@ -54,7 +57,7 @@ export const getproducts = async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
-        const totlaPost = await Wishlist.countDocuments();
+        const totlaPost = await Wishlist.countDocuments({ user: req.user.id });
         const totalpage = Math.ceil(totlaPost / perPage);
         if (page > totalpage) {
             return res.status(404).json({
@@ -89,20 +92,66 @@ export const clearwishlist = async (req, res) => {
     }
 }
 
-// export const movetocart = async (req, res) => {
-//     try {
-//         const product = await Wishlist.findOne({ _id: req.params.id });
-//         await Cart.create(product)
-//         return res.status(200).json({
-//             data: product
-//         })
+export const movetocart = async (req, res) => {
+    try {
+        const wishlistItem = await Wishlist.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
 
-//     } catch (error) {
-//         return res.status(500).json({
-//             message: error.message,
-//             success: false
-//         })
-//     }
-// }
+        if (!wishlistItem) {
+            return res.status(404).json({
+                message: "Wishlist item not found",
+                success: false
+            });
+        }
+        const product = await Product.findById(wishlistItem.product);
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found",
+                success: false
+            });
+        }
+
+        if (product.stock < 1) {
+            return res.status(400).json({
+                message: "Product is out of stock",
+                success: false
+            });
+        }
+
+        const alreadyInCart = await Cart.findOne({
+            user: req.user.id,
+            product: wishlistItem.product
+        });
+
+        if (alreadyInCart) {
+            return res.status(400).json({
+                message: "Product is already in your cart",
+                success: false
+            });
+        }
+
+        await Cart.create({
+            user: req.user.id,
+            product: wishlistItem.product,
+            quantity: 1,
+            total: product.price
+        });
+
+        await Wishlist.findOneAndDelete({ _id: req.params.id });
+
+        return res.status(200).json({
+            message: "Product moved to cart successfully",
+            success: true
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        })
+    }
+}
 
 

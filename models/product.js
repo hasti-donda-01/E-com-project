@@ -2,27 +2,31 @@ import mongoose from 'mongoose';
 const productSchema = mongoose.Schema({
     name: {
         type: String,
-        require: true
+        required: true
+    },
+    description: {          
+        type: String,
+        default: ""
     },
     price: {
         type: Number,
-        require: true
+        required: true
     },
     brand: {
         type: String,
-        require: true
+        required: true
     },
     image: {
         type: String,
-        require: true,
+        required: true,
     },
     stock: {
         type: Number,
-        require: true,
+        required: true,
     },
     imagename: {
         type: String,
-        require: true,
+        required: true,
     },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,11 +42,11 @@ const productSchema = mongoose.Schema({
     },
     discountPrice: {
         type: Number,
-        default: null       
+        default: null
     },
     discountPercent: {
         type: Number,
-        default: null       
+        default: null
     },
 
 }, {

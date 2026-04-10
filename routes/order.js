@@ -5,8 +5,8 @@ import { adjustPaymentRecord, approvereq, requestReturn, trackrefund } from '../
 
 
 const router = express.Router();
-router.post('/place',auth(["customer"]), createOrder);
-router.delete('/cancel/:id', cancelOrder)
+router.post('/place', auth(["customer"]), createOrder);
+router.delete('/cancel/:id',auth(["customer"]), cancelOrder)
 router.get('/track/:id', trackOrder);
 router.get('/viewhistory/:id', vieworderhistory)
 
@@ -16,7 +16,7 @@ router.post('/trackpayment/:id', auth(["Admin"]), trackpayment);
 router.get('/revenue', auth(["Admin"]), revenue)
 
 //manage revenue
-export default router;
+
 
 
 //return order
@@ -26,3 +26,7 @@ router.post('/approvereq/:id', auth(["Admin"]), approvereq);
 router.post('/trackrefund/:id', trackrefund);
 router.post('/adjustPaymentRecord/:id', adjustPaymentRecord)
 //  auth(["Admin"])
+
+
+
+export default router;

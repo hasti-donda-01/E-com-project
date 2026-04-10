@@ -152,7 +152,6 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // ─── BUY NOW ───────────────────────────────────────────
         if (buyNow) {
             const productDoc = await Product.findById(product);
             if (!productDoc) {
@@ -167,7 +166,7 @@ export const createOrder = async (req, res) => {
             const order = await Order.create({
                 product: productDoc._id,
                 userId: userId,
-                sellerId: productDoc.user,  // ✅ fixed — was product.user._id (wrong)
+                sellerId: productDoc.user,
                 totalAmount,
                 quantity,
                 address: deliveryAddress._id,
@@ -175,6 +174,12 @@ export const createOrder = async (req, res) => {
                 paymentStatus,
                 orderStatus
             });
+
+            await Product.findByIdAndUpdate(productDoc._id, {
+                $inc: { stock: -parseInt(quantity) }
+            });
+
+
 
             await Payment.create({
                 order: order._id,
@@ -190,10 +195,9 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // ─── CART CHECKOUT ─────────────────────────────────────
         else {
             const cartItems = await Cart.find({ user: userId }).populate('product');
-            //                                                    ✅ populate to get sellerId
+            //                                                  
 
             if (cartItems.length === 0) {
                 return res.status(400).json({
@@ -204,16 +208,21 @@ export const createOrder = async (req, res) => {
 
             const orders = await Promise.all(
                 cartItems.map(async (item) => {
+
                     const order = await Order.create({
                         product: item.product._id,
                         userId: userId,
-                        sellerId: item.product.user,  // ✅ fixed — now possible after populate
+                        sellerId: item.product.user,
                         quantity: item.quantity,
                         totalAmount: item.total,
                         address: deliveryAddress._id,
                         paymentMethod,
                         paymentStatus,
                         orderStatus
+                    });
+
+                    await Product.findByIdAndUpdate(item.product._id, {
+                        $inc: { stock: -item.quantity }
                     });
 
                     await Payment.create({
@@ -309,37 +318,37 @@ export const createOrder = async (req, res) => {
 
 
 export const updatepaymentstatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
 
-    // find payment using orderId
-    const payment = await Payment.findOne({ orderId });
+        // find payment using orderId
+        const payment = await Payment.findOne({ order: id });
 
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        message: "Payment not found"
-      });
+        if (!payment) {
+            return res.status(404).json({
+                success: false,
+                message: "Payment not found"
+            });
+        }
+
+        // update status
+        payment.status = status;
+
+        await payment.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment status updated",
+            data: payment
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-
-    // update status
-    payment.status = status;
-
-    await payment.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Payment status updated",
-      data: payment
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
 };
 
 export const trackOrder = async (req, res) => {
@@ -366,7 +375,7 @@ export const trackOrder = async (req, res) => {
 
 export const cancelOrder = async (req, res) => {
     try {
-        const order = await Order.findOneAndUpdate({ _id: req.params.id }, { $set: { orderStatus: "cancelled" } });
+        const order = await Order.findOneAndUpdate({ _id: req.params.id, userId: req.user.id }, { $set: { orderStatus: "cancelled" } });
         if (!order) {
             return res.status(404).json({
                 message: "Order not found",

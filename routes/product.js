@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { createProduct, deleteproduct, getproducts, getproductsbyid, productbycategory, setProductPricing, totalProduct, updateproduct } from '../controller/product.js';
+import { createProduct, deleteproduct, getproducts, getproductsbyid, productbycategory, setProductPricing, totalProduct, updateproduct, updateStock } from '../controller/product.js';
 import { auth } from '../middleware/auth.js';
 import { categorybasedbrowse, filterProducts } from '../controller/customer.js';
 const storage = multer.diskStorage({
@@ -31,5 +31,5 @@ router.get('/filterProducts', filterProducts)
 router.get('/categorybasedbrowse/:name', categorybasedbrowse)
 router.post('/setProductPricing/:id', setProductPricing)
 
-
+router.post('/updateStock/:id', auth(["seller"]), updateStock)
 export default router;

@@ -160,10 +160,27 @@ export const verifyOTP = async (req, res) => {
         }
         const seller = await User.findOne({ _id: sellerId });
         console.log(seller, "seller");
-
+        if (!seller) {
+            return res.status(400).json({
+                message: "user not found",
+                success: false
+            })
+        }
+        if (seller.otp != OTP) {
+            return res.status(400).json({
+                message: "Invalid OTP",
+                success: false
+            });
+        }
+        if (Date.now() > seller.otpExpireAt) {
+            return res.status(400).json({
+                message: "OTP has expired. Please register again.",
+                success: false
+            });
+        }
         await seller.updateOne({
             otp: null, otpExpireAt: null,
-            isVerify: true
+            isVerify: true, isActive: true
         })
         return res.status(200).json({
             messsage: "OTP Verified",
@@ -190,6 +207,13 @@ export const login = async (req, res) => {
         const seller = await User.findOne({
             email
         });
+
+        if (!seller) {
+            return res.status(404).json({
+                message: "User not Found",
+                success: false
+            })
+        }
         console.log(seller, "seller")
         if (seller.role == "seller") {
 
@@ -210,12 +234,7 @@ export const login = async (req, res) => {
                 success: false
             });
         }
-        if (!seller) {
-            return res.status(400).json({
-                message: "Seller not found",
-                success: false
-            })
-        }
+
         const token = jwt.sign({
             email, id: seller._id, name: seller.name, role: seller.role
         }, process.env.PRIVATEKEY, { expiresIn: '1d' });
@@ -352,7 +371,14 @@ export const changePassword = async (req, res) => {
             })
         }
 
-        if (seller.resetTokenExpireAt > Date.now()) {
+            // if (password === newpassword) {
+            //     return res.status(400).json({
+            //         message: "Please Enter Another Password",
+            //         success: false
+            //     })
+            // }
+
+        if (seller.resetTokenExpireAt < Date.now()) {
             return res.status(400).json({
                 message: "Reset token expired",
                 success: false
