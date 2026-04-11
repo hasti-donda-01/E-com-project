@@ -3,32 +3,53 @@ import fs from 'fs';
 
 export const createProduct = async (req, res) => {
     try {
+        const { name, price, brand, stock, categoryId } = req.body;
 
-        const { name, price, brand, stock, categoryId, user } = req.body;
-        console.log(req.file.filename, "fle");
-        const image = req.file.filename;
-        if (!name || !price || !brand || !image || !stock || !categoryId) {
+        // Check file
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Image is required"
+            });
+        }
+
+        const imageName = req.file.filename;
+
+        if (!name || !price || !brand || !stock || !categoryId) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"
             });
         }
 
+        // Dynamic URL (important)
+        const imageUrl = `${req.protocol}://${req.get("host")}/image/${imageName}`;
+
         const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, stock, imagename: req.file.filename, categoryId, user: req.user.id
-        }
+            name,
+            price,
+            brand,
+            stock,
+            categoryId,
+            user: req.user.id,
+            image: imageUrl,
+            imagename: imageName
+        };
+
         await Product.create(payload);
+
         return res.status(201).json({
             success: true,
-            message: "product add successfully"
-        })
+            message: "Product added successfully"
+        });
+
     } catch (error) {
         return res.status(500).json({
             success: false,
             message: error.message
-        })
+        });
     }
-}
+};
 
 export const getproducts = async (req, res) => {
     try {

@@ -34,31 +34,7 @@ export const registerSeller = async (req, res) => {
                 success: false
             })
         }
-        if (role == "Admin") {
-            const admin = await Admin.find();
-            console.log(admin, "admin");
 
-
-            if (admin.length == 1) {
-                return res.status(400).json({
-                    message: "You can not register as an admin",
-                    success: false
-                })
-            }
-
-            if (password !== confirm_password) {
-                return res.status(400).json({
-                    message: "password does not match! ",
-                    success: false
-                })
-            }
-            const hashpassword = await bcrypt.hash(password, 10)
-            await Admin.create({ name, email, phone, password: hashpassword, confirm_password });
-            return res.status(200).json({
-                message: "done",
-                success: true
-            })
-        }
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
@@ -98,12 +74,39 @@ export const registerSeller = async (req, res) => {
         console.log(hashpassword, "hash")
         const payload = {
 
-            name, email, address, password: hashpassword, phone, otp, otpExpireAt, role
+            name, email, address, password: hashpassword, phone, otp, otpExpireAt, role, profileImage: req.file
+                ? `http://localhost:7000/profile/${req.file.filename}`
+                : null,
+            profileImageName: req.file ? req.file.filename : null
         }
 
         const createduser = await User.create(payload);
         console.log("createduser", createduser)
+        if (role == "Admin") {
+            const admin = await Admin.find();
+            console.log(admin, "admin");
 
+
+            if (admin.length == 1) {
+                return res.status(400).json({
+                    message: "You can not register as an admin",
+                    success: false
+                })
+            }
+
+            if (password !== confirm_password) {
+                return res.status(400).json({
+                    message: "password does not match! ",
+                    success: false
+                })
+            }
+            const hashpassword = await bcrypt.hash(password, 10)
+            await Admin.create({ name, email, phone, password: hashpassword, confirm_password });
+            return res.status(200).json({
+                message: "done",
+                success: true
+            })
+        }
         if (role == "seller") {
             const { storeName, storeDesc, category, businessType, gstin, panNumber } = req.body
             const a = await User.findOne({ _id: createduser._id });
@@ -241,6 +244,7 @@ export const login = async (req, res) => {
         }, process.env.PRIVATEKEY, { expiresIn: '1d' });
         console.log(token)
         seller.isLogin = true;
+        seller.isActive = true;
         seller.save();
         return res.status(200).json({
             message: "Seller Logged In successfully",
@@ -355,15 +359,15 @@ export const resetPassword = async (req, res) => {
 
 export const changePassword = async (req, res) => {
     try {
-        const { sellerId, password, newpassword, confirm_password } = req.body;
-        if (!sellerId || !password || !newpassword || !confirm_password) {
+        const { password, newpassword, confirm_password } = req.body;
+        if (!password || !newpassword || !confirm_password) {
             return res.status(400).json({
                 message: "please fill all the fields",
                 success: false
             })
         }
 
-        const seller = await User.findOne({ _id: sellerId });
+        const seller = await User.findOne({ _id: req.user.id });
         console.log(seller)
         if (!seller) {
             return res.status(404).json({
@@ -379,12 +383,7 @@ export const changePassword = async (req, res) => {
         //     })
         // }
 
-        if (seller.resetTokenExpireAt < Date.now()) {
-            return res.status(400).json({
-                message: "Reset token expired",
-                success: false
-            });
-        }
+
 
         const hashedPassword = await bcrypt.hash(newpassword, 10);
 

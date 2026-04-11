@@ -1,5 +1,6 @@
 import { Address } from "../models/address.js";
 import { User } from "../models/user.js";
+import mongoose from 'mongoose'
 
 export const add_address = async (req, res) => {
     try {
@@ -72,7 +73,7 @@ export const getaddressofuser = async (req, res) => {
         const hello = await Address.aggregate([
             {
                 $match: {
-                    user: new mongoose.Types.ObjectId(userId)
+                    user: new mongoose.Types.ObjectId(req.user.id)
                 }
             },
             {

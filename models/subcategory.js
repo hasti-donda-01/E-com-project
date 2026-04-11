@@ -16,7 +16,10 @@ const subcategorySchema = mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+    imagename: {
+        type: String,
+    },
 });
 
 export const subCategory = mongoose.model("subCategory", subcategorySchema);

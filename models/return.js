@@ -36,6 +36,15 @@ const returnSchema = new mongoose.Schema({
     resolvedAt: {
         type: Date,
         default: null
+    },
+    resolvedBy: {
+        type: String,
+        enum: ["seller", "admin"],
+        default: null
+    },
+    sellerNote: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 export const Return = mongoose.model("Return", returnSchema);

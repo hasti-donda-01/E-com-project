@@ -5,7 +5,7 @@ import { auth } from '../middleware/auth.js';
 import { createsubCategory, deletecategory, getcategorybyid, getsubcategory, updatecategory } from '../controller/subcategory.js';
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './public/category')
+        cb(null, './public/subcategory')
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + `${path.extname(file.originalname)}`;

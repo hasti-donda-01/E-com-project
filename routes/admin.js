@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { auth } from '../middleware/auth.js';
-import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getalluser, getCustomerDetails, getSellerReport, monitorallorder, updateorderstatus, verifySeller } from '../controller/admin.js';
+import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateorderstatus, verifySeller } from '../controller/admin.js';
 import { adminDashboard } from '../controller/dashboards.js';
 // const storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
@@ -22,14 +22,16 @@ const router = express.Router();
 
 router.get('/getallsellers', auth(["Admin"]), getallseller);
 router.get('/getalluser', auth(["Admin"]), getalluser);
-router.get('/getallproducts', auth(["Admin", "seller", "customer"]), getallproducts);
+router.get('/getallproducts', auth(["Admin"]), getallproducts);
 router.delete('/deleteProduct/:id', auth(["Admin"]), deleteProduct)
 router.get('/accountstatus/:id', auth(["Admin"]), accountstatus);//block unblock user
 router.get('/getallorder', auth(["Admin"]), monitorallorder);
 router.get('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);
 router.get('/getcustomerdetail/:id', auth(["Admin"]), getCustomerDetails);//monitor customer activity
 router.post('/sellerapprove/:id', auth(["Admin"]), approveSeller);
+router.post('/sellerreject/:id', auth(["Admin"]), rejectSeller);
 router.get('/verifySeller/:id', auth(["Admin"]), verifySeller);
+
 router.get('/adminDashboard', auth(["Admin"]), adminDashboard)
 
 

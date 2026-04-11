@@ -33,6 +33,14 @@ const sellerSchema = mongoose.Schema({
     panNumber: {
         type: String,
         required: true
+    },
+    isRejected: {
+        type: Boolean,
+        default: false
+    },
+    rejectionReason: {
+        type: String,
+        default: null
     }
 });
 

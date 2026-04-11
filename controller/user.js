@@ -9,12 +9,12 @@ export const getUserProfile = async (req, res) => {
         const orders = await Order.find({ userId: req.user._id }).select('-__v -cancelledAt -deliveredAt')
             .sort({ createdAt: -1 });
         console.log(orders, "orders");
-        if (orders.length ==0) {
+        if (orders.length == 0) {
             return res.status(200).json({
-            message: "User get Successfully",
-            success: true,
-            data: [user]
-        })
+                message: "User get Successfully",
+                success: true,
+                data: [user]
+            })
         }
         // if (orders.length == 0) {
         //     return res.status(200).json({
@@ -72,6 +72,10 @@ export const updateUser = async (req, res) => {
             if (req.body[field]) updates[field] = req.body[field];
         });
 
+        if (req.file) {
+            updates.profileImage = `http://localhost:7000/profile/${req.file.filename}`;
+            updates.profileImageName = req.file.filename;
+        }
         if (Object.keys(updates).length === 0) {
             return res.status(400).json({
                 message: "Please provide name or phone to update",
@@ -82,7 +86,7 @@ export const updateUser = async (req, res) => {
         const user = await User.findOneAndUpdate(
             { _id: req.params.id },
             { $set: updates },
-            { new: true }  
+            { new: true }
         ).select('-password -otp -otpExpireAt -resetToken -resetTokenExpireAt -__v');
 
         if (!user) {
@@ -93,7 +97,7 @@ export const updateUser = async (req, res) => {
         }
 
         return res.status(200).json({
-            message: "Profile updated successfully", 
+            message: "Profile updated successfully",
             success: true,
             data: user
         });

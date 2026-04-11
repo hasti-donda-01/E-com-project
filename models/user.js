@@ -44,10 +44,10 @@ const userSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    // profileImage: {
-    //     type: String,
-    //     required: true
-    // },
+    profileImage: {
+        type: String,
+        required: true
+    },
     role: {
         type: String,
         enum: ["Admin", "customer", "seller"],
@@ -61,6 +61,10 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ["blocked", "unblocked"],
         default: "unblocked"
+    },
+    profileImageName:{
+        type: String,
+        default: false
     }
 }, {
     timestamps: true

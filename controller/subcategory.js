@@ -1,4 +1,5 @@
 import { subCategory } from "../models/subcategory.js";
+import fs from 'fs';
 
 export const createsubCategory = async (req, res) => {
     try {
@@ -39,7 +40,7 @@ export const createsubCategory = async (req, res) => {
 
 export const getsubcategory = async (req, res) => {
     try {
-        console.log(req.user,"req.user")
+        console.log(req.user, "req.user")
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
         const totlaPost = await subCategory.countDocuments();
@@ -104,7 +105,14 @@ export const deletecategory = async (req, res) => {
 
         const subcategory = await subCategory.findOneAndDelete({ _id: req.params.id });
         // console.log(product)
-        await fs.unlinkSync(`./public/category/${subcategory.imagename}`)
+        console.log(subcategory, "subcategory");
+        if (!subcategory) {
+            return res.status(404).json({
+                message: "SubCategory not found",
+                success: false
+            })
+        }
+        await fs.unlinkSync(`./public/subcategory/${subcategory.imagename}`)
         return res.status(200).json({
             message: " category deleted successfully",
             success: false
@@ -129,7 +137,7 @@ export const updatecategory = async (req, res) => {
 
         const category = await subCategory.findOneAndUpdate({ _id: req.params.id }, { $set: payload });
         console.log(category, "category")
-        await fs.unlinkSync(`./public/category/${category.imagename}`)
+        await fs.unlinkSync(`./public/subcategory/${category.imagename}`)
         return res.status(200).json({
             message: "product update successfully",
             success: true,
@@ -137,7 +145,7 @@ export const updatecategory = async (req, res) => {
         })
     } catch (error) {
         return res.status(500).json({
-            message: error.details,
+            message: error.message,
             success: false
         })
     }

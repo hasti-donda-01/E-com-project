@@ -1,6 +1,7 @@
 import { Order } from "../models/order.js";
 import { Payment } from "../models/payment.js";
 import { Product } from "../models/product.js";
+import { User } from "../models/user.js";
 
 export const getSellerPayments = async (req, res) => {
     try {
@@ -103,7 +104,6 @@ export const processFulfillment = async (req, res) => {
             });
         }
 
-        // ─── FIND ORDER ───────────────────────────────────
         const order = await Order.findById(id)
             .populate("product");
         if (!order) {
@@ -112,8 +112,6 @@ export const processFulfillment = async (req, res) => {
                 success: false
             });
         }
-
-        // ─── CHECK IF ORDER BELONGS TO SELLER ────────────
         if (order.product.user.toString() !== sellerId.toString()) {
             return res.status(403).json({
                 message: "Unauthorized - this order does not belong to you",
@@ -121,7 +119,6 @@ export const processFulfillment = async (req, res) => {
             });
         }
 
-        // ─── FULFILLMENT FLOW VALIDATION ─────────────────
         if (status === "shipped" && order.orderStatus !== "confirmed") {
             return res.status(400).json({
                 message: "Order must be confirmed before shipping",
@@ -136,7 +133,6 @@ export const processFulfillment = async (req, res) => {
             });
         }
 
-        // ─── UPDATE ORDER STATUS ──────────────────────────
         order.orderStatus = status;
         if (status === "delivered") {
             order.deliveredAt = new Date();
@@ -309,5 +305,46 @@ export const getmyproducts = async (req, res) => {
             success: false,
             message: error.message
         })
+    }
+}
+
+
+export const getMyProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id)
+            .select('-password -otp -resetToken'); 
+
+        return res.status(200).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+}
+
+export const updateMyProfile = async (req, res) => {
+    try {
+        const { name, phone } = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { $set: { name, phone } },
+            { new: true }
+        ).select('-password -otp -resetToken');
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            data: user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
     }
 }
