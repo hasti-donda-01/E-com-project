@@ -16,7 +16,7 @@ export const addtowish = async (req, res) => {
 
         const newWishlist = await Wishlist.create({
             user: req.user.id,
-            product
+            product: req.body.product
         });
 
         return res.status(201).json({

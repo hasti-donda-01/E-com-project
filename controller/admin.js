@@ -532,3 +532,53 @@ export const getSellerReport = async (req, res) => {
         });
     }
 };
+
+export const getAllSellerPayments = async (req, res) => {
+    try {
+        const payments = await Payment.find()
+            .populate({
+                path: "order",
+                select: "sellerId totalAmount orderStatus paymentMethod",
+                populate: {
+                    path: "sellerId",
+                    select: "name email"
+                }
+            })
+            .populate("user", "name email");
+
+        const formatted = payments.map(p => ({
+            paymentId: p._id,
+            amount: p.amount,
+            status: p.status,
+            paymentMethod: p.paymentMethod,
+            transactionId: p.transactionId,
+            seller: {
+                id: p.order?.sellerId?._id,
+                name: p.order?.sellerId?.name,
+                email: p.order?.sellerId?.email
+            },
+            order: {
+                id: p.order?._id,
+                totalAmount: p.order?.totalAmount,
+                orderStatus: p.order?.orderStatus,
+            },
+            buyer: {
+                id: p.user?._id,
+                name: p.user?.name,
+                email: p.user?.email
+            }
+        }));
+
+        return res.status(200).json({
+            success: true,
+            total: payments.length,
+            data: formatted
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};

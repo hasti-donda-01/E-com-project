@@ -30,6 +30,31 @@ export const getSellerPayments = async (req, res) => {
     }
 };
 
+
+export const getSellerOrder = async (req, res) => {
+    try {
+        const sellerId = req.user._id;
+
+        const products = await Product.find({ user: sellerId });
+        const productIds = products.map(p => p._id);
+
+        const orders = await Order.find({ product: { $in: productIds } })
+            .populate("product", "totalAmount orderStatus paymentStatus");
+
+        return res.status(200).json({
+            success: true,
+            total: orders.length,
+            data: orders
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message,
+            success: false
+        });
+    }
+};
+
 export const acceptRejectOrder = async (req, res) => {
     try {
         const { id } = req.params;
@@ -277,7 +302,6 @@ export const monitorPayoutStatus = async (req, res) => {
     }
 };
 
-
 export const getmyproducts = async (req, res) => {
     try {
 
@@ -308,11 +332,10 @@ export const getmyproducts = async (req, res) => {
     }
 }
 
-
 export const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id)
-            .select('-password -otp -resetToken'); 
+            .select('-password -otp -resetToken');
 
         return res.status(200).json({
             success: true,
@@ -330,11 +353,21 @@ export const updateMyProfile = async (req, res) => {
     try {
         const { name, phone } = req.body;
 
+
         const user = await User.findByIdAndUpdate(
             req.user.id,
             { $set: { name, phone } },
             { new: true }
         ).select('-password -otp -resetToken');
+
+
+        
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            })
+        }
 
         return res.status(200).json({
             success: true,

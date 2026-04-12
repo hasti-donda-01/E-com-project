@@ -4,7 +4,7 @@ const productSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    description: {          
+    description: {
         type: String,
         default: ""
     },
@@ -26,7 +26,7 @@ const productSchema = mongoose.Schema({
     },
     imagename: {
         type: String,
-        required: true,
+        // required: true,
     },
     categoryId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -39,7 +39,6 @@ export const createCategory = async (req, res) => {
 
 export const getcategory = async (req, res) => {
     try {
-        console.log(req.user, "req,user")
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
         const totlaPost = await Category.countDocuments();
@@ -51,14 +50,6 @@ export const getcategory = async (req, res) => {
             })
         }
 
-        if (req.user.role == 'customer' || req.user.role == 'seller') {
-            const category = await Category.find({ isActive: true }).skip((page - 1) * perPage).limit(perPage).exec();
-            return res.status(200).json({
-                message: "categories get successfully",
-                data: [category, "totalpages : " + totalpage, "page : " + page],
-                success: true
-            })
-        }
 
         const category = await Category.find().skip((page - 1) * perPage).limit(perPage).exec();
         console.log(category)

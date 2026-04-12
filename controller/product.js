@@ -5,6 +5,7 @@ export const createProduct = async (req, res) => {
     try {
         const { name, price, brand, stock, categoryId } = req.body;
 
+        console.log(req.file,"rerr")
         // Check file
         if (!req.file) {
             return res.status(400).json({
@@ -253,7 +254,7 @@ export const updateStock = async (req, res) => {
             });
         }
 
-       
+
         const product = await Product.findOne({
             _id: id,
             user: req.user.id
@@ -278,7 +279,7 @@ export const updateStock = async (req, res) => {
             data: {
                 productId: updatedProduct._id,
                 name: updatedProduct.name,
-                previousStock: product.stock,  
+                previousStock: product.stock,
                 updatedStock: updatedProduct.stock
             }
         });

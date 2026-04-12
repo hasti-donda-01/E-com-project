@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { auth } from '../middleware/auth.js';
-import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateorderstatus, verifySeller } from '../controller/admin.js';
+import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getAllSellerPayments, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateorderstatus, verifySeller } from '../controller/admin.js';
 import { adminDashboard } from '../controller/dashboards.js';
 // const storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
@@ -31,6 +31,8 @@ router.get('/getcustomerdetail/:id', auth(["Admin"]), getCustomerDetails);//moni
 router.post('/sellerapprove/:id', auth(["Admin"]), approveSeller);
 router.post('/sellerreject/:id', auth(["Admin"]), rejectSeller);
 router.get('/verifySeller/:id', auth(["Admin"]), verifySeller);
+
+router.get('/getAllSellerPayments', auth(["Admin"]), getAllSellerPayments)
 
 router.get('/adminDashboard', auth(["Admin"]), adminDashboard)
 

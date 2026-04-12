@@ -219,18 +219,25 @@ export const login = async (req, res) => {
             })
         }
         console.log(seller, "seller")
-        if (seller.role == "seller") {
+        if (seller.isActive == false) {
 
-            const sel = await Seller.findOne({ userId: seller._id });
-            console.log(sel, "sel")
-            if (sel.isApproved == false) {
-
-                return res.status(400).json({
-                    message: "user not approved",
-                    success: false
-                })
-            }
+            return res.status(400).json({
+                message: "user not approved",
+                success: false
+            })
         }
+        // if (seller.role == "seller") {
+
+        //     const sel = await Seller.findOne({ userId: seller._id });
+        //     console.log(sel, "sel")
+        //     if (sel.isApproved == false) {
+
+        //         return res.status(400).json({
+        //             message: "user not approved",
+        //             success: false
+        //         })
+        //     }
+        // }
         const isMatch = await bcrypt.compare(password, seller.password);
         if (!isMatch) {
             return res.status(400).json({
