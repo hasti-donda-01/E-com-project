@@ -77,7 +77,7 @@ import { User } from "../models/user.js";
 
 export const getalluser = async (req, res) => {
     try {
-        const sellerId = req.params.id;
+        const sellerId = req.user.id;
 
         // Fetch orders for this seller
         const orders = await Order.find({ sellerId: sellerId });

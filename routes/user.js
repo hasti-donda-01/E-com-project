@@ -14,7 +14,7 @@ router.delete('/deleteUser/:id',auth(["Admin"]),deleteUser)
 // router.update('/update/:id')
 router.post('/update/:id', auth(["customer", "Admin", "seller"]), updateUser);
 
-router.get("/getuser/:id", auth(["Admin"]), getalluser)
+router.get("/getuser", auth(["seller"]), getalluser)
 
 
 export default router;

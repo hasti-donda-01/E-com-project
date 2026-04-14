@@ -127,7 +127,7 @@ import { User } from "../models/user.js";
 
 export const createOrder = async (req, res) => {
     try {
-        const { product, paymentMethod, quantity, paymentStatus, orderStatus, buyNow, address } = req.body;
+        const { product, paymentMethod, quantity, orderStatus, buyNow, address } = req.body;
         const userId = req.user.id;
 
         const user = await User.findById(userId);
@@ -171,7 +171,6 @@ export const createOrder = async (req, res) => {
                 quantity,
                 address: deliveryAddress._id,
                 paymentMethod,
-                paymentStatus,
                 orderStatus
             });
 
@@ -217,7 +216,6 @@ export const createOrder = async (req, res) => {
                         totalAmount: item.total,
                         address: deliveryAddress._id,
                         paymentMethod,
-                        paymentStatus,
                         orderStatus
                     });
 
