@@ -1,28 +1,2269 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "swagger",
+    "title": "Meesho like",
     "version": "1.0.0",
-    "description": "Generated from a Postman collection."
+    "description": "Auto-generated from a Postman collection. Endpoints marked with \"x-needs-review\": true had no URL in the original collection and were given a placeholder path \u2014 fill in the real path in Postman and re-run the converter."
   },
   "servers": [
+    {
+      "url": "http://localhost:5000"
+    },
     {
       "url": "http://localhost:7000"
     }
   ],
+  "tags": [
+    {
+      "name": "address"
+    },
+    {
+      "name": "admin"
+    },
+    {
+      "name": "cart"
+    },
+    {
+      "name": "categories"
+    },
+    {
+      "name": "dashboards"
+    },
+    {
+      "name": "default"
+    },
+    {
+      "name": "despute"
+    },
+    {
+      "name": "Handle Wishlist"
+    },
+    {
+      "name": "order"
+    },
+    {
+      "name": "product"
+    },
+    {
+      "name": "return/refund"
+    },
+    {
+      "name": "seller"
+    },
+    {
+      "name": "subcategories"
+    },
+    {
+      "name": "user auth"
+    }
+  ],
   "paths": {
+    "/address/add-address": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "add address",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "address-add-address",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/address/get-address-of-user": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "get address of user",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "address-get-address-of-user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/address/new-request": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "New Request",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "address-new-request",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/address/set-default-adress": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "set default adress",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "address-set-default-adress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/address/update-address": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "update address",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "address-update-address",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/approve-seller": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "approve seller",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-approve-seller",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/block-unblock-user-account-status": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "block/unblock user(account status)",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-block-unblock-user-account-status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/get-all-products": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "get all products",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-get-all-products",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/getallorder": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "getallorder",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-getallorder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/getallsellerpayments": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "getAllSellerPayments",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-getallsellerpayments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/getcustomer-detail": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "getcustomer detail",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-getcustomer-detail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/monitor-seller": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "monitor seller",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-monitor-seller",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/monitor-user": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "monitor user",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-monitor-user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/updateorderstatus": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "updateorderstatus",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-updateorderstatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/verifyseller": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "verifySeller",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-verifyseller",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/view-customers": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "view customers",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-view-customers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/admin/view-sellers-detail": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "view sellers detail",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "admin-view-sellers-detail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
     "/api/product/get": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "get products",
+        "description": "get products (product)",
+        "operationId": "product-get-products",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/user/registerUser": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "register user",
+        "description": "register user (user auth)",
+        "operationId": "user-auth-register-user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/cart/addtocart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "addtocart",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "cart-addtocart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/cart/clear-cart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "clear cart",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "cart-clear-cart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/cart/get-cart-of-the-seller": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "get cart of the seller",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "cart-get-cart-of-the-seller",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/cart/remove-product-from-cart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "remove product from cart",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "cart-remove-product-from-cart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/cart/update-quantity": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "update quantity",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "cart-update-quantity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/categories/add-categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "add categories",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "categories-add-categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/categories/category-get-by-id": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "category get by id",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "categories-category-get-by-id",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/categories/delete-category": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "delete category",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "categories-delete-category",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/categories/get-all-categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "get all categories",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "categories-get-all-categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/categories/update-category": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "update category",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "categories-update-category",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/dashboards/admin-dashboard": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "Admin Dashboard",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "dashboards-admin-dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/dashboards/get-my-products": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "get my products",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "dashboards-get-my-products",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/dashboards/get-user-profile": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "get user profile",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "dashboards-get-user-profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/dashboards/getallproducts": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "getallproducts",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "dashboards-getallproducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/dashboards/seller-dashboard": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "Seller Dashboard",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "dashboards-seller-dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/default/deleteuser": {
       "get": {
         "tags": [
           "default"
         ],
-        "summary": "getallProduct",
-        "operationId": "get_api_product_get",
+        "summary": "deleteUser",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "default-deleteuser",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
           }
-        }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/default/profile": {
+      "get": {
+        "tags": [
+          "default"
+        ],
+        "summary": "profile",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "default-profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/default/update-profile": {
+      "get": {
+        "tags": [
+          "default"
+        ],
+        "summary": "update profile",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "default-update-profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/despute/get-all-desputes": {
+      "get": {
+        "tags": [
+          "despute"
+        ],
+        "summary": "get all desputes",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "despute-get-all-desputes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/despute/raisedespute": {
+      "get": {
+        "tags": [
+          "despute"
+        ],
+        "summary": "raisedespute",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "despute-raisedespute",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/despute/resolve-despute": {
+      "get": {
+        "tags": [
+          "despute"
+        ],
+        "summary": "resolve despute",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "despute-resolve-despute",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/handle-wishlist/add-to-wishlist": {
+      "get": {
+        "tags": [
+          "Handle Wishlist"
+        ],
+        "summary": "add to wishlist",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "handle-wishlist-add-to-wishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/handle-wishlist/clear-wishlist": {
+      "get": {
+        "tags": [
+          "Handle Wishlist"
+        ],
+        "summary": "clear wishlist",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "handle-wishlist-clear-wishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/handle-wishlist/getproducts": {
+      "get": {
+        "tags": [
+          "Handle Wishlist"
+        ],
+        "summary": "getproducts",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "handle-wishlist-getproducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/handle-wishlist/new-request": {
+      "get": {
+        "tags": [
+          "Handle Wishlist"
+        ],
+        "summary": "New Request",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "handle-wishlist-new-request",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/handle-wishlist/remove-from-wishlist": {
+      "get": {
+        "tags": [
+          "Handle Wishlist"
+        ],
+        "summary": "remove from wishlist",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "handle-wishlist-remove-from-wishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/cancel-order": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "cancel order",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-cancel-order",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/get-particular-seller-order": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "get particular seller order",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-get-particular-seller-order",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/new-request": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "New Request",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-new-request",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/payment-update": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "payment update",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-payment-update",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/place-order": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "place order",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-place-order",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/revenue": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "revenue",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-revenue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/track-order": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track order",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-track-order",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/track-payment": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track payment",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-track-payment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/update-payment-status": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "update payment status",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-update-payment-status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/order/view-order-history": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "view order  history",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "order-view-order-history",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/add-product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "add product",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-add-product",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/count-total": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "count total",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-count-total",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/delete-product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "delete product",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-delete-product",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/filterproducts": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "filterProducts",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-filterproducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/getproductnyid": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "getproductnyid",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-getproductnyid",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/productbycategory": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "productbycategory",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-productbycategory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/setproductpricing": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "setProductPricing",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-setproductpricing",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/product/update-product": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "update product",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "product-update-product",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/adjustpaymentrecord": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "adjustPaymentRecord",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-adjustpaymentrecord",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/approve-or-reject-return-req": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "approve or reject return req.",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-approve-or-reject-return-req",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/return-requset": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "return requset",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-return-requset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/seller-approve-refund": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "seller approve refund",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-seller-approve-refund",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/seller-view-req": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "seller view req.",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-seller-view-req",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/return-refund/trackrefund": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "trackrefund",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "return-refund-trackrefund",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/acceptrejectorder": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "acceptRejectOrder",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-acceptrejectorder",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/getmyproducts": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "getmyproducts",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-getmyproducts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/getsellerpayments": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "getSellerPayments",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-getsellerpayments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/monitorpayoutstatus": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "monitorPayoutStatus",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-monitorpayoutstatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/processfulfillment": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "processFulfillment",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-processfulfillment",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/seller/tracksellerearnings": {
+      "get": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "trackSellerEarnings",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "seller-tracksellerearnings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/subcategories/add-sub-categories": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "add sub categories",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "subcategories-add-sub-categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/subcategories/delete-subcategory": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "delete subcategory",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "subcategories-delete-subcategory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/subcategories/get-all-subcategories": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get all subcategories",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "subcategories-get-all-subcategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/subcategories/get-subcategory-by-id": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get subcategory by id",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "subcategories-get-subcategory-by-id",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/subcategories/update-subcategory": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "update subcategory",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "subcategories-update-subcategory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/user-auth/change-password": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "change password",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "user-auth-change-password",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/user-auth/login": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "login",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "user-auth-login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/user-auth/resetpassword": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "resetpassword",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "user-auth-resetpassword",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/user-auth/verifyemail": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "verifyEmail",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "user-auth-verifyemail",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
+      }
+    },
+    "/user-auth/verifyotp": {
+      "get": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "verifyOTP",
+        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
+        "operationId": "user-auth-verifyotp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-needs-review": true
       }
     }
   }
