@@ -1,0 +1,29 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "swagger",
+    "version": "1.0.0",
+    "description": "Generated from a Postman collection."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:7000"
+    }
+  ],
+  "paths": {
+    "/api/product/get": {
+      "get": {
+        "tags": [
+          "default"
+        ],
+        "summary": "getallProduct",
+        "operationId": "get_api_product_get",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+}
