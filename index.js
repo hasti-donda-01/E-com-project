@@ -1,26 +1,28 @@
-import env from 'dotenv';
+import env from "dotenv";
 env.config();
-import './config/dbConnect.js'
-import express from 'express';
-import mongoose from 'mongoose';
-import router from './routes/main.js';
 
-import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './controller/Swagger/swagger.json' with { type: 'json' };
+import "./config/dbConnect.js";
+import express from "express";
+import fs from "fs";
+import swaggerUi from "swagger-ui-express";
+import router from "./routes/main.js";
 
 const app = express();
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-const port = process.env.PORT;
-app.use(express.json())
-app.use('/api', router);
+const port = process.env.PORT || 7000;
+
+const swaggerDocument = JSON.parse(
+  fs.readFileSync(new URL("./swagger.json", import.meta.url), "utf-8")
+);
+
+app.use(express.json());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use("/api", router);
 
 app.use("/image", express.static("public/product"));
 app.use("/category_Image", express.static("public/category"));
+
 app.listen(port, () => {
-    console.log("server running", port);
-})
-
-
-
-
-// http://localhost:7000/api-docs
+  console.log("server running", port);
+});
