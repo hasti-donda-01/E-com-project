@@ -3,6 +3,7 @@ env.config();
 
 import "./config/dbConnect.js";
 import express from "express";
+import cors from "cors";
 import fs from "fs";
 import swaggerUi from "swagger-ui-express";
 import router from "./routes/main.js";
@@ -11,12 +12,13 @@ const app = express();
 const port = process.env.PORT || 7000;
 
 const swaggerDocument = JSON.parse(
-     fs.readFileSync(
-       new URL("./controller/Swagger/swagger.json", import.meta.url),
-       "utf-8"
-     )
-   );
+  fs.readFileSync(
+    new URL("./controller/swagger/swagger.json", import.meta.url),
+    "utf-8"
+  )
+);
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
