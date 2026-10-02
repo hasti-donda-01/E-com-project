@@ -25,6 +25,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api", router);
 
+app.use("/profile", express.static("public/profile"));
 app.use("/image", express.static("public/product"));
 app.use("/category_Image", express.static("public/category"));
 

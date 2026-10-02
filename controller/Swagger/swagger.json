@@ -15,7 +15,7 @@
   ],
   "tags": [
     {
-      "name": "user auth"
+      "name": "seller auth"
     },
     {
       "name": "profile"
@@ -67,13 +67,13 @@
     }
   },
   "paths": {
-    "/api/user/registerUser": {
+    "/api/seller/create": {
       "post": {
         "tags": [
-          "user auth"
+          "seller auth"
         ],
-        "summary": "register user",
-        "operationId": "post_api_user_registerUser",
+        "summary": "register seller",
+        "operationId": "post_api_seller_create",
         "responses": {
           "200": {
             "description": "Success"
@@ -98,9 +98,16 @@
                   "name",
                   "email",
                   "address",
+                  "phone",
                   "password",
                   "confirm_password",
-                  "phone"
+                  "role",
+                  "storeName",
+                  "storeDesc",
+                  "category",
+                  "businessType",
+                  "gstin",
+                  "panNumber"
                 ],
                 "properties": {
                   "name": {
@@ -129,8 +136,12 @@
                   },
                   "role": {
                     "type": "string",
+                    "enum": [
+                      "seller"
+                    ],
+                    "default": "seller",
                     "example": "seller",
-                    "description": "Use seller, Admin, or your customer role value. Seller fields below are only needed when role is seller."
+                    "description": "Registers a seller. Store details below are required."
                   },
                   "storeName": {
                     "type": "string",
@@ -156,10 +167,10 @@
                     "type": "string",
                     "example": "ABCDE1234F"
                   },
-                  "image": {
+                  "profileImage": {
                     "type": "string",
                     "format": "binary",
-                    "description": "Profile image. Field name must match upload.single(...) in your route."
+                    "description": "Profile image (field name profileImage)"
                   }
                 }
               }
@@ -169,13 +180,13 @@
         "security": []
       }
     },
-    "/api/user/login": {
+    "/api/seller/login": {
       "post": {
         "tags": [
-          "user auth"
+          "seller auth"
         ],
         "summary": "login",
-        "operationId": "post_api_user_login",
+        "operationId": "post_api_seller_login",
         "responses": {
           "200": {
             "description": "Success"
@@ -217,13 +228,48 @@
         "security": []
       }
     },
-    "/api/user/verifyEmail": {
+    "/api/seller/logout/{id}": {
       "post": {
         "tags": [
-          "user auth"
+          "seller auth"
+        ],
+        "summary": "logout",
+        "operationId": "post_api_seller_logout_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Seller _id"
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/seller/verifyEmail": {
+      "post": {
+        "tags": [
+          "seller auth"
         ],
         "summary": "verify email",
-        "operationId": "post_api_user_verifyEmail",
+        "operationId": "post_api_seller_verifyEmail",
         "responses": {
           "200": {
             "description": "Success"
@@ -260,13 +306,13 @@
         "security": []
       }
     },
-    "/api/user/verifyOTP": {
+    "/api/seller/verifyOTP": {
       "post": {
         "tags": [
-          "user auth"
+          "seller auth"
         ],
         "summary": "verify OTP",
-        "operationId": "post_api_user_verifyOTP",
+        "operationId": "post_api_seller_verifyOTP",
         "responses": {
           "200": {
             "description": "Success"
@@ -308,13 +354,13 @@
         "security": []
       }
     },
-    "/api/user/change-password": {
+    "/api/seller/changePassword": {
       "put": {
         "tags": [
-          "user auth"
+          "seller auth"
         ],
         "summary": "change password",
-        "operationId": "put_api_user_change_password",
+        "operationId": "put_api_seller_changePassword",
         "responses": {
           "200": {
             "description": "Success"
@@ -365,13 +411,13 @@
         ]
       }
     },
-    "/api/user/resetPassword": {
+    "/api/seller/resetPassword": {
       "post": {
         "tags": [
-          "user auth"
+          "seller auth"
         ],
         "summary": "reset password",
-        "operationId": "post_api_user_resetPassword",
+        "operationId": "post_api_seller_resetPassword",
         "responses": {
           "200": {
             "description": "Success"
@@ -421,101 +467,6 @@
           }
         },
         "security": []
-      }
-    },
-    "/api/user/profile": {
-      "get": {
-        "tags": [
-          "profile"
-        ],
-        "summary": "profile",
-        "operationId": "get_api_user_profile",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/user/update-profile": {
-      "put": {
-        "tags": [
-          "profile"
-        ],
-        "summary": "update profile",
-        "operationId": "put_api_user_update_profile",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/user/deleteUser": {
-      "delete": {
-        "tags": [
-          "profile"
-        ],
-        "summary": "delete user",
-        "operationId": "delete_api_user_deleteUser",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
       }
     },
     "/api/address/add-address": {
@@ -1234,13 +1185,13 @@
         ]
       }
     },
-    "/api/categories/add-category": {
+    "/api/category/add-category": {
       "post": {
         "tags": [
           "categories"
         ],
         "summary": "add category",
-        "operationId": "post_api_categories_add_category",
+        "operationId": "post_api_category_add_category",
         "responses": {
           "200": {
             "description": "Success"
@@ -1273,13 +1224,13 @@
         ]
       }
     },
-    "/api/categories/get-category/{id}": {
+    "/api/category/get-category/{id}": {
       "get": {
         "tags": [
           "categories"
         ],
         "summary": "get category by id",
-        "operationId": "get_api_categories_get_category_id",
+        "operationId": "get_api_category_get_category_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1311,13 +1262,13 @@
         ]
       }
     },
-    "/api/categories/delete-category/{id}": {
+    "/api/category/delete-category/{id}": {
       "delete": {
         "tags": [
           "categories"
         ],
         "summary": "delete category",
-        "operationId": "delete_api_categories_delete_category_id",
+        "operationId": "delete_api_category_delete_category_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1349,13 +1300,13 @@
         ]
       }
     },
-    "/api/categories/get-all-categories": {
+    "/api/category/get-all-categories": {
       "get": {
         "tags": [
           "categories"
         ],
         "summary": "get all categories",
-        "operationId": "get_api_categories_get_all_categories",
+        "operationId": "get_api_category_get_all_categories",
         "responses": {
           "200": {
             "description": "Success"
@@ -1377,13 +1328,13 @@
         ]
       }
     },
-    "/api/categories/update-category/{id}": {
+    "/api/category/update-category/{id}": {
       "put": {
         "tags": [
           "categories"
         ],
         "summary": "update category",
-        "operationId": "put_api_categories_update_category_id",
+        "operationId": "put_api_category_update_category_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1426,13 +1377,13 @@
         ]
       }
     },
-    "/api/subcategories/add-sub-category": {
+    "/api/subcat/add-sub-category": {
       "post": {
         "tags": [
           "subcategories"
         ],
         "summary": "add sub category",
-        "operationId": "post_api_subcategories_add_sub_category",
+        "operationId": "post_api_subcat_add_sub_category",
         "responses": {
           "200": {
             "description": "Success"
@@ -1465,13 +1416,13 @@
         ]
       }
     },
-    "/api/subcategories/delete-subcategory/{id}": {
+    "/api/subcat/delete-subcategory/{id}": {
       "delete": {
         "tags": [
           "subcategories"
         ],
         "summary": "delete subcategory",
-        "operationId": "delete_api_subcategories_delete_subcategory_id",
+        "operationId": "delete_api_subcat_delete_subcategory_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1503,13 +1454,13 @@
         ]
       }
     },
-    "/api/subcategories/get-all-subcategories": {
+    "/api/subcat/get-all-subcategories": {
       "get": {
         "tags": [
           "subcategories"
         ],
         "summary": "get all subcategories",
-        "operationId": "get_api_subcategories_get_all_subcategories",
+        "operationId": "get_api_subcat_get_all_subcategories",
         "responses": {
           "200": {
             "description": "Success"
@@ -1531,13 +1482,13 @@
         ]
       }
     },
-    "/api/subcategories/get-subcategory/{id}": {
+    "/api/subcat/get-subcategory/{id}": {
       "get": {
         "tags": [
           "subcategories"
         ],
         "summary": "get subcategory by id",
-        "operationId": "get_api_subcategories_get_subcategory_id",
+        "operationId": "get_api_subcat_get_subcategory_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1569,13 +1520,13 @@
         ]
       }
     },
-    "/api/subcategories/update-subcategory/{id}": {
+    "/api/subcat/update-subcategory/{id}": {
       "put": {
         "tags": [
           "subcategories"
         ],
         "summary": "update subcategory",
-        "operationId": "put_api_subcategories_update_subcategory_id",
+        "operationId": "put_api_subcat_update_subcategory_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1864,13 +1815,13 @@
         ]
       }
     },
-    "/api/wishlist/add-to-wishlist": {
+    "/api/wish/add-to-wishlist": {
       "post": {
         "tags": [
           "wishlist"
         ],
         "summary": "add to wishlist",
-        "operationId": "post_api_wishlist_add_to_wishlist",
+        "operationId": "post_api_wish_add_to_wishlist",
         "responses": {
           "200": {
             "description": "Success"
@@ -1903,13 +1854,13 @@
         ]
       }
     },
-    "/api/wishlist/clear-wishlist": {
+    "/api/wish/clear-wishlist": {
       "delete": {
         "tags": [
           "wishlist"
         ],
         "summary": "clear wishlist",
-        "operationId": "delete_api_wishlist_clear_wishlist",
+        "operationId": "delete_api_wish_clear_wishlist",
         "responses": {
           "200": {
             "description": "Success"
@@ -1931,13 +1882,13 @@
         ]
       }
     },
-    "/api/wishlist/getProducts": {
+    "/api/wish/getProducts": {
       "get": {
         "tags": [
           "wishlist"
         ],
         "summary": "get wishlist products",
-        "operationId": "get_api_wishlist_getProducts",
+        "operationId": "get_api_wish_getProducts",
         "responses": {
           "200": {
             "description": "Success"
@@ -1959,13 +1910,13 @@
         ]
       }
     },
-    "/api/wishlist/remove-from-wishlist/{id}": {
+    "/api/wish/remove-from-wishlist/{id}": {
       "delete": {
         "tags": [
           "wishlist"
         ],
         "summary": "remove from wishlist",
-        "operationId": "delete_api_wishlist_remove_from_wishlist_id",
+        "operationId": "delete_api_wish_remove_from_wishlist_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -3024,6 +2975,149 @@
         ],
         "summary": "track seller earnings",
         "operationId": "get_api_seller_trackSellerEarnings",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/getUserProfile": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "get user profile",
+        "operationId": "get_api_user_getUserProfile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/update/{id}": {
+      "post": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "update user",
+        "operationId": "post_api_user_update_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/deleteUser/{id}": {
+      "delete": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "delete user (Admin only)",
+        "operationId": "delete_api_user_deleteUser_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/getuser": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "get all users (seller only)",
+        "operationId": "get_api_user_getuser",
         "responses": {
           "200": {
             "description": "Success"
