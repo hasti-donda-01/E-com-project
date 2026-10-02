@@ -11,8 +11,11 @@ const app = express();
 const port = process.env.PORT || 7000;
 
 const swaggerDocument = JSON.parse(
-  fs.readFileSync(new URL("./swagger.json", import.meta.url), "utf-8")
-);
+     fs.readFileSync(
+       new URL("./controller/Swagger/swagger.json", import.meta.url),
+       "utf-8"
+     )
+   );
 
 app.use(express.json());
 
