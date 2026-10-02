@@ -3,14 +3,23 @@
   "info": {
     "title": "Meesho like",
     "version": "1.0.0",
-    "description": "Auto-generated from a Postman collection. Endpoints marked with \"x-needs-review\": true had no URL in the original collection and were given a placeholder path \u2014 fill in the real path in Postman and re-run the converter."
+    "description": "E-commerce API"
   },
   "servers": [
     {
       "url": "https://e-com-project-b3ci.onrender.com"
+    },
+    {
+      "url": "http://localhost:7000"
     }
   ],
   "tags": [
+    {
+      "name": "user auth"
+    },
+    {
+      "name": "profile"
+    },
     {
       "name": "address"
     },
@@ -24,16 +33,16 @@
       "name": "categories"
     },
     {
+      "name": "subcategories"
+    },
+    {
       "name": "dashboards"
     },
     {
-      "name": "default"
+      "name": "dispute"
     },
     {
-      "name": "despute"
-    },
-    {
-      "name": "Handle Wishlist"
+      "name": "wishlist"
     },
     {
       "name": "order"
@@ -46,27 +55,28 @@
     },
     {
       "name": "seller"
-    },
-    {
-      "name": "subcategories"
-    },
-    {
-      "name": "user auth"
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
   "paths": {
-    "/address/add-address": {
-      "get": {
+    "/api/user/registerUser": {
+      "post": {
         "tags": [
-          "address"
+          "user auth"
         ],
-        "summary": "add address",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "address-add-address",
-        "parameters": [],
+        "summary": "register user",
+        "operationId": "post_api_user_registerUser",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -78,21 +88,343 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": []
       }
     },
-    "/address/get-address-of-user": {
+    "/api/user/login": {
+      "post": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "login",
+        "operationId": "post_api_user_login",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/verifyEmail": {
+      "post": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "verify email",
+        "operationId": "post_api_user_verifyEmail",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/verifyOTP": {
+      "post": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "verify OTP",
+        "operationId": "post_api_user_verifyOTP",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/change-password": {
+      "put": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "change password",
+        "operationId": "put_api_user_change_password",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/resetPassword": {
+      "post": {
+        "tags": [
+          "user auth"
+        ],
+        "summary": "reset password",
+        "operationId": "post_api_user_resetPassword",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/profile": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "profile",
+        "operationId": "get_api_user_profile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/update-profile": {
+      "put": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "update profile",
+        "operationId": "put_api_user_update_profile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/user/deleteUser": {
+      "delete": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "delete user",
+        "operationId": "delete_api_user_deleteUser",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/address/add-address": {
+      "post": {
+        "tags": [
+          "address"
+        ],
+        "summary": "add address",
+        "operationId": "post_api_address_add_address",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/address/get-address-of-user": {
       "get": {
         "tags": [
           "address"
         ],
         "summary": "get address of user",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "address-get-address-of-user",
-        "parameters": [],
+        "operationId": "get_api_address_get_address_of_user",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -104,73 +436,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
-      }
-    },
-    "/address/new-request": {
-      "get": {
-        "tags": [
-          "address"
-        ],
-        "summary": "New Request",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "address-new-request",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
+        "security": [
+          {
+            "bearerAuth": []
           }
-        },
-        "x-needs-review": true
+        ]
       }
     },
-    "/address/set-default-adress": {
-      "get": {
-        "tags": [
-          "address"
-        ],
-        "summary": "set default adress",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "address-set-default-adress",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/address/update-address": {
-      "get": {
+    "/api/address/update-address/{id}": {
+      "put": {
         "tags": [
           "address"
         ],
         "summary": "update address",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "address-update-address",
-        "parameters": [],
+        "operationId": "put_api_address_update_address_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -182,21 +464,82 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/approve-seller": {
-      "get": {
+    "/api/address/set-default-address/{id}": {
+      "put": {
+        "tags": [
+          "address"
+        ],
+        "summary": "set default address",
+        "operationId": "put_api_address_set_default_address_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/approve-seller": {
+      "put": {
         "tags": [
           "admin"
         ],
         "summary": "approve seller",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-approve-seller",
-        "parameters": [],
+        "operationId": "put_api_admin_approve_seller",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -208,21 +551,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/block-unblock-user-account-status": {
-      "get": {
+    "/api/admin/block-unblock-user": {
+      "put": {
         "tags": [
           "admin"
         ],
-        "summary": "block/unblock user(account status)",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-block-unblock-user-account-status",
-        "parameters": [],
+        "summary": "block/unblock user (account status)",
+        "operationId": "put_api_admin_block_unblock_user",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -234,21 +590,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/get-all-products": {
+    "/api/admin/get-all-products": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "get all products",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-get-all-products",
-        "parameters": [],
+        "operationId": "get_api_admin_get_all_products",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -260,21 +629,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/getallorder": {
+    "/api/admin/getAllOrder": {
       "get": {
         "tags": [
           "admin"
         ],
-        "summary": "getallorder",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-getallorder",
-        "parameters": [],
+        "summary": "get all orders",
+        "operationId": "get_api_admin_getAllOrder",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -286,21 +657,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/getallsellerpayments": {
+    "/api/admin/getAllSellerPayments": {
       "get": {
         "tags": [
           "admin"
         ],
-        "summary": "getAllSellerPayments",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-getallsellerpayments",
-        "parameters": [],
+        "summary": "get all seller payments",
+        "operationId": "get_api_admin_getAllSellerPayments",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -312,21 +685,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/getcustomer-detail": {
+    "/api/admin/get-customer-detail/{id}": {
       "get": {
         "tags": [
           "admin"
         ],
-        "summary": "getcustomer detail",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-getcustomer-detail",
-        "parameters": [],
+        "summary": "get customer detail",
+        "operationId": "get_api_admin_get_customer_detail_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -338,21 +713,33 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/monitor-seller": {
+    "/api/admin/monitor-seller": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "monitor seller",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-monitor-seller",
-        "parameters": [],
+        "operationId": "get_api_admin_monitor_seller",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -364,21 +751,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/monitor-user": {
+    "/api/admin/monitor-user": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "monitor user",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-monitor-user",
-        "parameters": [],
+        "operationId": "get_api_admin_monitor_user",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -390,21 +779,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/updateorderstatus": {
-      "get": {
+    "/api/admin/updateOrderStatus": {
+      "put": {
         "tags": [
           "admin"
         ],
-        "summary": "updateorderstatus",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-updateorderstatus",
-        "parameters": [],
+        "summary": "update order status",
+        "operationId": "put_api_admin_updateOrderStatus",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -416,21 +807,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/verifyseller": {
-      "get": {
+    "/api/admin/verifySeller": {
+      "put": {
         "tags": [
           "admin"
         ],
-        "summary": "verifySeller",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-verifyseller",
-        "parameters": [],
+        "summary": "verify seller",
+        "operationId": "put_api_admin_verifySeller",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -442,21 +846,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/view-customers": {
+    "/api/admin/view-customers": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "view customers",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-view-customers",
-        "parameters": [],
+        "operationId": "get_api_admin_view_customers",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -468,21 +885,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/admin/view-sellers-detail": {
+    "/api/admin/view-sellers-detail": {
       "get": {
         "tags": [
           "admin"
         ],
         "summary": "view sellers detail",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "admin-view-sellers-detail",
-        "parameters": [],
+        "operationId": "get_api_admin_view_sellers_detail",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -494,7 +913,1261 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/cart/addToCart": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "add to cart",
+        "operationId": "post_api_cart_addToCart",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/cart/clear-cart": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "clear cart",
+        "operationId": "delete_api_cart_clear_cart",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/cart/get-cart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "get cart",
+        "operationId": "get_api_cart_get_cart",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/cart/remove-product-from-cart/{id}": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "remove product from cart",
+        "operationId": "delete_api_cart_remove_product_from_cart_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/cart/update-quantity": {
+      "put": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "update quantity",
+        "operationId": "put_api_cart_update_quantity",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/categories/add-category": {
+      "post": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "add category",
+        "operationId": "post_api_categories_add_category",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/categories/get-category/{id}": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "get category by id",
+        "operationId": "get_api_categories_get_category_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/categories/delete-category/{id}": {
+      "delete": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "delete category",
+        "operationId": "delete_api_categories_delete_category_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/categories/get-all-categories": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "get all categories",
+        "operationId": "get_api_categories_get_all_categories",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/categories/update-category/{id}": {
+      "put": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "update category",
+        "operationId": "put_api_categories_update_category_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/subcategories/add-sub-category": {
+      "post": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "add sub category",
+        "operationId": "post_api_subcategories_add_sub_category",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/subcategories/delete-subcategory/{id}": {
+      "delete": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "delete subcategory",
+        "operationId": "delete_api_subcategories_delete_subcategory_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/subcategories/get-all-subcategories": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get all subcategories",
+        "operationId": "get_api_subcategories_get_all_subcategories",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/subcategories/get-subcategory/{id}": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get subcategory by id",
+        "operationId": "get_api_subcategories_get_subcategory_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/subcategories/update-subcategory/{id}": {
+      "put": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "update subcategory",
+        "operationId": "put_api_subcategories_update_subcategory_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboards/admin-dashboard": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "admin dashboard",
+        "operationId": "get_api_dashboards_admin_dashboard",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboards/seller-dashboard": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "seller dashboard",
+        "operationId": "get_api_dashboards_seller_dashboard",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboards/get-my-products": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "get my products",
+        "operationId": "get_api_dashboards_get_my_products",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboards/get-user-profile": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "get user profile",
+        "operationId": "get_api_dashboards_get_user_profile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/dashboards/getAllProducts": {
+      "get": {
+        "tags": [
+          "dashboards"
+        ],
+        "summary": "get all products",
+        "operationId": "get_api_dashboards_getAllProducts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/despute/get-all-desputes": {
+      "get": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "get all disputes",
+        "operationId": "get_api_despute_get_all_desputes",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/despute/raiseDespute": {
+      "post": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "raise dispute",
+        "operationId": "post_api_despute_raiseDespute",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/despute/resolve-despute": {
+      "put": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "resolve dispute",
+        "operationId": "put_api_despute_resolve_despute",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/wishlist/add-to-wishlist": {
+      "post": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "add to wishlist",
+        "operationId": "post_api_wishlist_add_to_wishlist",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/wishlist/clear-wishlist": {
+      "delete": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "clear wishlist",
+        "operationId": "delete_api_wishlist_clear_wishlist",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/wishlist/getProducts": {
+      "get": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "get wishlist products",
+        "operationId": "get_api_wishlist_getProducts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/wishlist/remove-from-wishlist/{id}": {
+      "delete": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "remove from wishlist",
+        "operationId": "delete_api_wishlist_remove_from_wishlist_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/cancel-order/{id}": {
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "cancel order",
+        "operationId": "put_api_order_cancel_order_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/get-particular-seller-order": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "get particular seller order",
+        "operationId": "get_api_order_get_particular_seller_order",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/payment-update": {
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "payment update",
+        "operationId": "put_api_order_payment_update",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/place-order": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "place order",
+        "operationId": "post_api_order_place_order",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/revenue": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "revenue",
+        "operationId": "get_api_order_revenue",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/track-order/{id}": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track order",
+        "operationId": "get_api_order_track_order_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/track-payment/{id}": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track payment",
+        "operationId": "get_api_order_track_payment_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/update-payment-status": {
+      "put": {
+        "tags": [
+          "order"
+        ],
+        "summary": "update payment status",
+        "operationId": "put_api_order_update_payment_status",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/order/view-order-history": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "view order history",
+        "operationId": "get_api_order_view_order_history",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/product/get": {
@@ -503,62 +2176,10 @@
           "product"
         ],
         "summary": "get products",
-        "description": "get products (product)",
-        "operationId": "product-get-products",
-        "parameters": [],
+        "operationId": "get_api_product_get",
         "responses": {
           "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/api/user/registerUser": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "register user",
-        "description": "register user (user auth)",
-        "operationId": "user-auth-register-user",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/cart/addtocart": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "addtocart",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "cart-addtocart",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -570,931 +2191,19 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": []
       }
     },
-    "/cart/clear-cart": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "clear cart",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "cart-clear-cart",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/cart/get-cart-of-the-seller": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "get cart of the seller",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "cart-get-cart-of-the-seller",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/cart/remove-product-from-cart": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "remove product from cart",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "cart-remove-product-from-cart",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/cart/update-quantity": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "update quantity",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "cart-update-quantity",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/categories/add-categories": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "add categories",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "categories-add-categories",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/categories/category-get-by-id": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "category get by id",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "categories-category-get-by-id",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/categories/delete-category": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "delete category",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "categories-delete-category",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/categories/get-all-categories": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "get all categories",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "categories-get-all-categories",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/categories/update-category": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "update category",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "categories-update-category",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/dashboards/admin-dashboard": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "Admin Dashboard",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "dashboards-admin-dashboard",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/dashboards/get-my-products": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "get my products",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "dashboards-get-my-products",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/dashboards/get-user-profile": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "get user profile",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "dashboards-get-user-profile",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/dashboards/getallproducts": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "getallproducts",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "dashboards-getallproducts",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/dashboards/seller-dashboard": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "Seller Dashboard",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "dashboards-seller-dashboard",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/default/deleteuser": {
-      "get": {
-        "tags": [
-          "default"
-        ],
-        "summary": "deleteUser",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "default-deleteuser",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/default/profile": {
-      "get": {
-        "tags": [
-          "default"
-        ],
-        "summary": "profile",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "default-profile",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/default/update-profile": {
-      "get": {
-        "tags": [
-          "default"
-        ],
-        "summary": "update profile",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "default-update-profile",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/despute/get-all-desputes": {
-      "get": {
-        "tags": [
-          "despute"
-        ],
-        "summary": "get all desputes",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "despute-get-all-desputes",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/despute/raisedespute": {
-      "get": {
-        "tags": [
-          "despute"
-        ],
-        "summary": "raisedespute",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "despute-raisedespute",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/despute/resolve-despute": {
-      "get": {
-        "tags": [
-          "despute"
-        ],
-        "summary": "resolve despute",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "despute-resolve-despute",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/handle-wishlist/add-to-wishlist": {
-      "get": {
-        "tags": [
-          "Handle Wishlist"
-        ],
-        "summary": "add to wishlist",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "handle-wishlist-add-to-wishlist",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/handle-wishlist/clear-wishlist": {
-      "get": {
-        "tags": [
-          "Handle Wishlist"
-        ],
-        "summary": "clear wishlist",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "handle-wishlist-clear-wishlist",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/handle-wishlist/getproducts": {
-      "get": {
-        "tags": [
-          "Handle Wishlist"
-        ],
-        "summary": "getproducts",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "handle-wishlist-getproducts",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/handle-wishlist/new-request": {
-      "get": {
-        "tags": [
-          "Handle Wishlist"
-        ],
-        "summary": "New Request",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "handle-wishlist-new-request",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/handle-wishlist/remove-from-wishlist": {
-      "get": {
-        "tags": [
-          "Handle Wishlist"
-        ],
-        "summary": "remove from wishlist",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "handle-wishlist-remove-from-wishlist",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/cancel-order": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "cancel order",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-cancel-order",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/get-particular-seller-order": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "get particular seller order",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-get-particular-seller-order",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/new-request": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "New Request",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-new-request",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/payment-update": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "payment update",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-payment-update",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/place-order": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "place order",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-place-order",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/revenue": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "revenue",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-revenue",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/track-order": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "track order",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-track-order",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/track-payment": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "track payment",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-track-payment",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/update-payment-status": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "update payment status",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-update-payment-status",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/order/view-order-history": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "view order  history",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "order-view-order-history",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/product/add-product": {
-      "get": {
+    "/api/product/add-product": {
+      "post": {
         "tags": [
           "product"
         ],
         "summary": "add product",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-add-product",
-        "parameters": [],
+        "operationId": "post_api_product_add_product",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1506,21 +2215,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/count-total": {
+    "/api/product/count-total": {
       "get": {
         "tags": [
           "product"
         ],
         "summary": "count total",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-count-total",
-        "parameters": [],
+        "operationId": "get_api_product_count_total",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1532,21 +2254,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/delete-product": {
-      "get": {
+    "/api/product/delete-product/{id}": {
+      "delete": {
         "tags": [
           "product"
         ],
         "summary": "delete product",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-delete-product",
-        "parameters": [],
+        "operationId": "delete_api_product_delete_product_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1558,21 +2282,33 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/filterproducts": {
+    "/api/product/filterProducts": {
       "get": {
         "tags": [
           "product"
         ],
-        "summary": "filterProducts",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-filterproducts",
-        "parameters": [],
+        "summary": "filter products",
+        "operationId": "get_api_product_filterProducts",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1584,21 +2320,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/getproductnyid": {
+    "/api/product/getProductById/{id}": {
       "get": {
         "tags": [
           "product"
         ],
-        "summary": "getproductnyid",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-getproductnyid",
-        "parameters": [],
+        "summary": "get product by id",
+        "operationId": "get_api_product_getProductById_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1610,21 +2348,33 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/productbycategory": {
+    "/api/product/productByCategory/{id}": {
       "get": {
         "tags": [
           "product"
         ],
-        "summary": "productbycategory",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-productbycategory",
-        "parameters": [],
+        "summary": "product by category",
+        "operationId": "get_api_product_productByCategory_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1636,21 +2386,33 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/setproductpricing": {
-      "get": {
+    "/api/product/setProductPricing": {
+      "put": {
         "tags": [
           "product"
         ],
-        "summary": "setProductPricing",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-setproductpricing",
-        "parameters": [],
+        "summary": "set product pricing",
+        "operationId": "put_api_product_setProductPricing",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1662,21 +2424,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/product/update-product": {
-      "get": {
+    "/api/product/update-product/{id}": {
+      "put": {
         "tags": [
           "product"
         ],
         "summary": "update product",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "product-update-product",
-        "parameters": [],
+        "operationId": "put_api_product_update_product_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1688,21 +2463,44 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/adjustpaymentrecord": {
-      "get": {
+    "/api/return-refund/adjustPaymentRecord": {
+      "put": {
         "tags": [
           "return/refund"
         ],
-        "summary": "adjustPaymentRecord",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-adjustpaymentrecord",
-        "parameters": [],
+        "summary": "adjust payment record",
+        "operationId": "put_api_return_refund_adjustPaymentRecord",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1714,21 +2512,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/approve-or-reject-return-req": {
-      "get": {
+    "/api/return-refund/approve-or-reject-return": {
+      "put": {
         "tags": [
           "return/refund"
         ],
-        "summary": "approve or reject return req.",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-approve-or-reject-return-req",
-        "parameters": [],
+        "summary": "approve or reject return request",
+        "operationId": "put_api_return_refund_approve_or_reject_return",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1740,21 +2551,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/return-requset": {
-      "get": {
+    "/api/return-refund/return-request": {
+      "post": {
         "tags": [
           "return/refund"
         ],
-        "summary": "return requset",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-return-requset",
-        "parameters": [],
+        "summary": "return request",
+        "operationId": "post_api_return_refund_return_request",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1766,21 +2590,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/seller-approve-refund": {
-      "get": {
+    "/api/return-refund/seller-approve-refund": {
+      "put": {
         "tags": [
           "return/refund"
         ],
         "summary": "seller approve refund",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-seller-approve-refund",
-        "parameters": [],
+        "operationId": "put_api_return_refund_seller_approve_refund",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1792,21 +2629,34 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/seller-view-req": {
+    "/api/return-refund/seller-view-requests": {
       "get": {
         "tags": [
           "return/refund"
         ],
-        "summary": "seller view req.",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-seller-view-req",
-        "parameters": [],
+        "summary": "seller view requests",
+        "operationId": "get_api_return_refund_seller_view_requests",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1818,21 +2668,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/return-refund/trackrefund": {
+    "/api/return-refund/trackRefund/{id}": {
       "get": {
         "tags": [
           "return/refund"
         ],
-        "summary": "trackrefund",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "return-refund-trackrefund",
-        "parameters": [],
+        "summary": "track refund",
+        "operationId": "get_api_return_refund_trackRefund_id",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1844,21 +2696,72 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/seller/acceptrejectorder": {
+    "/api/seller/acceptRejectOrder": {
+      "put": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "accept/reject order",
+        "operationId": "put_api_seller_acceptRejectOrder",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/seller/getMyProducts": {
       "get": {
         "tags": [
           "seller"
         ],
-        "summary": "acceptRejectOrder",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-acceptrejectorder",
-        "parameters": [],
+        "summary": "get my products",
+        "operationId": "get_api_seller_getMyProducts",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1870,21 +2773,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/seller/getmyproducts": {
+    "/api/seller/getSellerPayments": {
       "get": {
         "tags": [
           "seller"
         ],
-        "summary": "getmyproducts",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-getmyproducts",
-        "parameters": [],
+        "summary": "get seller payments",
+        "operationId": "get_api_seller_getSellerPayments",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1896,21 +2801,23 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/seller/getsellerpayments": {
+    "/api/seller/monitorPayoutStatus": {
       "get": {
         "tags": [
           "seller"
         ],
-        "summary": "getSellerPayments",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-getsellerpayments",
-        "parameters": [],
+        "summary": "monitor payout status",
+        "operationId": "get_api_seller_monitorPayoutStatus",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1922,21 +2829,62 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/seller/monitorpayoutstatus": {
+    "/api/seller/processFulfillment": {
+      "put": {
+        "tags": [
+          "seller"
+        ],
+        "summary": "process fulfillment",
+        "operationId": "put_api_seller_processFulfillment",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/seller/trackSellerEarnings": {
       "get": {
         "tags": [
           "seller"
         ],
-        "summary": "monitorPayoutStatus",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-monitorpayoutstatus",
-        "parameters": [],
+        "summary": "track seller earnings",
+        "operationId": "get_api_seller_trackSellerEarnings",
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success"
           },
           "400": {
             "description": "Bad request"
@@ -1948,319 +2896,11 @@
             "description": "Server error"
           }
         },
-        "x-needs-review": true
-      }
-    },
-    "/seller/processfulfillment": {
-      "get": {
-        "tags": [
-          "seller"
-        ],
-        "summary": "processFulfillment",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-processfulfillment",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
+        "security": [
+          {
+            "bearerAuth": []
           }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/seller/tracksellerearnings": {
-      "get": {
-        "tags": [
-          "seller"
-        ],
-        "summary": "trackSellerEarnings",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "seller-tracksellerearnings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/subcategories/add-sub-categories": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "add sub categories",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "subcategories-add-sub-categories",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/subcategories/delete-subcategory": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "delete subcategory",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "subcategories-delete-subcategory",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/subcategories/get-all-subcategories": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "get all subcategories",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "subcategories-get-all-subcategories",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/subcategories/get-subcategory-by-id": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "get subcategory by id",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "subcategories-get-subcategory-by-id",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/subcategories/update-subcategory": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "update subcategory",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "subcategories-update-subcategory",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/user-auth/change-password": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "change password",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "user-auth-change-password",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/user-auth/login": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "login",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "user-auth-login",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/user-auth/resetpassword": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "resetpassword",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "user-auth-resetpassword",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/user-auth/verifyemail": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "verifyEmail",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "user-auth-verifyemail",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
-      }
-    },
-    "/user-auth/verifyotp": {
-      "get": {
-        "tags": [
-          "user auth"
-        ],
-        "summary": "verifyOTP",
-        "description": "NOTE: this request had no URL defined in the Postman collection; the path above was auto-generated and should be reviewed/corrected.",
-        "operationId": "user-auth-verifyotp",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "x-needs-review": true
+        ]
       }
     }
   }
