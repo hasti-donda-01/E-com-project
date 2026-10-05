@@ -16,10 +16,10 @@ const port = process.env.PORT || 7000;
 // Render runs behind a proxy; needed so rate limiting sees the real user IP
 app.set("trust proxy", 1);
 
-// Load swagger file
+// Load swagger file (folder is "Swagger" with capital S, must match exactly on Linux)
 const swaggerDocument = JSON.parse(
   fs.readFileSync(
-    new URL("./controller/swagger/swagger.json", import.meta.url),
+    new URL("./controller/Swagger/swagger.json", import.meta.url),
     "utf-8"
   )
 );
