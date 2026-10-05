@@ -72,7 +72,7 @@
         "tags": [
           "seller auth"
         ],
-        "summary": "register seller",
+        "summary": "register user / seller",
         "operationId": "post_api_seller_create",
         "responses": {
           "200": {
@@ -101,13 +101,7 @@
                   "phone",
                   "password",
                   "confirm_password",
-                  "role",
-                  "storeName",
-                  "storeDesc",
-                  "category",
-                  "businessType",
-                  "gstin",
-                  "panNumber"
+                  "role"
                 ],
                 "properties": {
                   "name": {
@@ -137,35 +131,43 @@
                   "role": {
                     "type": "string",
                     "enum": [
-                      "seller"
+                      "user",
+                      "seller",
+                      "admin"
                     ],
-                    "default": "seller",
-                    "example": "seller",
-                    "description": "Registers a seller. Store details below are required."
+                    "default": "user",
+                    "example": "user",
+                    "description": "Account type. Store details below are required only when role is seller."
                   },
                   "storeName": {
                     "type": "string",
-                    "example": "My Store"
+                    "example": "My Store",
+                    "description": "Required for seller"
                   },
                   "storeDesc": {
                     "type": "string",
-                    "example": "Clothes and accessories"
+                    "example": "Clothes and accessories",
+                    "description": "Required for seller"
                   },
                   "category": {
                     "type": "string",
-                    "example": "Fashion"
+                    "example": "Fashion",
+                    "description": "Required for seller"
                   },
                   "businessType": {
                     "type": "string",
-                    "example": "Individual"
+                    "example": "Individual",
+                    "description": "Required for seller"
                   },
                   "gstin": {
                     "type": "string",
-                    "example": "24ABCDE1234F1Z5"
+                    "example": "24ABCDE1234F1Z5",
+                    "description": "Required for seller"
                   },
                   "panNumber": {
                     "type": "string",
-                    "example": "ABCDE1234F"
+                    "example": "ABCDE1234F",
+                    "description": "Required for seller"
                   },
                   "profileImage": {
                     "type": "string",
