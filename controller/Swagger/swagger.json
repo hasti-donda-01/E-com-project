@@ -971,9 +971,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
+                  "category_name": {
                     "type": "string",
                     "example": "Fashion"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "lorem ..."
                   },
                   "category_Image": {
                     "type": "string",
