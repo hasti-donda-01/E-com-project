@@ -2,15 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Meesho like",
-    "version": "1.0.0",
-    "description": "E-commerce API"
+    "version": "1.1.0",
+    "description": "E-commerce API. Roles: customer, seller, Admin."
   },
   "servers": [
     {
-      "url": "https://e-com-project-b3ci.onrender.com"
+      "url": "https://e-com-project-b3ci.onrender.com",
+      "description": "Production (Render)"
     },
     {
-      "url": "http://localhost:7000"
+      "url": "http://localhost:7000",
+      "description": "Local"
     }
   ],
   "tags": [
@@ -18,16 +20,7 @@
       "name": "seller auth"
     },
     {
-      "name": "profile"
-    },
-    {
-      "name": "address"
-    },
-    {
-      "name": "admin"
-    },
-    {
-      "name": "cart"
+      "name": "product"
     },
     {
       "name": "categories"
@@ -36,10 +29,16 @@
       "name": "subcategories"
     },
     {
-      "name": "dashboards"
+      "name": "admin"
     },
     {
-      "name": "dispute"
+      "name": "cart"
+    },
+    {
+      "name": "profile"
+    },
+    {
+      "name": "address"
     },
     {
       "name": "wishlist"
@@ -48,13 +47,13 @@
       "name": "order"
     },
     {
-      "name": "product"
-    },
-    {
       "name": "return/refund"
     },
     {
-      "name": "seller"
+      "name": "seller panel"
+    },
+    {
+      "name": "dispute"
     }
   ],
   "components": {
@@ -72,7 +71,7 @@
         "tags": [
           "seller auth"
         ],
-        "summary": "register user / seller",
+        "summary": "register user / seller / admin",
         "operationId": "post_api_seller_create",
         "responses": {
           "200": {
@@ -81,13 +80,14 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
+          },
+          "201": {
+            "description": "Registered successfully"
           }
         },
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -131,181 +131,53 @@
                   "role": {
                     "type": "string",
                     "enum": [
-                      "user",
+                      "customer",
                       "seller",
-                      "admin"
+                      "Admin"
                     ],
-                    "default": "user",
-                    "example": "user",
-                    "description": "Account type. Store details below are required only when role is seller."
+                    "default": "customer",
+                    "example": "customer"
                   },
                   "storeName": {
                     "type": "string",
                     "example": "My Store",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "storeDesc": {
                     "type": "string",
                     "example": "Clothes and accessories",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "category": {
                     "type": "string",
                     "example": "Fashion",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "businessType": {
                     "type": "string",
                     "example": "Individual",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "gstin": {
                     "type": "string",
                     "example": "24ABCDE1234F1Z5",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "panNumber": {
                     "type": "string",
                     "example": "ABCDE1234F",
-                    "description": "Required for seller"
+                    "description": "Required only when role is seller"
                   },
                   "profileImage": {
                     "type": "string",
                     "format": "binary",
-                    "description": "Profile image (field name profileImage)"
+                    "description": "Profile image"
                   }
                 }
               }
             }
           }
-        },
-        "security": []
-      }
-    },
-    "/api/seller/login": {
-      "post": {
-        "tags": [
-          "seller auth"
-        ],
-        "summary": "login",
-        "operationId": "post_api_seller_login",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "example": "test@gmail.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "example": "123456"
-                  }
-                },
-                "required": [
-                  "email",
-                  "password"
-                ]
-              }
-            }
-          }
-        },
-        "security": []
-      }
-    },
-    "/api/seller/logout/{id}": {
-      "post": {
-        "tags": [
-          "seller auth"
-        ],
-        "summary": "logout",
-        "operationId": "post_api_seller_logout_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Seller _id"
-          }
-        ],
-        "security": []
-      }
-    },
-    "/api/seller/verifyEmail": {
-      "post": {
-        "tags": [
-          "seller auth"
-        ],
-        "summary": "verify email",
-        "operationId": "post_api_seller_verifyEmail",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "example": "test@gmail.com"
-                  }
-                },
-                "required": [
-                  "email"
-                ]
-              }
-            }
-          }
-        },
-        "security": []
+        }
       }
     },
     "/api/seller/verifyOTP": {
@@ -322,19 +194,21 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
           }
         },
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "sellerId",
+                  "OTP"
+                ],
                 "properties": {
                   "sellerId": {
                     "type": "string",
@@ -344,25 +218,20 @@
                     "type": "number",
                     "example": 1234
                   }
-                },
-                "required": [
-                  "sellerId",
-                  "OTP"
-                ]
+                }
               }
             }
           }
-        },
-        "security": []
+        }
       }
     },
-    "/api/seller/changePassword": {
-      "put": {
+    "/api/seller/login": {
+      "post": {
         "tags": [
           "seller auth"
         ],
-        "summary": "change password",
-        "operationId": "put_api_seller_changePassword",
+        "summary": "login",
+        "operationId": "post_api_seller_login",
         "responses": {
           "200": {
             "description": "Success"
@@ -370,47 +239,109 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
           }
         },
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "test@gmail.com"
+                  },
                   "password": {
                     "type": "string",
                     "example": "123456"
-                  },
-                  "newpassword": {
-                    "type": "string",
-                    "example": "654321"
-                  },
-                  "confirm_password": {
-                    "type": "string",
-                    "example": "654321"
                   }
-                },
-                "required": [
-                  "password",
-                  "newpassword",
-                  "confirm_password"
-                ]
+                }
               }
             }
           }
+        }
+      }
+    },
+    "/api/seller/logout/{id}": {
+      "post": {
+        "tags": [
+          "seller auth"
+        ],
+        "summary": "logout",
+        "operationId": "post_api_seller_logout_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
         },
-        "security": [
+        "security": [],
+        "parameters": [
           {
-            "bearerAuth": []
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
+      }
+    },
+    "/api/seller/verifyEmail": {
+      "post": {
+        "tags": [
+          "seller auth"
+        ],
+        "summary": "verify email (start password reset)",
+        "operationId": "post_api_seller_verifyEmail",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "test@gmail.com"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/seller/resetPassword": {
@@ -427,19 +358,23 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
           }
         },
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "sellerId",
+                  "resetToken",
+                  "newpassword",
+                  "confirm_password"
+                ],
                 "properties": {
                   "sellerId": {
                     "type": "string",
@@ -457,27 +392,82 @@
                     "type": "string",
                     "example": "654321"
                   }
-                },
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seller/changePassword": {
+      "post": {
+        "tags": [
+          "seller auth"
+        ],
+        "summary": "change password",
+        "operationId": "post_api_seller_changePassword",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
                 "required": [
-                  "sellerId",
-                  "resetToken",
+                  "password",
                   "newpassword",
                   "confirm_password"
-                ]
+                ],
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "example": "123456",
+                    "description": "Current password"
+                  },
+                  "newpassword": {
+                    "type": "string",
+                    "example": "654321"
+                  },
+                  "confirm_password": {
+                    "type": "string",
+                    "example": "654321"
+                  }
+                }
               }
             }
           }
-        },
-        "security": []
+        }
       }
     },
-    "/api/address/add-address": {
+    "/api/product/create": {
       "post": {
         "tags": [
-          "address"
+          "product"
         ],
-        "summary": "add address",
-        "operationId": "post_api_address_add_address",
+        "summary": "create product",
+        "operationId": "post_api_product_create",
         "responses": {
           "200": {
             "description": "Success"
@@ -485,543 +475,49 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "example": {}
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
-    "/api/address/get-address-of-user": {
-      "get": {
-        "tags": [
-          "address"
-        ],
-        "summary": "get address of user",
-        "operationId": "get_api_address_get_address_of_user",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/address/update-address/{id}": {
-      "put": {
-        "tags": [
-          "address"
-        ],
-        "summary": "update address",
-        "operationId": "put_api_address_update_address_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/address/set-default-address/{id}": {
-      "put": {
-        "tags": [
-          "address"
-        ],
-        "summary": "set default address",
-        "operationId": "put_api_address_set_default_address_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/approve-seller": {
-      "put": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "approve seller",
-        "operationId": "put_api_admin_approve_seller",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/block-unblock-user": {
-      "put": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "block/unblock user (account status)",
-        "operationId": "put_api_admin_block_unblock_user",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/get-all-products": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "get all products",
-        "operationId": "get_api_admin_get_all_products",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/getAllOrder": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "get all orders",
-        "operationId": "get_api_admin_getAllOrder",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/getAllSellerPayments": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "get all seller payments",
-        "operationId": "get_api_admin_getAllSellerPayments",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/get-customer-detail/{id}": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "get customer detail",
-        "operationId": "get_api_admin_get_customer_detail_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/monitor-seller": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "monitor seller",
-        "operationId": "get_api_admin_monitor_seller",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/monitor-user": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "monitor user",
-        "operationId": "get_api_admin_monitor_user",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/updateOrderStatus": {
-      "put": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "update order status",
-        "operationId": "put_api_admin_updateOrderStatus",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/verifySeller": {
-      "put": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "verify seller",
-        "operationId": "put_api_admin_verifySeller",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/view-customers": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "view customers",
-        "operationId": "get_api_admin_view_customers",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/admin/view-sellers-detail": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "summary": "view sellers detail",
-        "operationId": "get_api_admin_view_sellers_detail",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/cart/addToCart": {
+    "/api/product/update/{id}": {
       "post": {
         "tags": [
-          "cart"
+          "product"
         ],
-        "summary": "add to cart",
-        "operationId": "post_api_cart_addToCart",
+        "summary": "update product",
+        "operationId": "post_api_product_update_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -1029,328 +525,25 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
-      }
-    },
-    "/api/cart/clear-cart": {
-      "delete": {
-        "tags": [
-          "cart"
         ],
-        "summary": "clear cart",
-        "operationId": "delete_api_cart_clear_cart",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/cart/get-cart": {
-      "get": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "get cart",
-        "operationId": "get_api_cart_get_cart",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/cart/remove-product-from-cart/{id}": {
-      "delete": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "remove product from cart",
-        "operationId": "delete_api_cart_remove_product_from_cart_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/cart/update-quantity": {
-      "put": {
-        "tags": [
-          "cart"
-        ],
-        "summary": "update quantity",
-        "operationId": "put_api_cart_update_quantity",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/category/add-category": {
-      "post": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "add category",
-        "operationId": "post_api_category_add_category",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/category/get-category/{id}": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "get category by id",
-        "operationId": "get_api_category_get_category_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/category/delete-category/{id}": {
-      "delete": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "delete category",
-        "operationId": "delete_api_category_delete_category_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/category/get-all-categories": {
-      "get": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "get all categories",
-        "operationId": "get_api_category_get_all_categories",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/category/update-category/{id}": {
-      "put": {
-        "tags": [
-          "categories"
-        ],
-        "summary": "update category",
-        "operationId": "put_api_category_update_category_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
+        "description": "Allowed roles: seller",
         "parameters": [
           {
             "name": "id",
@@ -1364,905 +557,21 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "example": {}
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/subcat/add-sub-category": {
-      "post": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "add sub category",
-        "operationId": "post_api_subcat_add_sub_category",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/subcat/delete-subcategory/{id}": {
-      "delete": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "delete subcategory",
-        "operationId": "delete_api_subcat_delete_subcategory_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/subcat/get-all-subcategories": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "get all subcategories",
-        "operationId": "get_api_subcat_get_all_subcategories",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/subcat/get-subcategory/{id}": {
-      "get": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "get subcategory by id",
-        "operationId": "get_api_subcat_get_subcategory_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/subcat/update-subcategory/{id}": {
-      "put": {
-        "tags": [
-          "subcategories"
-        ],
-        "summary": "update subcategory",
-        "operationId": "put_api_subcat_update_subcategory_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/dashboards/admin-dashboard": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "admin dashboard",
-        "operationId": "get_api_dashboards_admin_dashboard",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/dashboards/seller-dashboard": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "seller dashboard",
-        "operationId": "get_api_dashboards_seller_dashboard",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/dashboards/get-my-products": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "get my products",
-        "operationId": "get_api_dashboards_get_my_products",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/dashboards/get-user-profile": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "get user profile",
-        "operationId": "get_api_dashboards_get_user_profile",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/dashboards/getAllProducts": {
-      "get": {
-        "tags": [
-          "dashboards"
-        ],
-        "summary": "get all products",
-        "operationId": "get_api_dashboards_getAllProducts",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/despute/get-all-desputes": {
-      "get": {
-        "tags": [
-          "dispute"
-        ],
-        "summary": "get all disputes",
-        "operationId": "get_api_despute_get_all_desputes",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/despute/raiseDespute": {
-      "post": {
-        "tags": [
-          "dispute"
-        ],
-        "summary": "raise dispute",
-        "operationId": "post_api_despute_raiseDespute",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/despute/resolve-despute": {
-      "put": {
-        "tags": [
-          "dispute"
-        ],
-        "summary": "resolve dispute",
-        "operationId": "put_api_despute_resolve_despute",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/wish/add-to-wishlist": {
-      "post": {
-        "tags": [
-          "wishlist"
-        ],
-        "summary": "add to wishlist",
-        "operationId": "post_api_wish_add_to_wishlist",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/wish/clear-wishlist": {
-      "delete": {
-        "tags": [
-          "wishlist"
-        ],
-        "summary": "clear wishlist",
-        "operationId": "delete_api_wish_clear_wishlist",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/wish/getProducts": {
-      "get": {
-        "tags": [
-          "wishlist"
-        ],
-        "summary": "get wishlist products",
-        "operationId": "get_api_wish_getProducts",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/wish/remove-from-wishlist/{id}": {
-      "delete": {
-        "tags": [
-          "wishlist"
-        ],
-        "summary": "remove from wishlist",
-        "operationId": "delete_api_wish_remove_from_wishlist_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/cancel-order/{id}": {
-      "put": {
-        "tags": [
-          "order"
-        ],
-        "summary": "cancel order",
-        "operationId": "put_api_order_cancel_order_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/get-particular-seller-order": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "get particular seller order",
-        "operationId": "get_api_order_get_particular_seller_order",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/payment-update": {
-      "put": {
-        "tags": [
-          "order"
-        ],
-        "summary": "payment update",
-        "operationId": "put_api_order_payment_update",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/place-order": {
-      "post": {
-        "tags": [
-          "order"
-        ],
-        "summary": "place order",
-        "operationId": "post_api_order_place_order",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/revenue": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "revenue",
-        "operationId": "get_api_order_revenue",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/track-order/{id}": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "track order",
-        "operationId": "get_api_order_track_order_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/track-payment/{id}": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "track payment",
-        "operationId": "get_api_order_track_payment_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/update-payment-status": {
-      "put": {
-        "tags": [
-          "order"
-        ],
-        "summary": "update payment status",
-        "operationId": "put_api_order_update_payment_status",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/order/view-order-history": {
-      "get": {
-        "tags": [
-          "order"
-        ],
-        "summary": "view order history",
-        "operationId": "get_api_order_view_order_history",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/product/get": {
@@ -2270,7 +579,7 @@
         "tags": [
           "product"
         ],
-        "summary": "get products",
+        "summary": "get all products",
         "operationId": "get_api_product_get",
         "responses": {
           "200": {
@@ -2279,9 +588,6 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
           }
@@ -2289,52 +595,13 @@
         "security": []
       }
     },
-    "/api/product/add-product": {
-      "post": {
-        "tags": [
-          "product"
-        ],
-        "summary": "add product",
-        "operationId": "post_api_product_add_product",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/product/count-total": {
+    "/api/product/getp/{id}": {
       "get": {
         "tags": [
           "product"
         ],
-        "summary": "count total",
-        "operationId": "get_api_product_count_total",
+        "summary": "get product by id",
+        "operationId": "get_api_product_getp_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -2342,41 +609,14 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/product/delete-product/{id}": {
-      "delete": {
-        "tags": [
-          "product"
-        ],
-        "summary": "delete product",
-        "operationId": "delete_api_product_delete_product_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
+        "security": [],
         "parameters": [
           {
             "name": "id",
@@ -2386,10 +626,116 @@
               "type": "string"
             }
           }
+        ]
+      }
+    },
+    "/api/product/delete/{id}": {
+      "delete": {
+        "tags": [
+          "product"
         ],
+        "summary": "delete product",
+        "operationId": "delete_api_product_delete_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/product/count": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "count total products",
+        "operationId": "get_api_product_count",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/product/productbycategory/{id}": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "products by category id",
+        "operationId": "get_api_product_productbycategory_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -2408,269 +754,20 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "security": []
       }
     },
-    "/api/product/getProductById/{id}": {
-      "get": {
-        "tags": [
-          "product"
-        ],
-        "summary": "get product by id",
-        "operationId": "get_api_product_getProductById_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/product/productByCategory/{id}": {
-      "get": {
-        "tags": [
-          "product"
-        ],
-        "summary": "product by category",
-        "operationId": "get_api_product_productByCategory_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/product/setProductPricing": {
-      "put": {
-        "tags": [
-          "product"
-        ],
-        "summary": "set product pricing",
-        "operationId": "put_api_product_setProductPricing",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/product/update-product/{id}": {
-      "put": {
-        "tags": [
-          "product"
-        ],
-        "summary": "update product",
-        "operationId": "put_api_product_update_product_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/adjustPaymentRecord": {
-      "put": {
-        "tags": [
-          "return/refund"
-        ],
-        "summary": "adjust payment record",
-        "operationId": "put_api_return_refund_adjustPaymentRecord",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/approve-or-reject-return": {
-      "put": {
-        "tags": [
-          "return/refund"
-        ],
-        "summary": "approve or reject return request",
-        "operationId": "put_api_return_refund_approve_or_reject_return",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/return-request": {
+    "/api/product/setProductPricing/{id}": {
       "post": {
         "tags": [
-          "return/refund"
+          "product"
         ],
-        "summary": "return request",
-        "operationId": "post_api_return_refund_return_request",
+        "summary": "set product pricing (no auth in code)",
+        "operationId": "post_api_product_setProductPricing_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -2678,119 +775,14 @@
           "400": {
             "description": "Bad request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
           }
         },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/seller-approve-refund": {
-      "put": {
-        "tags": [
-          "return/refund"
-        ],
-        "summary": "seller approve refund",
-        "operationId": "put_api_return_refund_seller_approve_refund",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {}
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/seller-view-requests": {
-      "get": {
-        "tags": [
-          "return/refund"
-        ],
-        "summary": "seller view requests",
-        "operationId": "get_api_return_refund_seller_view_requests",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/return-refund/trackRefund/{id}": {
-      "get": {
-        "tags": [
-          "return/refund"
-        ],
-        "summary": "track refund",
-        "operationId": "get_api_return_refund_trackRefund_id",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
+        "security": [],
         "parameters": [
           {
             "name": "id",
@@ -2801,59 +793,27 @@
             }
           }
         ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/seller/acceptRejectOrder": {
-      "put": {
-        "tags": [
-          "seller"
-        ],
-        "summary": "accept/reject order",
-        "operationId": "put_api_seller_acceptRejectOrder",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {}
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
-    "/api/seller/getMyProducts": {
-      "get": {
+    "/api/product/updateStock/{id}": {
+      "post": {
         "tags": [
-          "seller"
+          "product"
         ],
-        "summary": "get my products",
-        "operationId": "get_api_seller_getMyProducts",
+        "summary": "update stock",
+        "operationId": "post_api_product_updateStock_id",
         "responses": {
           "200": {
             "description": "Success"
@@ -2861,122 +821,56 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
-        ]
-      }
-    },
-    "/api/seller/getSellerPayments": {
-      "get": {
-        "tags": [
-          "seller"
         ],
-        "summary": "get seller payments",
-        "operationId": "get_api_seller_getSellerPayments",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
+        "description": "Allowed roles: seller",
+        "parameters": [
           {
-            "bearerAuth": []
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
-      }
-    },
-    "/api/seller/monitorPayoutStatus": {
-      "get": {
-        "tags": [
-          "seller"
         ],
-        "summary": "monitor payout status",
-        "operationId": "get_api_seller_monitorPayoutStatus",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/seller/processFulfillment": {
-      "put": {
-        "tags": [
-          "seller"
-        ],
-        "summary": "process fulfillment",
-        "operationId": "put_api_seller_processFulfillment",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        },
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {}
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
-    "/api/seller/trackSellerEarnings": {
-      "get": {
+    "/api/category/create": {
+      "post": {
         "tags": [
-          "seller"
+          "categories"
         ],
-        "summary": "track seller earnings",
-        "operationId": "get_api_seller_trackSellerEarnings",
+        "summary": "create category",
+        "operationId": "post_api_category_create",
         "responses": {
           "200": {
             "description": "Success"
@@ -2984,18 +878,1179 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
+        ],
+        "description": "Allowed roles: Admin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_Image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name category_Image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/update/{id}": {
+      "post": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "update category",
+        "operationId": "post_api_category_update_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_Image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name category_Image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/get": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "get all categories",
+        "operationId": "get_api_category_get",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/category/get/{id}": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "get category by id",
+        "operationId": "get_api_category_get_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ]
+      }
+    },
+    "/api/category/delete/{id}": {
+      "delete": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "delete category",
+        "operationId": "delete_api_category_delete_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/subcat/create": {
+      "post": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "create subcategory",
+        "operationId": "post_api_subcat_create",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subcat/update/{id}": {
+      "post": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "update subcategory",
+        "operationId": "post_api_subcat_update_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (field name image)"
+                  }
+                },
+                "description": "TODO: add text fields from the controller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subcat/get": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get all subcategories",
+        "operationId": "get_api_subcat_get",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/subcat/get/{id}": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "get subcategory by id",
+        "operationId": "get_api_subcat_get_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/subcat/delete/{id}": {
+      "delete": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "delete subcategory",
+        "operationId": "delete_api_subcat_delete_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/getallsellers": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "get all sellers",
+        "operationId": "get_api_admin_getallsellers",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/getalluser": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "get all users",
+        "operationId": "get_api_admin_getalluser",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/getallproducts": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "get all products",
+        "operationId": "get_api_admin_getallproducts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/deleteProduct/{id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "delete product",
+        "operationId": "delete_api_admin_deleteProduct_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/accountstatus/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "block / unblock user",
+        "operationId": "get_api_admin_accountstatus_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/getallorder": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "monitor all orders",
+        "operationId": "get_api_admin_getallorder",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/updateorderstatus/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "update order status",
+        "operationId": "get_api_admin_updateorderstatus_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/getcustomerdetail/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "customer detail / activity",
+        "operationId": "get_api_admin_getcustomerdetail_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/sellerapprove/{id}": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "approve seller",
+        "operationId": "post_api_admin_sellerapprove_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/sellerreject/{id}": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "reject seller",
+        "operationId": "post_api_admin_sellerreject_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/verifySeller/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "verify seller",
+        "operationId": "get_api_admin_verifySeller_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/admin/getAllSellerPayments": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "all seller payments",
+        "operationId": "get_api_admin_getAllSellerPayments",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/adminDashboard": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "admin dashboard",
+        "operationId": "get_api_admin_adminDashboard",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/admin/getSellerReport/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "seller activity report (no auth in code)",
+        "operationId": "get_api_admin_getSellerReport_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/cart/addtocart": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "add to cart",
+        "operationId": "post_api_cart_addtocart",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cart/removeproductfromcart/{id}": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "remove product from cart",
+        "operationId": "delete_api_cart_removeproductfromcart_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/cart/getcartofuser": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "get cart",
+        "operationId": "get_api_cart_getcartofuser",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer"
+      }
+    },
+    "/api/cart/updatequantity/{id}": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "update quantity",
+        "operationId": "get_api_cart_updatequantity_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/cart/clearcart": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "clear cart",
+        "operationId": "delete_api_cart_clearcart",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer"
       }
     },
     "/api/user/getUserProfile": {
@@ -3003,7 +2058,7 @@
         "tags": [
           "profile"
         ],
-        "summary": "get user profile",
+        "summary": "get own profile",
         "operationId": "get_api_user_getUserProfile",
         "responses": {
           "200": {
@@ -3012,16 +2067,65 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer"
+      }
+    },
+    "/api/user/deleteUser/{id}": {
+      "delete": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "delete user",
+        "operationId": "delete_api_user_deleteUser_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -3040,13 +2144,25 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
         "parameters": [
           {
             "name": "id",
@@ -3063,25 +2179,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {}
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
-    "/api/user/deleteUser/{id}": {
-      "delete": {
+    "/api/user/getuser": {
+      "get": {
         "tags": [
           "profile"
         ],
-        "summary": "delete user (Admin only)",
-        "operationId": "delete_api_user_deleteUser_id",
+        "summary": "get all users",
+        "operationId": "get_api_user_getuser",
         "responses": {
           "200": {
             "description": "Success"
@@ -3089,13 +2201,146 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/address/add": {
+      "post": {
+        "tags": [
+          "address"
+        ],
+        "summary": "add address",
+        "operationId": "post_api_address_add",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/address/remove/{id}": {
+      "delete": {
+        "tags": [
+          "address"
+        ],
+        "summary": "remove address",
+        "operationId": "delete_api_address_remove_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/address/update/{id}": {
+      "post": {
+        "tags": [
+          "address"
+        ],
+        "summary": "update address",
+        "operationId": "post_api_address_update_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
         "parameters": [
           {
             "name": "id",
@@ -3106,20 +2351,27 @@
             }
           }
         ],
-        "security": [
-          {
-            "bearerAuth": []
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
           }
-        ]
+        }
       }
     },
-    "/api/user/getuser": {
+    "/api/address/getaddressofuser": {
       "get": {
         "tags": [
-          "profile"
+          "address"
         ],
-        "summary": "get all users (seller only)",
-        "operationId": "get_api_user_getuser",
+        "summary": "get addresses of user",
+        "operationId": "get_api_address_getaddressofuser",
         "responses": {
           "200": {
             "description": "Success"
@@ -3127,19 +2379,1412 @@
           "400": {
             "description": "Bad request"
           },
+          "500": {
+            "description": "Server error"
+          },
           "401": {
             "description": "Unauthorized"
           },
-          "500": {
-            "description": "Server error"
+          "403": {
+            "description": "Forbidden"
           }
         },
         "security": [
           {
             "bearerAuth": []
           }
+        ],
+        "description": "Allowed roles: Admin, seller, customer"
+      }
+    },
+    "/api/address/setdefaultAddress": {
+      "get": {
+        "tags": [
+          "address"
+        ],
+        "summary": "set default address",
+        "operationId": "get_api_address_setdefaultAddress",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer"
+      }
+    },
+    "/api/wish/addtowish": {
+      "post": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "add to wishlist",
+        "operationId": "post_api_wish_addtowish",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/wish/remove/{id}": {
+      "delete": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "remove from wishlist",
+        "operationId": "delete_api_wish_remove_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ]
-      }     
+      }
+    },
+    "/api/wish/get": {
+      "get": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "get wishlist products",
+        "operationId": "get_api_wish_get",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer"
+      }
+    },
+    "/api/wish/clear": {
+      "delete": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "clear wishlist",
+        "operationId": "delete_api_wish_clear",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer"
+      }
+    },
+    "/api/wish/movetocart/{id}": {
+      "get": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "move wishlist item to cart",
+        "operationId": "get_api_wish_movetocart_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/place": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "place order",
+        "operationId": "post_api_order_place",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/cancel/{id}": {
+      "delete": {
+        "tags": [
+          "order"
+        ],
+        "summary": "cancel order",
+        "operationId": "delete_api_order_cancel_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/track/{id}": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track order (no auth in code)",
+        "operationId": "get_api_order_track_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/viewhistory/{id}": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "view order history (no auth in code)",
+        "operationId": "get_api_order_viewhistory_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/updatepaymentstatus/{id}": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "update payment status",
+        "operationId": "post_api_order_updatepaymentstatus_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/trackpayment/{id}": {
+      "post": {
+        "tags": [
+          "order"
+        ],
+        "summary": "track payment",
+        "operationId": "post_api_order_trackpayment_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/revenue": {
+      "get": {
+        "tags": [
+          "order"
+        ],
+        "summary": "revenue",
+        "operationId": "get_api_order_revenue",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/order/requestReturn/{id}": {
+      "post": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "request return",
+        "operationId": "post_api_order_requestReturn_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/approvereq/{id}": {
+      "post": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "approve / reject return",
+        "operationId": "post_api_order_approvereq_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/trackrefund/{id}": {
+      "post": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "track refund (no auth in code)",
+        "operationId": "post_api_order_trackrefund_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/order/adjustPaymentRecord/{id}": {
+      "post": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "adjust payment record (no auth in code)",
+        "operationId": "post_api_order_adjustPaymentRecord_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/getSellerRefundRequests": {
+      "get": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "seller refund requests",
+        "operationId": "get_api_order_getSellerRefundRequests",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/order/sellerHandleRefund/{id}": {
+      "post": {
+        "tags": [
+          "return/refund"
+        ],
+        "summary": "seller handles refund",
+        "operationId": "post_api_order_sellerHandleRefund_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sellerp/getSellerPayments": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "get seller payments",
+        "operationId": "post_api_sellerp_getSellerPayments",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/sellerp/getSellerOrder/{id}": {
+      "get": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "get seller order",
+        "operationId": "get_api_sellerp_getSellerOrder_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/sellerp/acceptRejectOrder/{id}": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "accept / reject order",
+        "operationId": "post_api_sellerp_acceptRejectOrder_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sellerp/processFulfillment/{id}": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "process fulfillment",
+        "operationId": "post_api_sellerp_processFulfillment_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sellerp/trackSellerEarnings": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "track seller earnings",
+        "operationId": "post_api_sellerp_trackSellerEarnings",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/sellerp/monitorPayoutStatus": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "monitor payout status",
+        "operationId": "post_api_sellerp_monitorPayoutStatus",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/sellerp/getmyproducts": {
+      "get": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "get my products",
+        "operationId": "get_api_sellerp_getmyproducts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/sellerp/refundrequests": {
+      "get": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "refund requests",
+        "operationId": "get_api_sellerp_refundrequests",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller"
+      }
+    },
+    "/api/sellerp/handlerefund/{id}": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "handle refund",
+        "operationId": "post_api_sellerp_handlerefund_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: seller",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sellerp/getMyProfile": {
+      "get": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "get my profile",
+        "operationId": "get_api_sellerp_getMyProfile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer"
+      }
+    },
+    "/api/sellerp/updateMyProfile": {
+      "post": {
+        "tags": [
+          "seller panel"
+        ],
+        "summary": "update my profile",
+        "operationId": "post_api_sellerp_updateMyProfile",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin, seller, customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/despute/raisedespute": {
+      "post": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "raise dispute",
+        "operationId": "post_api_despute_raisedespute",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: customer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/despute/getAllDisputes": {
+      "get": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "get all disputes",
+        "operationId": "get_api_despute_getAllDisputes",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin"
+      }
+    },
+    "/api/despute/resolveDispute/{id}": {
+      "post": {
+        "tags": [
+          "dispute"
+        ],
+        "summary": "resolve dispute",
+        "operationId": "post_api_despute_resolveDispute_id",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Allowed roles: Admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {},
+                "description": "TODO: fields not confirmed yet (send the controller)"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
