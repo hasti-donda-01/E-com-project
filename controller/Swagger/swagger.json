@@ -77,14 +77,14 @@
           "200": {
             "description": "Success"
           },
+          "201": {
+            "description": "Created successfully"
+          },
           "400": {
             "description": "Bad request"
           },
           "500": {
             "description": "Server error"
-          },
-          "201": {
-            "description": "Registered successfully"
           }
         },
         "security": [],
@@ -94,15 +94,6 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name",
-                  "email",
-                  "address",
-                  "phone",
-                  "password",
-                  "confirm_password",
-                  "role"
-                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -173,7 +164,16 @@
                     "format": "binary",
                     "description": "Profile image"
                   }
-                }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "address",
+                  "phone",
+                  "password",
+                  "confirm_password",
+                  "role"
+                ]
               }
             }
           }
@@ -205,10 +205,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "sellerId",
-                  "OTP"
-                ],
                 "properties": {
                   "sellerId": {
                     "type": "string",
@@ -218,7 +214,11 @@
                     "type": "number",
                     "example": 1234
                   }
-                }
+                },
+                "required": [
+                  "sellerId",
+                  "OTP"
+                ]
               }
             }
           }
@@ -250,10 +250,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -263,7 +259,11 @@
                     "type": "string",
                     "example": "123456"
                   }
-                }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -329,15 +329,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email"
-                ],
                 "properties": {
                   "email": {
                     "type": "string",
                     "example": "test@gmail.com"
                   }
-                }
+                },
+                "required": [
+                  "email"
+                ]
               }
             }
           }
@@ -369,12 +369,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "sellerId",
-                  "resetToken",
-                  "newpassword",
-                  "confirm_password"
-                ],
                 "properties": {
                   "sellerId": {
                     "type": "string",
@@ -392,7 +386,13 @@
                     "type": "string",
                     "example": "654321"
                   }
-                }
+                },
+                "required": [
+                  "sellerId",
+                  "resetToken",
+                  "newpassword",
+                  "confirm_password"
+                ]
               }
             }
           }
@@ -435,11 +435,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "password",
-                  "newpassword",
-                  "confirm_password"
-                ],
                 "properties": {
                   "password": {
                     "type": "string",
@@ -454,7 +449,12 @@
                     "type": "string",
                     "example": "654321"
                   }
-                }
+                },
+                "required": [
+                  "password",
+                  "newpassword",
+                  "confirm_password"
+                ]
               }
             }
           }
@@ -471,6 +471,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "201": {
+            "description": "Created successfully"
           },
           "400": {
             "description": "Bad request"
@@ -498,13 +501,40 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Shirt"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 499
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Nike"
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "example": 10
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "example": "category _id"
+                  },
                   "image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "required": [
+                  "name",
+                  "price",
+                  "brand",
+                  "stock",
+                  "categoryId",
+                  "image"
+                ]
               }
             }
           }
@@ -561,13 +591,33 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Shirt"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 499
+                  },
+                  "brand": {
+                    "type": "string",
+                    "example": "Nike"
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "example": 10
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "example": "category _id"
+                  },
                   "image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -799,8 +849,17 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "example": 499
+                  },
+                  "discount": {
+                    "type": "number",
+                    "example": 10
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -856,8 +915,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "stock": {
+                    "type": "integer",
+                    "example": 50
+                  }
+                },
+                "required": [
+                  "stock"
+                ],
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -874,6 +941,9 @@
         "responses": {
           "200": {
             "description": "Success"
+          },
+          "201": {
+            "description": "Created successfully"
           },
           "400": {
             "description": "Bad request"
@@ -901,13 +971,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Fashion"
+                  },
                   "category_Image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name category_Image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "required": [
+                  "name",
+                  "category_Image"
+                ],
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -964,13 +1042,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Fashion"
+                  },
                   "category_Image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name category_Image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -1088,6 +1170,9 @@
           "200": {
             "description": "Success"
           },
+          "201": {
+            "description": "Created successfully"
+          },
           "400": {
             "description": "Bad request"
           },
@@ -1114,13 +1199,26 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "T-Shirts"
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "example": "category _id"
+                  },
                   "image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "required": [
+                  "name",
+                  "categoryId",
+                  "image"
+                ],
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -1177,13 +1275,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "T-Shirts"
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "example": "category _id"
+                  },
                   "image": {
                     "type": "string",
                     "format": "binary",
                     "description": "Image file (field name image)"
                   }
                 },
-                "description": "TODO: add text fields from the controller"
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -1640,19 +1746,7 @@
               "type": "string"
             }
           }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
-              }
-            }
-          }
-        }
+        ]
       }
     },
     "/api/admin/sellerreject/{id}": {
@@ -1704,8 +1798,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "example": "Documents not valid"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -1891,8 +1990,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "product _id"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                },
+                "required": [
+                  "productId"
+                ],
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2179,8 +2290,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Test User"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "Surat, Gujarat"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2255,8 +2379,37 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "example": "Test User"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "street": {
+                    "type": "string",
+                    "example": "MG Road"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Surat"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Gujarat"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "example": "395001"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "India"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2357,8 +2510,37 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "example": "Test User"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "street": {
+                    "type": "string",
+                    "example": "MG Road"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Surat"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Gujarat"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "example": "395001"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "India"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2465,8 +2647,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "product _id"
+                  }
+                },
+                "required": [
+                  "productId"
+                ],
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2663,8 +2853,17 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "addressId": {
+                    "type": "string",
+                    "example": "address _id"
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "example": "COD"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2833,8 +3032,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "paymentStatus": {
+                    "type": "string",
+                    "example": "paid"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -2967,8 +3171,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "example": "Wrong size"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3024,8 +3233,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "approved"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3104,8 +3318,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "example": 499
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3193,8 +3412,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "approved"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3327,8 +3551,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "accepted"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3384,8 +3613,17 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "shipped"
+                  },
+                  "trackingId": {
+                    "type": "string",
+                    "example": "TRK123456"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3569,8 +3807,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "approved"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3645,8 +3888,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Test User"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "Surat, Gujarat"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3689,8 +3945,17 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "orderId": {
+                    "type": "string",
+                    "example": "order _id"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "example": "Item not received"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
@@ -3778,8 +4043,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "example": {},
-                "description": "TODO: fields not confirmed yet (send the controller)"
+                "properties": {
+                  "resolution": {
+                    "type": "string",
+                    "example": "Refund issued"
+                  }
+                },
+                "description": "GUESSED fields - verify against your controller (req.body)"
               }
             }
           }
