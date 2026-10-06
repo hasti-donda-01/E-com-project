@@ -1,7 +1,7 @@
 // dotenv MUST be the first import so env variables load before anything else
+import connectDB from "./config/dbConnect.js";
 import "dotenv/config";
 
-import "./config/dbConnect.js";
 import express from "express";
 import cors from "cors";
 import fs from "fs";
@@ -87,6 +87,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: "Server error" });
 });
 
-app.listen(port, () => {
-  console.log("server running", port);
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log("server running", port);
+  });
 });
