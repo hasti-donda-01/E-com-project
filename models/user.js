@@ -10,7 +10,7 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true,
         lowercase: true,
-        trim: true  
+        trim: true
     },
     password: {
         type: String,
@@ -50,9 +50,10 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["Admin", "customer", "seller"],
-        default: "customer"
-    },
+        enum: ["admin", "seller", "user"],
+        default: "user",
+        lowercase: true
+    }
     isActive: {
         type: Boolean,
         default: false
@@ -62,7 +63,7 @@ const userSchema = mongoose.Schema({
         enum: ["blocked", "unblocked"],
         default: "unblocked"
     },
-    profileImageName:{
+    profileImageName: {
         type: String,
         default: false
     }
