@@ -53,7 +53,7 @@ const userSchema = mongoose.Schema({
         enum: ["admin", "seller", "user"],
         default: "user",
         lowercase: true
-    }
+    },
     isActive: {
         type: Boolean,
         default: false
