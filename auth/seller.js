@@ -205,40 +205,19 @@ export const login = async (req, res) => {
             return res.status(400).json({
                 message: "please enter email and password",
                 success: false
-            })
+            });
         }
 
-        const seller = await User.findOne({
-            email
-        });
-
-        if (!seller) {
+        const user = await User.findOne({ email });
+        if (!user) {
             return res.status(404).json({
-                message: "User not Found",
+                message: "User not found",
                 success: false
-            })
+            });
         }
-        console.log(seller, "seller")
-        if (seller.isActive == false) {
 
-            return res.status(400).json({
-                message: "user not approved",
-                success: false
-            })
-        }
-        // if (seller.role == "seller") {
-
-        //     const sel = await Seller.findOne({ userId: seller._id });
-        //     console.log(sel, "sel")
-        //     if (sel.isApproved == false) {
-
-        //         return res.status(400).json({
-        //             message: "user not approved",
-        //             success: false
-        //         })
-        //     }
-        // }
-        const isMatch = await bcrypt.compare(password, seller.password);
+        // check the password first, so we don't reveal account status to strangers
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
                 message: "Invalid credentials",
@@ -246,25 +225,41 @@ export const login = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({
-            email, id: seller._id, name: seller.name, role: seller.role
-        }, process.env.PRIVATEKEY, { expiresIn: '1d' });
-        console.log(token)
-        seller.isLogin = true;
-        seller.isActive = true;
-        seller.save();
+        if (!user.isVerify) {
+            return res.status(403).json({
+                message: "Please verify your OTP first",
+                success: false
+            });
+        }
+
+        if (user.isActive === false) {
+            return res.status(403).json({
+                message: "Your account is blocked. Contact admin.",
+                success: false
+            });
+        }
+
+        const token = jwt.sign(
+            { email: user.email, id: user._id, name: user.name, role: user.role },
+            process.env.PRIVATEKEY,
+            { expiresIn: "1d" }
+        );
+
+        user.isLogin = true;
+        await user.save();
+
         return res.status(200).json({
-            message: "Seller Logged In successfully",
+            message: "Logged in successfully",
             success: true,
-            token: token
-        })
+            token
+        });
     } catch (error) {
         return res.status(500).json({
             message: error.message,
             success: false
-        })
+        });
     }
-}
+};
 
 export const logout = async (req, res) => {
 
