@@ -580,7 +580,42 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Shirt"
+                },
+                "price": {
+                  "type": "number",
+                  "example": 499
+                },
+                "brand": {
+                  "type": "string",
+                  "example": "Nike"
+                },
+                "stock": {
+                  "type": "integer",
+                  "example": 10
+                },
+                "categoryId": {
+                  "type": "string",
+                  "example": "category _id"
+                },
+                "image": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "Image file (field name image)"
+                }
+              },
+              "required": [
+                "name",
+                "price",
+                "brand",
+                "stock",
+                "categoryId",
+                "image"
+              ]
             }
           }
         ],
@@ -986,7 +1021,8 @@
                   }
                 },
                 "required": [
-                  "name",
+                  "category_name",
+                  "description",
                   "category_Image"
                 ],
                 "description": "GUESSED fields - verify against your controller (req.body)"
@@ -2384,9 +2420,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "fullName": {
-                    "type": "string",
-                    "example": "Test User"
+                  "type": {
+                    "enum": [
+                      "home",
+                      "work",
+                      "others"
+                    ]
                   },
                   "phone": {
                     "type": "string",
@@ -2395,6 +2434,10 @@
                   "street": {
                     "type": "string",
                     "example": "MG Road"
+                  },
+                  "addressline": {
+                    "type": "string",
+                    "example": "XYZ"
                   },
                   "city": {
                     "type": "string",
@@ -2459,7 +2502,13 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "example": "Test User"
+                }
+              }
             }
           }
         ]

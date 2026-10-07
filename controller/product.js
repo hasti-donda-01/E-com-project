@@ -53,35 +53,29 @@ export const createProduct = async (req, res) => {
 };
 
 export const getproducts = async (req, res) => {
-    try {
+  try {
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const perPage = 3;
 
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / perPage);
 
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Product.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
-            return res.status(404).json({
-                message: "page not found",
-                success: false
-            })
-        }
+    const products = await Product.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
 
-        const products = await Product.find().skip((page - 1) * perPage).limit(perPage).exec();
-        console.log(products, "products")
-        return res.status(200).json({
-            message: "products get successfully",
-            data: [products, "totalpages : " + totalpage, "page : " + page],
-            success: true
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        })
-    }
-}
-
+    return res.status(200).json({
+      success: true,
+      message: "products fetched successfully",
+      data: products,
+      page,
+      totalPages,
+      totalProducts,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 export const getproductsbyid = async (req, res) => {
     try {
 
