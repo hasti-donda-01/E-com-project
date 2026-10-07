@@ -31,10 +31,10 @@ export const auth = (role) => async (req, res, next) => {
             })
         }
         req.user = user
-        if (!role.includes(decode.role)) {
-            return res.status(400).json({
+        const allowed = [].concat(role).map(r => r.toLowerCase());
+        if (!allowed.includes(String(decode.role).toLowerCase())) {
+            return res.status(403).json({
                 success: false,
-
                 message: 'Unauthorized user'
             })
         }

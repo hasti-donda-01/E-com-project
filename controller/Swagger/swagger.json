@@ -973,32 +973,12 @@
         ],
         "summary": "create category",
         "operationId": "post_api_category_create",
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "201": {
-            "description": "Created successfully"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Server error"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
+        "description": "Allowed roles: Admin",
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "description": "Allowed roles: Admin",
         "requestBody": {
           "required": true,
           "content": {
@@ -1012,22 +992,36 @@
                   },
                   "description": {
                     "type": "string",
-                    "example": "lorem ..."
+                    "example": "All fashion products"
                   },
                   "category_Image": {
                     "type": "string",
-                    "format": "binary",
-                    "description": "Image file (field name category_Image)"
+                    "format": "binary"
                   }
                 },
                 "required": [
                   "category_name",
-                  "description",
                   "category_Image"
-                ],
-                "description": "GUESSED fields - verify against your controller (req.body)"
+                ]
               }
             }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category Created successfully"
+          },
+          "400": {
+            "description": "Missing fields / image, or category name already exists"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       }
