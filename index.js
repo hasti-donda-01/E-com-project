@@ -1,4 +1,3 @@
-// dotenv MUST be the first import so env variables load before anything else
 
   import "dotenv/config";
 import dns from "node:dns";

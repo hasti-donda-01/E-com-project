@@ -58,9 +58,11 @@ export const getcategory = async (req, res) => {
 
         return res.status(200).json({
             message: "categories get successfully",
-            data: [category, "totalpages : " + totalpage, "page : " + page],
+            data: category,
+            totalPages: totalpage,
+            page,
             success: true
-        })
+        });
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -120,25 +122,42 @@ export const deletecategory = async (req, res) => {
 
 export const updatecategory = async (req, res) => {
     try {
-        console.log(req.file, "file")
-        const { category_name, category_Image } = req.body;
+        const { category_name, description } = req.body;
 
-        const payload = {
-            category_name, category_Image: `http://localhost:7000/category_Image/${req.file.filename}`, imagename: req.file.filename
+        const category = await Category.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({
+                message: "Category not found",
+                success: false
+            });
         }
 
-        const category = await Category.findOneAndUpdate({ _id: req.params.id }, { $set: payload });
-        console.log(category, "category")
-        await fs.unlinkSync(`./public/category/${category.imagename}`)
+        if (category_name) category.category_name = category_name;
+        if (description) category.description = description;
+
+        if (req.file) {
+            if (category.imagename) {
+                try {
+                    await cloudinary.uploader.destroy(category.imagename);
+                } catch (err) {
+                    console.log("Cloudinary delete skipped:", err.message);
+                }
+            }
+            category.category_Image = req.file.path;
+            category.imagename = req.file.filename;
+        }
+
+        await category.save();
+
         return res.status(200).json({
-            message: "product update successfully",
+            message: "Category updated successfully",
             success: true,
             data: category
-        })
+        });
     } catch (error) {
         return res.status(500).json({
-            message: error.details,
+            message: error.message,
             success: false
-        })
+        });
     }
-}
+};

@@ -1,5 +1,4 @@
 import express from 'express';
-import { uploadCategory } from '../config/cloudinary.js';
 import { createCategory, deletecategory, getcategory, getcategorybyid, updatecategory } from '../controller/category.js';
 import { auth } from '../middleware/auth.js';
 
