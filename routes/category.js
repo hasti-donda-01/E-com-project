@@ -1,6 +1,7 @@
 import express from 'express';
 import { createCategory, deletecategory, getcategory, getcategorybyid, updatecategory } from '../controller/category.js';
 import { auth } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
