@@ -1,7 +1,7 @@
 import express from 'express';
 import { createCategory, deletecategory, getcategory, getcategorybyid, updatecategory } from '../controller/category.js';
 import { auth } from '../middleware/auth.js';
-import { uploadCategory } from '../middleware/upload.js';   // use your real file name/path
+import { uploadCategory } from '../config/cloudinary.js';  
 
 const router = express.Router();
 
