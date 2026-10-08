@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { auth } from '../middleware/auth.js';
+import { uploadSubcategory } from '../config/cloudinary.js';
 import { createsubCategory, deletecategory, getcategorybyid, getsubcategory, updatecategory } from '../controller/subcategory.js';
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

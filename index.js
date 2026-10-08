@@ -1,8 +1,8 @@
 // dotenv MUST be the first import so env variables load before anything else
 
+  import "dotenv/config";
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
-import "dotenv/config";
 import connectDB from "./config/dbConnect.js";
 
 import express from "express";

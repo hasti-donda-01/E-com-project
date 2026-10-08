@@ -2,40 +2,40 @@ import { Category } from "../models/category.js";
 import fs from 'fs';
 export const createCategory = async (req, res) => {
     try {
-
-        console.log(req.file, "reqfile");
-        const category_Image = req.file.filename
         const { category_name, description } = req.body;
+        const imageUrl = req.file?.path;     
+        const publicId = req.file?.filename;  
 
-
-        if (!category_name || !category_Image) {
+        if (!category_name || !imageUrl) {
             return res.status(400).json({
                 message: "please fill all the fields",
                 success: false
             });
-
         }
+
         const category = await Category.findOne({ category_name });
         if (category) {
             return res.status(400).json({
                 message: "Category Name already exist",
                 success: false
-            })
+            });
         }
 
-        const payload = { category_name, description, category_Image: `http://localhost:7000/category_Image/${req.file.filename}`, imagename: req.file.filename }
-        await Category.create(payload);
+        await Category.create({
+            category_name,
+            description,
+            category_Image: imageUrl,
+            imagename: publicId
+        });
+
         return res.status(201).json({
             message: "Category Created successfully",
             success: true
-        })
+        });
     } catch (error) {
-        return res.status(500).json({
-            message: error.message,
-            success: false
-        })
+        return res.status(500).json({ message: error.message, success: false });
     }
-}
+};
 
 export const getcategory = async (req, res) => {
     try {

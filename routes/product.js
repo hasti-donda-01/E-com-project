@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import { uploadProduct } from '../config/cloudinary.js';
 import { createProduct, deleteproduct, getproducts, getproductsbyid, productbycategory, setProductPricing, totalProduct, updateproduct, updateStock } from '../controller/product.js';
 import { auth } from '../middleware/auth.js';
 import { categorybasedbrowse, filterProducts } from '../controller/customer.js';
