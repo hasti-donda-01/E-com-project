@@ -6,7 +6,7 @@ import { uploadCategory } from '../config/cloudinary.js';
 const router = express.Router();
 
 router.post('/create', auth(["Admin"]), uploadCategory.single('category_Image'), createCategory);
-router.post('/update/:id', auth(["Admin"]), upload.single('category_Image'), updatecategory);
+router.post('/update/:id', auth(["Admin"]), uploadCategory.single('category_Image'), updatecategory);
 router.get('/get', getcategory);
 router.get('/get/:id', getcategorybyid);
 router.delete('/delete/:id', auth(["Admin"]), deletecategory);
