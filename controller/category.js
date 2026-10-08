@@ -1,10 +1,12 @@
 import { Category } from "../models/category.js";
 import fs from 'fs';
+import { cloudinary } from '../config/cloudinary.js';
+
 export const createCategory = async (req, res) => {
     try {
         const { category_name, description } = req.body;
-        const imageUrl = req.file?.path;     
-        const publicId = req.file?.filename;  
+        const imageUrl = req.file?.path;
+        const publicId = req.file?.filename;
 
         if (!category_name || !imageUrl) {
             return res.status(400).json({
@@ -92,22 +94,29 @@ export const getcategorybyid = async (req, res) => {
 
 export const deletecategory = async (req, res) => {
     try {
+        const category = await Category.findById(req.params.id);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found", success: false });
+        }
 
-        const category = await Category.findOneAndDelete({ _id: req.params.id });
-        // console.log(product)
-        await fs.unlinkSync(`./public/category/${category.imagename}`)
+        if (category.imagename) {
+            try {
+                await cloudinary.uploader.destroy(category.imagename);
+            } catch (err) {
+                console.log("Cloudinary delete skipped:", err.message);
+            }
+        }
+
+        await Category.findByIdAndDelete(req.params.id);
+
         return res.status(200).json({
-            message: " category deleted successfully",
-            success: false
-        })
-
+            message: "Category deleted successfully",
+            success: true
+        });
     } catch (error) {
-        return res.status(500).json({
-            message: error.message,
-            success: false
-        })
+        return res.status(500).json({ message: error.message, success: false });
     }
-}
+};
 
 export const updatecategory = async (req, res) => {
     try {
