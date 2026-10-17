@@ -24,11 +24,16 @@ export const sendCustomerOtp = async (req, res) => {
         }
 
         let user = await User.findOne({ email });
-        if (user && user.role !== 'user') {
+        if (user && user.role !== 'customer') {
             return res.status(403).json({ message: "This email is registered with a different account type", success: false });
         }
         if (user && user.status === 'blocked') {
             return res.status(403).json({ message: "Your account is blocked", success: false });
+        }
+
+        // 30 second resend limit
+        if (user?.otpExpireAt && user.otpExpireAt.getTime() - 4.5 * 60 * 1000 > Date.now()) {
+            return res.status(429).json({ message: "Please wait 30 seconds before requesting another OTP", success: false });
         }
 
         const otp = crypto.randomInt(100000, 1000000).toString();
@@ -38,7 +43,7 @@ export const sendCustomerOtp = async (req, res) => {
             otpAttempts: 0
         };
 
-        if (!user) await User.create({ email, role: 'user', ...update });  // role is always "user"
+        if (!user) await User.create({ email, role: 'customer', ...update });
         else await user.updateOne(update);
 
         await transporter.sendMail({
@@ -59,11 +64,12 @@ export const verifyCustomerOtp = async (req, res) => {
     try {
         const email = String(req.body.email || '').trim().toLowerCase();
         const { otp } = req.body;
-        if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required", success: false });
+        if (!otp) {
+            return res.status(400).json({ message: " OTP is
+                 required", success: false });
         }
 
-        const user = await User.findOne({ email, role: 'user' });
+        const user = await User.findOne({ email, role: 'customer' });
         if (!user || !user.otp) {
             return res.status(400).json({ message: "Invalid or expired OTP", success: false });
         }
