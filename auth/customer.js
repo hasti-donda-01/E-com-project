@@ -75,7 +75,6 @@ export const sendCustomerOtp = async (req, res) => {
         } else {
             await user.updateOne(update);
         }
-
         await transporter.sendMail({
             from: process.env.EMAIL,
             to: email,
