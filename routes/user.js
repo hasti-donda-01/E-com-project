@@ -5,7 +5,6 @@ import express from 'express';
 import { auth } from '../middleware/auth.js';
 import { deleteUser, getUserProfile, updateUser } from '../controller/user.js';
 import { getalluser } from '../controller/dashboards.js';
-
 const router = express.Router();
 
 router.get('/getUserProfile', auth(["customer", "Admin", "seller"]), getUserProfile);

@@ -4102,6 +4102,111 @@
           }
         }
       }
+    },
+    "/api/seller/customer/send-otp": {
+      "post": {
+        "tags": [
+          "customer auth"
+        ],
+        "summary": "customer signup / login - send OTP to email",
+        "operationId": "post_api_seller_customer_send_otp",
+        "description": "Customer enters only an email. A new email creates a customer account (role is always user). An existing email just gets a fresh OTP, so signup and login are the same flow. OTP is valid for 5 minutes.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "customer@gmail.com"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent to your email"
+          },
+          "400": {
+            "description": "Invalid email"
+          },
+          "403": {
+            "description": "Blocked account, or email belongs to a seller/admin"
+          },
+          "429": {
+            "description": "Too many requests"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/seller/customer/verify-otp": {
+      "post": {
+        "tags": [
+          "customer auth"
+        ],
+        "summary": "customer - verify OTP and get token",
+        "operationId": "post_api_seller_customer_verify_otp",
+        "description": "Verifies the OTP and returns a JWT. Max 5 wrong attempts, then request a new OTP. Use the token as: Authorization: Bearer <token>",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "customer@gmail.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                },
+                "required": [
+                  "email",
+                  "otp"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged in successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Logged in successfully",
+                  "success": true,
+                  "token": "eyJhbGciOiJIUzI1NiIs..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired OTP"
+          },
+          "429": {
+            "description": "Too many attempts"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
     }
   }
 }
