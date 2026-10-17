@@ -65,8 +65,7 @@ export const verifyCustomerOtp = async (req, res) => {
         const email = String(req.body.email || '').trim().toLowerCase();
         const { otp } = req.body;
         if (!otp) {
-            return res.status(400).json({ message: " OTP is
-                 required", success: false });
+            return res.status(400).json({ message: " OTP is required", success: false });
         }
 
         const user = await User.findOne({ email, role: 'customer' });
