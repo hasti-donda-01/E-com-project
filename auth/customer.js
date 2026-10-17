@@ -1,20 +1,34 @@
-
 import 'dotenv/config';
 import fs from 'fs';
+import dns from 'dns';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { User } from '../models/user.js';
 
+// Prefer IPv4 (Render has no outbound IPv6)
+dns.setDefaultResultOrder('ipv4first');
+
 const hello = fs.readFileSync('./index.html', 'utf8');
 
+// Defaults to Gmail. To switch to Brevo, set these in Render env:
+// SMTP_HOST=smtp-relay.brevo.com, SMTP_PORT=2525,
+// SMTP_USER=<brevo smtp login>, SMTP_PASS=<brevo smtp key>
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465,
     auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD
-    }
+        user: process.env.SMTP_USER || process.env.EMAIL,
+        pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD
+    },
+    family: 4, // force IPv4
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,7 +45,7 @@ export const sendCustomerOtp = async (req, res) => {
             });
         }
 
-        let user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
         if (user && user.role !== 'customer') {
             return res.status(403).json({
@@ -58,6 +72,7 @@ export const sendCustomerOtp = async (req, res) => {
             });
         }
 
+        // must be a string for bcrypt
         const otp = crypto.randomInt(100000, 1000000).toString();
 
         const update = {
@@ -75,14 +90,24 @@ export const sendCustomerOtp = async (req, res) => {
         } else {
             await user.updateOne(update);
         }
-        await transporter.sendMail({
-            from: process.env.EMAIL,
-            to: email,
-            subject: "Your verification code",
-            html: hello
-                .replace("{{otp}}", otp)
-                .replace("{{name}}", "there")
-        });
+
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL,
+                to: email,
+                subject: "Your verification code",
+                html: hello
+                    .replaceAll("{{otp}}", otp)
+                    .replaceAll("{{name}}", "there")
+            });
+        } catch (mailError) {
+            // clear the OTP so the user is not locked out by the 30s limit
+            await User.updateOne(
+                { email },
+                { otp: null, otpExpireAt: null, otpAttempts: 0 }
+            );
+            throw mailError;
+        }
 
         return res.status(200).json({
             message: "OTP sent to your email",
