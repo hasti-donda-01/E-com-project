@@ -1,70 +1,56 @@
 import 'dotenv/config';
-import fs from 'fs';
-import dns from 'dns';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
-import { User } from '../models/user.js';
+import { Customer } from '../models/customer.js';
 
-// Prefer IPv4 (Render has no outbound IPv6)
-dns.setDefaultResultOrder('ipv4first');
+const PHONE_RE = /^[6-9]\d{9}$/;      // 10-digit Indian mobile number
+const OTP_VALID_MS = 5 * 60 * 1000;   // OTP valid for 5 minutes
+const RESEND_WAIT_MS = 30 * 1000;     // 30 seconds between requests
+const MAX_ATTEMPTS = 5;
 
-const hello = fs.readFileSync('./index.html', 'utf8');
+// Sends the OTP by SMS (written for Fast2SMS; for MSG91 or Twilio only this function changes)
+const sendSms = async (phone, otp) => {
+    if (!process.env.SMS_API_KEY) {
+        if (process.env.RENDER) {
+            throw new Error('SMS provider is not configured');
+        }
+        console.log(`[DEV ONLY] OTP for ${phone}: ${otp}`);   // local testing without an SMS account
+        return;
+    }
 
-// Defaults to Gmail. To switch to Brevo, set these in Render env:
-// SMTP_HOST=smtp-relay.brevo.com, SMTP_PORT=2525,
-// SMTP_USER=<brevo smtp login>, SMTP_PASS=<brevo smtp key>
-const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+    const resp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        method: 'POST',
+        headers: {
+            authorization: process.env.SMS_API_KEY,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ route: 'otp', variables_values: otp, numbers: phone })
+    });
+    const data = await resp.json();
+    if (!data.return) {
+        throw new Error(data.message || 'Failed to send SMS');
+    }
+};
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: SMTP_PORT,
-    secure: SMTP_PORT === 465,
-    auth: {
-        user: process.env.SMTP_USER || process.env.EMAIL,
-        pass: process.env.SMTP_PASS || process.env.EMAIL_PASSWORD
-    },
-    family: 4, // force IPv4
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000
-});
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// POST { email }
+// POST { phone }
 export const sendCustomerOtp = async (req, res) => {
     try {
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const phone = String(req.body.phone || '').trim();
 
-        if (!EMAIL_RE.test(email)) {
+        if (!PHONE_RE.test(phone)) {
             return res.status(400).json({
-                message: "Enter a valid email address",
+                message: "Enter a valid 10-digit mobile number",
                 success: false
             });
         }
 
-        const user = await User.findOne({ email });
+        const customer = await Customer.findOne({ phone });
 
-        if (user && user.role !== 'customer') {
-            return res.status(403).json({
-                message: "This email is registered with a different account type",
-                success: false
-            });
-        }
-
-        if (user && user.status === 'blocked') {
-            return res.status(403).json({
-                message: "Your account is blocked",
-                success: false
-            });
-        }
-
-        // 30-second resend limit
+        // 30-second resend limit (only while an OTP is pending)
         if (
-            user?.otpExpireAt &&
-            user.otpExpireAt.getTime() - 4.5 * 60 * 1000 > Date.now()
+            customer?.otp &&
+            Date.now() - customer.updatedAt.getTime() < RESEND_WAIT_MS
         ) {
             return res.status(429).json({
                 message: "Please wait 30 seconds before requesting another OTP",
@@ -72,45 +58,24 @@ export const sendCustomerOtp = async (req, res) => {
             });
         }
 
-        // must be a string for bcrypt
         const otp = crypto.randomInt(100000, 1000000).toString();
 
-        const update = {
-            otp: await bcrypt.hash(otp, 10),
-            otpExpireAt: new Date(Date.now() + 5 * 60 * 1000),
-            otpAttempts: 0
-        };
-
-        if (!user) {
-            await User.create({
-                email,
-                role: 'customer',
-                ...update
-            });
-        } else {
-            await user.updateOne(update);
-        }
+        await Customer.updateOne(
+            { phone },
+            { $set: { otp, otpAttempts: 0 } },
+            { upsert: true }
+        );
 
         try {
-            await transporter.sendMail({
-                from: process.env.EMAIL,
-                to: email,
-                subject: "Your verification code",
-                html: hello
-                    .replaceAll("{{otp}}", otp)
-                    .replaceAll("{{name}}", "there")
-            });
-        } catch (mailError) {
-            // clear the OTP so the user is not locked out by the 30s limit
-            await User.updateOne(
-                { email },
-                { otp: null, otpExpireAt: null, otpAttempts: 0 }
-            );
-            throw mailError;
+            await sendSms(phone, otp);
+        } catch (smsError) {
+            // don't leave an OTP the user never received
+            await Customer.updateOne({ phone }, { $set: { otp: null } });
+            throw smsError;
         }
 
         return res.status(200).json({
-            message: "OTP sent to your email",
+            message: "OTP sent to your mobile number",
             success: true
         });
 
@@ -122,70 +87,65 @@ export const sendCustomerOtp = async (req, res) => {
     }
 };
 
-// POST { email, otp }
+// POST { phone, otp }
+// POST { phone, otp, email, password }
+// POST { phone, otp, password }
+// POST { phone, otp }
 export const verifyCustomerOtp = async (req, res) => {
     try {
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const phone = String(req.body.phone || '').trim();
         const { otp } = req.body;
 
-        if (!otp) {
+        if (!phone || !otp) {
             return res.status(400).json({
-                message: "OTP is required",
+                message: "Phone and OTP are required",
                 success: false
             });
         }
 
-        const user = await User.findOne({
-            email,
-            role: 'customer'
-        });
+        const customer = await Customer.findOne({ phone });
 
-        if (!user || !user.otp) {
+        if (!customer || !customer.otp) {
             return res.status(400).json({
                 message: "Invalid or expired OTP",
                 success: false
             });
         }
 
-        if (user.otpAttempts >= 5) {
+        if (customer.otpAttempts >= MAX_ATTEMPTS) {
             return res.status(429).json({
                 message: "Too many attempts. Request a new OTP.",
                 success: false
             });
         }
 
-        if (new Date() > user.otpExpireAt) {
+        if (Date.now() - customer.updatedAt.getTime() > OTP_VALID_MS) {
             return res.status(400).json({
                 message: "OTP expired. Request a new one.",
                 success: false
             });
         }
 
-        if (!(await bcrypt.compare(String(otp), user.otp))) {
-            await user.updateOne({
-                $inc: { otpAttempts: 1 }
-            });
-
+        // OTP is stored as plain text, so compare directly
+        if (String(otp) !== customer.otp) {
+            await Customer.updateOne({ _id: customer._id }, { $inc: { otpAttempts: 1 } });
             return res.status(400).json({
                 message: "Invalid OTP",
                 success: false
             });
         }
 
-        await user.updateOne({
-            otp: null,
-            otpExpireAt: null,
-            otpAttempts: 0,
-            isVerify: true,
-            isActive: true,
-            isLogin: true
-        });
+        // one-time use
+        await Customer.updateOne(
+            { _id: customer._id },
+            { $set: { otp: null, otpAttempts: 0, isVerify: true } }
+        );
 
         const token = jwt.sign(
             {
-                email: user.email,
-                id: user._id,
-                role: user.role
+                phone: customer.phone,
+                id: customer._id,
+                role: 'customer'
             },
             process.env.PRIVATEKEY,
             { expiresIn: "7d" }

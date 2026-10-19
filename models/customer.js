@@ -1,6 +1,29 @@
-// name:         { type: String, required: function () { return this.role !== "user"; }, default: null },
-// password:     { type: String, required: function () { return this.role !== "user"; }, default: null },
-// phone:        { type: String, required: function () { return this.role !== "user"; }, unique: true, sparse: true, default: undefined },
-// profileImage: { type: String, default: null },
-// otpAttempts:  { type: Number, default: 0 },          // add this new field
-// profileImageName: { type: String, default: null },   // was default: false
+import mongoose from 'mongoose';
+
+const customerSchema = new mongoose.Schema(
+    {
+        phone: {
+            type: String,
+            required: true,
+            unique: true,
+            sparse: true,
+            trim: true
+        },
+        // filled in when the customer verifies the OTP for the first time
+        email: {
+            type: String,
+            lowercase: true,
+            trim: true,
+            unique: true,
+            sparse: true,
+            default: undefined
+        },
+        password: { type: String, default: null },        // bcrypt hash
+        otp: { type: String, default: null },             // bcrypt hash
+        otpAttempts: { type: Number, default: 0 },
+        isVerify: { type: Boolean, default: false }
+    },
+    { timestamps: true }
+);
+
+export const Customer = mongoose.model('Customer', customerSchema);

@@ -3,7 +3,7 @@
   "info": {
     "title": "Meesho like",
     "version": "1.2.0",
-    "description": "E-commerce API. Roles: customer, seller, admin. Customers sign in with an email OTP; sellers register with full details; admins are created with the seed script."
+    "description": "E-commerce API. Roles: customer, seller, admin. Customers sign in with a phone number OTP; sellers register with full details; admins are created with the seed script."
   },
   "servers": [
     {
@@ -74,9 +74,9 @@
         "tags": [
           "customer auth"
         ],
-        "summary": "customer signup / login - send OTP to email",
+        "summary": "customer signup / login - send OTP by SMS",
         "operationId": "post_api_seller_customer_send_otp",
-        "description": "Customer enters only an email. A new email creates a customer account (role is always customer). An existing email just gets a fresh OTP, so signup and login are the same flow. OTP is valid for 5 minutes",
+        "description": "Customer enters only a 10-digit mobile number. A new number creates a customer account (role is always customer). An existing number just gets a fresh OTP, so signup and login are the same flow. OTP is valid for 5 minutes. A new OTP can be requested every 30 seconds",
         "security": [],
         "requestBody": {
           "required": true,
@@ -85,13 +85,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": {
+                  "phone": {
                     "type": "string",
-                    "example": "customer@gmail.com"
+                    "example": "9876543210",
+                    "description": "10-digit Indian mobile number (starts with 6-9)"
                   }
                 },
                 "required": [
-                  "email"
+                  "phone"
                 ]
               }
             }
@@ -99,19 +100,16 @@
         },
         "responses": {
           "200": {
-            "description": "OTP sent to your email"
+            "description": "OTP sent to your mobile number"
           },
           "400": {
-            "description": "Invalid email"
-          },
-          "403": {
-            "description": "Blocked account, or email belongs to a seller/admin"
+            "description": "Enter a valid 10-digit mobile number"
           },
           "429": {
-            "description": "Too many requests"
+            "description": "Please wait 30 seconds before requesting another OTP"
           },
           "500": {
-            "description": "Server error"
+            "description": "Server error (for example SMS provider not configured)"
           }
         }
       }
@@ -132,9 +130,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": {
+                  "phone": {
                     "type": "string",
-                    "example": "customer@gmail.com"
+                    "example": "9876543210"
                   },
                   "otp": {
                     "type": "string",
@@ -142,7 +140,7 @@
                   }
                 },
                 "required": [
-                  "email",
+                  "phone",
                   "otp"
                 ]
               }
@@ -163,10 +161,10 @@
             }
           },
           "400": {
-            "description": "Invalid or expired OTP"
+            "description": "Phone and OTP are required / Invalid or expired OTP / OTP expired / Invalid OTP"
           },
           "429": {
-            "description": "Too many attempts"
+            "description": "Too many attempts. Request a new OTP"
           },
           "500": {
             "description": "Server error"
@@ -345,7 +343,7 @@
         ],
         "summary": "login (seller / admin)",
         "operationId": "post_api_seller_login",
-        "description": "For sellers and admin (email + password). Customers log in with the email OTP flow",
+        "description": "For sellers and admin (email + password). Customers log in with the phone OTP flow",
         "security": [],
         "requestBody": {
           "required": true,
