@@ -10,12 +10,14 @@ const RESEND_WAIT_MS = 30 * 1000;     // 30 seconds between requests
 const MAX_ATTEMPTS = 5;
 
 // Sends the OTP by SMS (written for Fast2SMS; for MSG91 or Twilio only this function changes)
+// Sends the OTP by SMS. Without SMS_API_KEY it prints the OTP in the server logs instead.
 const sendSms = async (phone, otp) => {
     if (!process.env.SMS_API_KEY) {
-        if (process.env.RENDER) {
+        // On Render this is only allowed when ALLOW_DEV_OTP=true (for testing)
+        if (process.env.RENDER && process.env.ALLOW_DEV_OTP !== 'true') {
             throw new Error('SMS provider is not configured');
         }
-        console.log(`[DEV ONLY] OTP for ${phone}: ${otp}`);   // local testing without an SMS account
+        console.log(`[DEV ONLY] OTP for ${phone}: ${otp}`);
         return;
     }
 
