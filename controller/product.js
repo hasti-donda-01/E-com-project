@@ -3,7 +3,7 @@ import fs from 'fs';
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, brand, stock, categoryId } = req.body;
+        const { name, price, brand, stock, categoryId,discount,rating } = req.body;
 
         console.log(req.file,"rerr")
         // Check file
@@ -16,7 +16,7 @@ export const createProduct = async (req, res) => {
 
         const imageName = req.file.filename;
 
-        if (!name || !price || !brand || !stock || !categoryId) {
+        if (!name || !price || !brand || !stock || !categoryId || !discount || !rating) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"

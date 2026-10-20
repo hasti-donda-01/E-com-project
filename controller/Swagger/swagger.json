@@ -618,6 +618,14 @@
                     "type": "integer",
                     "example": 10
                   },
+                  "discount": {
+                    "type": "number",
+                    "example": 10
+                  },
+                  "rating": {
+                    "type": "number",
+                    "example": 4.5
+                  },
                   "categoryId": {
                     "type": "string",
                     "example": "category _id"
@@ -633,6 +641,8 @@
                   "price",
                   "brand",
                   "stock",
+                  "discount",
+                  "rating",
                   "categoryId",
                   "image"
                 ]

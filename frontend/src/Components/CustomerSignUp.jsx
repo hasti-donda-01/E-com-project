@@ -1,0 +1,70 @@
+import { useState } from 'react'
+import meeshologo from './Images/meeshoLogo.svg'
+import { useDispatch, useSelector } from 'react-redux'
+import { addCustomer } from '../redux/action/customerApi'
+import { useNavigate } from 'react-router-dom'
+export default function CutomerSignUp() {
+
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const dispatch = useDispatch()
+    let navigate = useNavigate();
+    const { status, error, message } = useSelector((state) => state.customer)
+    const submitData = async () => {
+        try {
+            await dispatch(addCustomer({ phone: phoneNumber })).unwrap()
+            navigate('/verify-otp', { state: { phoneNumber } })
+        } catch {
+            // The rejected request message is displayed from Redux state.
+        }
+    }
+    return (
+        <div>
+            <div className='customerheader'>
+                <div className='customerheader1'>
+                    <div className='customerheader2'>
+                        <div className='customerheader3'>
+                            <a href='/'>
+                                <img src={meeshologo} alt='meeshoLogo' />
+                            </a>
+                        </div>
+
+                        <div className='customerheader4'>
+                            <div placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader5'>
+                                <div className='customerheader6'>
+                                    <input type="text" placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader7' />
+                                </div>
+                            </div>
+
+                            <div className='customerheader8' style={{ color: "white" }}>
+                                <div className='customerheader9'>
+                                    <span className='customerheader10'>
+                                        Become a Supplier
+                                    </span>
+                                </div>
+                                <div className='customerheader11'>
+
+                                </div>
+                                <div className='customerheader9'>
+                                    <span className='customerheader10'>
+                                        Investor Relations
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <main className="eOwSMC">
+                <div className="sc-kFkjun lgbbvF AuthWrapperstyled__StyledCard-sc-1plclw5-1 kxEhGu" color="white"><div className="sc-kFkjun ghANen AuthWrapperstyled__StyledImgWrapper-sc-1plclw5-8 dRTrGm" color="white"><picture><source srcSet="https://images.meesho.com/images/marketing/1661417516766.webp" type="image/webp" className="lazyload" /><img src="https://images.meesho.com/images/marketing/1661417516766.webp" width="433" height="200" className="lazyload AuthWrapperstyled__StyledPerfImage-sc-1plclw5-9 kSgJsB" alt="banner" /></picture></div><div className="sc-kFkjun ghANen AuthWrapperstyled__StyledCard2-sc-1plclw5-3 VMhsx" color="white"><div className="sc-kFkjun isIvud" color="white"><h6 font-size="20px" font-weight="bold" color="greyBase" className="sc-dOfePm bzKJDM">Sign Up to view your profile</h6><div className="sc-kFkjun cuomGy Authstyled__StyledCard-sc-2hunyy-2 icAkSj" color="white"><div className="CountryDropdown__StyledWrapper-sc-xzyn0c-0 eIhKkE"><span font-size="12px" font-weight="book" color="greyT2" className="sc-dOfePm czKNKx">Country</span><span font-size="16px" font-weight="demi" color="greyBase" className="sc-dOfePm fJsHQf">🇮🇳 +91</span><div className="sc-jXuTBK kUFBUY"></div></div>                <div className="Input__InputContainer-sc-1goybxj-0 gcwUCC"><input placeholder=" phone number" type="tel" maxLength="10" autoComplete="off" className="Input__InputField-sc-1goybxj-1 chAFGe" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value.replace(/\D/g, '').slice(0, 10))} /></div></div>
+                
+                <button type="submit" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" font-size="15px" onClick={submitData} disabled={status === 'loading'}><div className="sc-jOTjWM knCwk"><span font-size="18px" font-weight="demi" color="#ffffff" className="sc-dOfePm lgUtFF">{status === 'loading' ? 'Saving...' : 'Continue'}</span></div></button>
+                {error && <p role="alert">{error}</p>}
+                {message && <p role="status">{message}</p>}
+                
+                </div><span font-size="12px" font-weight="demi" color="greyT2" className="sc-dOfePm fsmGU AuthWrapperstyled__StyledCaption-sc-1plclw5-4 bsTzl" width="1920">By continuing, you agree to Meesho’s&nbsp;<a href="https://www.meesho.com/legal/terms-conditions"><span font-size="12px" font-weight="demi" className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Terms &amp; Conditions &nbsp;</span></a>and &nbsp;<a href="https://www.meesho.com/legal/privacy"><span font-size="12px" font-weight="demi" className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Privacy Policy</span></a></span></div></div>
+            </main>
+        </div>
+    )
+}
