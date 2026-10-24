@@ -59,8 +59,6 @@ export const getcategory = async (req, res) => {
         return res.status(200).json({
             message: "categories get successfully",
             data: category,
-            totalPages: totalpage,
-            page,
             success: true
         });
     } catch (error) {
