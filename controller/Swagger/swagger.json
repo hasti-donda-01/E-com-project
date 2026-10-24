@@ -217,7 +217,7 @@
                   "role": {
                     "type": "string",
                     "enum": [
-                      "seller"
+                      "seller","Admin"
                     ],
                     "default": "seller",
                     "example": "seller",
