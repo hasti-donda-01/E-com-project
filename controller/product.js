@@ -3,7 +3,7 @@ import { cloudinary } from "../config/cloudinary.js";
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, brand, stock, categoryId } = req.body;
+        const { name, price, brand, stock, categoryId, discount, rating } = req.body;
 
         if (!req.file) {
             return res.status(400).json({
@@ -12,29 +12,42 @@ export const createProduct = async (req, res) => {
             });
         }
 
-        if (!name || !price || !brand || stock === undefined || !categoryId) {
+        const numericPrice = Number(price);
+        const numericStock = Number(stock);
+        const numericDiscount = Number(discount);
+        const numericRating = Number(rating);
+
+        if (!name?.trim() || !brand?.trim() || !categoryId ||
+            !Number.isFinite(numericPrice) || numericPrice <= 0 ||
+            !Number.isInteger(numericStock) || numericStock < 0 ||
+            !Number.isFinite(numericDiscount) || numericDiscount < 0 || numericDiscount > 100 ||
+            !Number.isFinite(numericRating) || numericRating < 0 || numericRating > 5) {
             return res.status(400).json({
                 success: false,
-                message: "Please fill all the fields"
+                message: "Please provide valid product details"
             });
         }
 
         const payload = {
             name: name.trim(),
-            price: Number(price),
+            price: numericPrice,
             brand: brand.trim(),
-            stock: Number(stock),
+            stock: numericStock,
             categoryId,
             user: req.user.id,
             image: req.file.path,
-            imagename: req.file.filename
+            imagename: req.file.filename,
+            discountPrice: numericPrice * (1 - numericDiscount / 100),
+            discountPercent: numericDiscount,
+            rating: numericRating
         };
 
-        await Product.create(payload);
+        const product = await Product.create(payload);
 
         return res.status(201).json({
             success: true,
-            message: "Product added successfully"
+            message: "Product added successfully",
+            data: product
         });
 
     } catch (error) {

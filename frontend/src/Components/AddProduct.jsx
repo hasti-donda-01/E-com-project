@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiUploadCloud, FiX, FiCheckCircle, FiAlertCircle, FiStar } from 'react-icons/fi';
 
@@ -63,29 +63,78 @@ function Field({ label, htmlFor, error, hint, children }) {
 export default function AddProduct() {
     const [form, setForm] = useState(initialForm);
     const [image, setImage] = useState(null); // { file, url }
-    const [categories, setCategories] = useState(null); // null = loading, [] = use text input
+    const [categories, setCategories] = useState(null); // null = loading, [] = no available categories
+    const [categoryError, setCategoryError] = useState('');
+    const [categoryLoadAttempt, setCategoryLoadAttempt] = useState(0);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const fileRef = useRef(null);
     const imageRef = useRef(image);
-    imageRef.current = image;
 
-    // Load categories; if the request fails, fall back to a plain categoryId input
+    useEffect(() => {
+        imageRef.current = image;
+    }, [image]);
+
+    // The categories endpoint is paginated, so gather all pages for the selector.
     useEffect(() => {
         const controller = new AbortController();
-        fetch(CATEGORIES_URL, { signal: controller.signal, credentials: 'include' })
-            .then((r) => (r.ok ? r.json() : Promise.reject()))
-            .then((list) =>
+        const loadCategories = async () => {
+            setCategories(null);
+            setCategoryError('');
+            try {
+                const firstResponse = await fetch(`${CATEGORIES_URL}?page=1`, {
+                    signal: controller.signal,
+                    credentials: 'include'
+                });
+                if (!firstResponse.ok) {
+                    const detail = await firstResponse.json().catch(() => ({}));
+                    throw new Error(detail.message || `Could not load categories (${firstResponse.status}).`);
+                }
+
+                const firstPage = await firstResponse.json();
+                if (firstPage.success === false || !Array.isArray(firstPage.data)) {
+                    throw new Error(firstPage.message || 'The categories response was invalid.');
+                }
+
+                const allCategories = [...firstPage.data];
+                const totalPages = Number(firstPage.totalPages) || 1;
+                for (let page = 2; page <= totalPages; page += 1) {
+                    const response = await fetch(`${CATEGORIES_URL}?page=${page}`, {
+                        signal: controller.signal,
+                        credentials: 'include'
+                    });
+                    if (!response.ok) {
+                        const detail = await response.json().catch(() => ({}));
+                        throw new Error(detail.message || `Could not load categories (${response.status}).`);
+                    }
+                    const payload = await response.json();
+                    if (payload.success === false || !Array.isArray(payload.data)) {
+                        throw new Error(payload.message || 'The categories response was invalid.');
+                    }
+                    allCategories.push(...payload.data);
+                }
+
                 setCategories(
-                    Array.isArray(list)
-                        ? list.map((c) => ({ id: String(c._id ?? c.id), name: c.name }))
-                        : []
-                )
-            )
-            .catch((err) => err?.name !== 'AbortError' && setCategories([]));
+                    allCategories
+                        .filter((category) => category.isActive !== false)
+                        .map((category) => ({
+                            id: String(category._id ?? category.id),
+                            name: category.category_name ?? category.name
+                        }))
+                        .filter((category) => category.id && category.name)
+                );
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setCategories([]);
+                    setCategoryError(err.message || 'Could not load categories.');
+                }
+            }
+        };
+
+        loadCategories();
         return () => controller.abort();
-    }, []);
+    }, [categoryLoadAttempt]);
 
     // Free the preview URL when leaving the page
     useEffect(() => () => imageRef.current && URL.revokeObjectURL(imageRef.current.url), []);
@@ -177,12 +226,19 @@ export default function AddProduct() {
                 credentials: 'include',
                 headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
-            if (!res.ok) {
-                let detail = '';
-                try { detail = (await res.json()).message ?? ''; } catch { /* no JSON body */ }
-                throw new Error(detail || `Request failed (${res.status})`);
+            let response;
+            try {
+                response = await res.json();
+            } catch {
+                throw new Error(`The server returned an invalid response (${res.status}).`);
             }
-            setResult({ type: 'success', text: 'Product added.' });
+            if (!res.ok) {
+                throw new Error(response.message || `Request failed (${res.status})`);
+            }
+            if (!response.success) {
+                throw new Error(response.message || 'The server did not confirm that the product was saved.');
+            }
+            setResult({ type: 'success', text: response.message || 'Product added successfully.' });
             removeImage();
             setForm(initialForm);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -253,30 +309,42 @@ export default function AddProduct() {
                                     />
                                 </Field>
 
-                                <Field label="Category" htmlFor="categoryId" error={errors.categoryId}>
-                                    {categories && categories.length > 0 ? (
-                                        <select
-                                            id="categoryId"
-                                            value={form.categoryId}
-                                            onChange={setField('categoryId')}
-                                            className={inputClass(errors.categoryId)}
+                                <Field
+                                    label="Category"
+                                    htmlFor="categoryId"
+                                    error={errors.categoryId}
+                                    hint={categoryError || (categories?.length === 0 ? 'No categories are available yet.' : undefined)}
+                                >
+                                    <select
+                                        id="categoryId"
+                                        value={form.categoryId}
+                                        onChange={setField('categoryId')}
+                                        disabled={categories === null || Boolean(categoryError) || categories.length === 0}
+                                        className={inputClass(errors.categoryId)}
+                                    >
+                                        <option value="">
+                                            {categories === null
+                                                ? 'Loading categories…'
+                                                : categoryError
+                                                    ? 'Categories could not be loaded'
+                                                    : categories.length === 0
+                                                        ? 'No categories available'
+                                                        : 'Select a category'}
+                                        </option>
+                                        {(categories || []).map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {categoryError && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setCategoryLoadAttempt((attempt) => attempt + 1)}
+                                            className="mt-1 text-xs font-semibold text-[#9f2089] hover:underline"
                                         >
-                                            <option value="">Select a category</option>
-                                            {categories.map((c) => (
-                                                <option key={c.id} value={c.id}>
-                                                    {c.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        <input
-                                            id="categoryId"
-                                            value={form.categoryId}
-                                            onChange={setField('categoryId')}
-                                            disabled={categories === null}
-                                            placeholder={categories === null ? 'Loading categories…' : 'Category ID'}
-                                            className={inputClass(errors.categoryId)}
-                                        />
+                                            Retry loading categories
+                                        </button>
                                     )}
                                 </Field>
                             </div>

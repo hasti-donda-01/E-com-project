@@ -41,19 +41,19 @@ export const createCategory = async (req, res) => {
 
 export const getcategory = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Category.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
-            return res.status(404).json({
-                message: "page not found",
-                success: false
-            })
-        }
+        // const page = parseInt(req.query.page) || 1;
+        // const perPage = 3;
+        // const totlaPost = await Category.countDocuments();
+        // const totalpage = Math.ceil(totlaPost / perPage);
+        // if (page > totalpage) {
+        //     return res.status(404).json({
+        //         message: "page not found",
+        //         success: false
+        //     })
+        // }
 
 
-        const category = await Category.find().skip((page - 1) * perPage).limit(perPage).exec();
+        const category = await Category.find();
         console.log(category)
 
         return res.status(200).json({

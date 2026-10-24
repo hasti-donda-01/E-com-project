@@ -48,6 +48,12 @@ const productSchema = mongoose.Schema({
         type: Number,
         default: null
     },
+    rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+        default: null
+    },
 
 }, {
     timestamps: true
