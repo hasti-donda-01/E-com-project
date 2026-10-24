@@ -1,12 +1,10 @@
 import { Product } from "../models/product.js";
-import fs from 'fs';
+import { cloudinary } from "../config/cloudinary.js";
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, brand, stock, categoryId,discount,rating } = req.body;
+        const { name, price, brand, stock, categoryId } = req.body;
 
-        console.log(req.file,"rerr")
-        // Check file
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -14,27 +12,22 @@ export const createProduct = async (req, res) => {
             });
         }
 
-        const imageName = req.file.filename;
-
-        if (!name || !price || !brand || !stock || !categoryId || !discount || !rating) {
+        if (!name || !price || !brand || stock === undefined || !categoryId) {
             return res.status(400).json({
                 success: false,
                 message: "Please fill all the fields"
             });
         }
 
-        // Dynamic URL (important)
-        const imageUrl = `${req.protocol}://${req.get("host")}/image/${imageName}`;
-
         const payload = {
-            name,
-            price,
-            brand,
-            stock,
+            name: name.trim(),
+            price: Number(price),
+            brand: brand.trim(),
+            stock: Number(stock),
             categoryId,
             user: req.user.id,
-            image: imageUrl,
-            imagename: imageName
+            image: req.file.path,
+            imagename: req.file.filename
         };
 
         await Product.create(payload);
@@ -101,37 +94,75 @@ export const getproductsbyid = async (req, res) => {
 
 export const deleteproduct = async (req, res) => {
     try {
-
         const product = await Product.findOneAndDelete({ _id: req.params.id, user: req.user.id });
-        await fs.unlinkSync(`./public/product/${product.imagename}`)
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found",
+                success: false
+            });
+        }
+
+        let warning;
+        if (product.imagename) {
+            try {
+                await cloudinary.uploader.destroy(product.imagename);
+            } catch (error) {
+                console.error("Product image cleanup failed:", error);
+                warning = "The product was deleted, but its image could not be removed.";
+            }
+        }
         return res.status(200).json({
-            message: " product deleted successfully",
-            success: false
+            message: "Product deleted successfully",
+            success: true,
+            warning
         })
 
     } catch (error) {
         return res.status(500).json({
             message: error.message,
-            success: true
+            success: false
         })
     }
 }
 
 export const updateproduct = async (req, res) => {
     try {
-        console.log(req.file, "file")
-        const { name, price, brand, stock, image, user } = req.body;
-
-        const payload = {
-            name, price, brand, image: `http://localhost:7000/image/${req.file.filename}`, user, stock, imagename: req.file.filename
+        const { name, price, brand, stock } = req.body;
+        const product = await Product.findOne({ _id: req.params.id, user: req.user.id });
+        if (!product) {
+            return res.status(404).json({
+                message: "Product not found",
+                success: false
+            });
         }
 
-        const product = await Product.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { $set: payload });
-        await fs.unlinkSync(`./public/product/${product.imagename}`)
+        if (name !== undefined) product.name = name.trim();
+        if (price !== undefined) product.price = Number(price);
+        if (brand !== undefined) product.brand = brand.trim();
+        if (stock !== undefined) product.stock = Number(stock);
+
+        const oldImageName = req.file ? product.imagename : null;
+        if (req.file) {
+            product.image = req.file.path;
+            product.imagename = req.file.filename;
+        }
+
+        await product.save();
+
+        let warning;
+        if (oldImageName) {
+            try {
+                await cloudinary.uploader.destroy(oldImageName);
+            } catch (error) {
+                console.error("Previous product image cleanup failed:", error);
+                warning = "The product was updated, but its previous image could not be removed.";
+            }
+        }
         return res.status(200).json({
-            message: "product update successfully",
+            message: "Product updated successfully",
             success: true,
-            data: product
+            data: product,
+            warning
         })
     } catch (error) {
         return res.status(500).json({

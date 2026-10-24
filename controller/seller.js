@@ -304,24 +304,25 @@ export const monitorPayoutStatus = async (req, res) => {
 
 export const getmyproducts = async (req, res) => {
     try {
-
-
         const page = parseInt(req.query.page) || 1;
         const perPage = 3;
-        const totlaPost = await Product.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
+        const sellerFilter = { user: req.user.id };
+        const totalProducts = await Product.countDocuments(sellerFilter);
+        const totalPages = Math.ceil(totalProducts / perPage);
+        if (page > totalPages && totalPages > 0) {
             return res.status(404).json({
                 message: "page not found",
                 success: false
             })
         }
 
-        const products = await Product.find({ user: req.user.id }).skip((page - 1) * perPage).limit(perPage).exec();
-        console.log(products, "products")
+        const products = await Product.find(sellerFilter)
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .exec();
         return res.status(200).json({
             message: "products get successfully",
-            data: [products, "totalpages : " + totalpage, "page : " + page],
+            data: [products, "totalpages : " + totalPages, "page : " + page],
             success: true
         })
     } catch (error) {

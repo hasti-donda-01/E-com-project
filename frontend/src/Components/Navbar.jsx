@@ -8,11 +8,19 @@ import { CgProfile } from 'react-icons/cg';
 import { GiReturnArrow } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
+import { GiPriceTag } from 'react-icons/gi';
 export default function Navbar() {
 
     let navigate = useNavigate();
     const signupbtn = () => {
         navigate('/customer-signup');
+    }
+
+    const supplier = () => {
+        navigate('/Becomesupplier');
+    }
+    const Inverster = () => {
+        navigate('/Inverster')
     }
     return (
         <div className="sc-VHjGu DesktopHeader__ContainerStyled-sc-r0p6o1-0 bCjyid ggRIXx">
@@ -45,7 +53,7 @@ export default function Navbar() {
                 >
                     {/* Supplier */}
                     <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk">
-                        <span className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
+                        <span onClick={supplier} className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
                             Become a Supplier
                         </span>
                     </div>
@@ -53,7 +61,7 @@ export default function Navbar() {
                     <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
 
                     {/* Investor Relations */}
-                    <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk">
+                    <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk" onClick={Inverster}>
                         <span className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
                             Investor Relations
                         </span>
@@ -70,16 +78,19 @@ export default function Navbar() {
                         </span>
                         <div className='profile-dropdown'>
                             <h5>Hello User</h5>
+                            <div className='profile-dropdown-item'>To access your Meesho Account</div>
                             <button className='signupbtn' onClick={signupbtn}>Sign Up</button>
+                            <div className='profile-dropdown-items'>My Orders</div>
+                            <div className='profile-dropdown-items'>Delete Account</div>
                         </div>
                     </div>
 
                     {/* Cart */}
-                    <a href="/auth?redirect=https%3A%2F%2Fwww.meesho.com%2Fmcheckout%2Fcart&amp;source=cart-icon&amp;screen=HP">
+                    <a onClick={supplier}>
                         <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
                             <BsCart2 height={25} width={25} color='#222' />
 
-                            <span className="sc-dOfePm kBqyGz hover header-right">
+                            <span  className="sc-dOfePm kBqyGz hover header-right">
                                 Cart
                             </span>
                         </div>
@@ -125,15 +136,15 @@ export default function Navbar() {
                 <div className='feature-item'>
 
                     <div className="items">
-                            <GiReturnArrow />
+                            <GiReturnArrow  color="rgb(159, 32, 137)"/>
                             <span className='items-name'>7 Days Easy Return</span> 
                     </div>
                      <div className="items">
-                            <IoMdCash  />
+                            <IoMdCash color="rgb(159, 32, 137)"  />
                             <span className='items-name'>Cash on Delivery</span> 
                     </div>
                      <div className="items">
-                            <GiReturnArrow />
+                            <GiPriceTag color="rgb(159, 32, 137)" />
                             <span className='items-name'>Lowest Prices</span> 
                     </div>
                 </div>

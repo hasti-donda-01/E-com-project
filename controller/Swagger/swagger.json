@@ -62,9 +62,10 @@
   "components": {
     "securitySchemes": {
       "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Paste the raw JWT returned by seller login (without the word 'Bearer'). Swagger adds the Bearer prefix automatically."
       }
     }
   },
@@ -589,7 +590,7 @@
         ],
         "summary": "create product",
         "operationId": "post_api_product_create",
-        "description": "Allowed roles: seller",
+        "description": "Allowed roles: seller. Authorize with the raw JWT returned by seller login; do not include the 'Bearer' prefix in the Swagger Authorize input.",
         "security": [
           {
             "bearerAuth": []
