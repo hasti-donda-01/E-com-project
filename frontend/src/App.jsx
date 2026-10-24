@@ -22,6 +22,7 @@ import ProductCard from './Components/ProductCard'
 import SupplierDashboard from './Components/SupplierDashboard'
 import AddProduct from './Components/AddProduct'
 import SupplierProducts from './Components/SupplierProducts'
+import AdminPanel from './Components/AdminPanel'
 
 function App() {
 
@@ -47,6 +48,7 @@ function App() {
         <Route path='/AddProduct' element={<AddProduct />} />
         <Route path='/supplier/add-product' element={<AddProduct />} />
         <Route path='/supplier/products' element={<SupplierProducts />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </BrowserRouter>
   )

@@ -198,7 +198,7 @@ export const verifyOTP = async (req, res) => {
     }
 }
 
-export const login = async (req, res) => {
+const authenticateUser = async (req, res, { adminOnly = false, cookieSession = false } = {}) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -221,6 +221,13 @@ export const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({
                 message: "Invalid credentials",
+                success: false
+            });
+        }
+
+        if (adminOnly && String(user.role).toLowerCase() !== "admin") {
+            return res.status(403).json({
+                message: "Admin access required",
                 success: false
             });
         }
@@ -248,6 +255,22 @@ export const login = async (req, res) => {
         user.isLogin = true;
         await user.save();
 
+        if (cookieSession) {
+            const secure = req.secure || process.env.NODE_ENV === "production";
+            res.cookie("AccessToken", token, {
+                httpOnly: true,
+                secure,
+                sameSite: secure ? "none" : "lax",
+                maxAge: 24 * 60 * 60 * 1000,
+                path: "/"
+            });
+            return res.status(200).json({
+                message: "Logged in successfully",
+                success: true,
+                data: { name: user.name, email: user.email, role: user.role }
+            });
+        }
+
         return res.status(200).json({
             message: "Logged in successfully",
             success: true,
@@ -259,6 +282,31 @@ export const login = async (req, res) => {
             success: false
         });
     }
+};
+
+export const login = (req, res) => authenticateUser(req, res);
+
+export const adminLogin = (req, res) =>
+    authenticateUser(req, res, { adminOnly: true, cookieSession: true });
+
+export const getAdminSession = (req, res) => res.status(200).json({
+    success: true,
+    data: {
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+    }
+});
+
+export const logoutAdmin = (req, res) => {
+    const secure = req.secure || process.env.NODE_ENV === "production";
+    res.clearCookie("AccessToken", {
+        httpOnly: true,
+        secure,
+        sameSite: secure ? "none" : "lax",
+        path: "/"
+    });
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 export const logout = async (req, res) => {

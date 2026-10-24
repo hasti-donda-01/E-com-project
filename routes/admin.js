@@ -4,6 +4,7 @@ import path from 'path';
 import { auth } from '../middleware/auth.js';
 import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getAllSellerPayments, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateorderstatus, verifySeller } from '../controller/admin.js';
 import { adminDashboard } from '../controller/dashboards.js';
+import { adminLogin, getAdminSession, logoutAdmin } from '../auth/seller.js';
 // const storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
 //         cb(null, './public/category')
@@ -20,6 +21,9 @@ import { adminDashboard } from '../controller/dashboards.js';
 
 const router = express.Router();
 
+router.post('/login', adminLogin);
+router.post('/logout', logoutAdmin);
+router.get('/session', auth(["Admin"]), getAdminSession);
 router.get('/getallsellers', auth(["Admin"]), getallseller);
 router.get('/getalluser', auth(["Admin"]), getalluser);
 router.get('/getallproducts', auth(["Admin"]), getallproducts);

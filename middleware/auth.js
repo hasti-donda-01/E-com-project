@@ -3,21 +3,41 @@ import { User } from '../models/user.js';
 
 export const auth = (role) => async (req, res, next) => {
     try {
-        const a = req.get('Authorization');
+        const authorization = req.get('Authorization');
+        const cookieToken = req.headers.cookie
+            ?.split(';')
+            .map((cookie) => cookie.trim())
+            .find((cookie) => cookie.startsWith('AccessToken='))
+            ?.slice('AccessToken='.length);
+        const token = authorization
+            ? authorization.startsWith('Bearer ')
+                ? authorization.slice('Bearer '.length)
+                : null
+            : cookieToken;
+        const authenticatedByCookie = !authorization && Boolean(cookieToken);
 
-        if (!a) {
+        if (!token) {
             return res.status(400).json({
                 success: false,
                 message: "Token Required"
             })
         }
-        const token = a.split(' ')[1];
-        console.log(token, "token");
+
+        if (authenticatedByCookie && !["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+            const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173,http://localhost:5174")
+                .split(",")
+                .map((origin) => origin.trim())
+                .filter(Boolean);
+            if (!allowedOrigins.includes(req.get("Origin"))) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Request origin is not allowed"
+                });
+            }
+        }
+
         const decode = jwt.verify(token, process.env.PRIVATEKEY);
-        console.log(decode, "decode")
-        console.log(decode.role, "decode");
         const user = await User.findOne({ _id: decode.id })
-        console.log(user)
         if (!user) {
             return res.status(404).json({
                 message: "user not found",
@@ -48,5 +68,4 @@ export const auth = (role) => async (req, res, next) => {
         })
     }
 }
-
 

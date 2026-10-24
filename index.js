@@ -34,13 +34,17 @@ app.use(
   })
 );
 
-// CORS: set FRONTEND_URL in Render to restrict. If not set, allows all origins.
+// Set FRONTEND_URL to the exact frontend origin(s), comma-separated, in production.
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173,http://localhost:5174")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
-  cors(
-    process.env.FRONTEND_URL
-      ? { origin: process.env.FRONTEND_URL.split(",") }
-      : {}
-  )
+  cors({
+    origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)),
+    credentials: true
+  })
 );
 
 app.use(express.json());
@@ -54,6 +58,7 @@ const authLimiter = rateLimit({
   message: { message: "Too many attempts, please try again later." },
 });
 app.use("/api/seller/login", authLimiter);
+app.use("/api/admin/login", authLimiter);
 app.use("/api/seller/verifyOTP", authLimiter);
 app.use("/api/seller/verifyEmail", authLimiter);
 app.use("/api/seller/resetPassword", authLimiter);

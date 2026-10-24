@@ -84,8 +84,7 @@ export default function AddProduct() {
             setCategoryError('');
             try {
                 const firstResponse = await fetch(`${CATEGORIES_URL}?page=1`, {
-                    signal: controller.signal,
-                    credentials: 'include'
+                    signal: controller.signal
                 });
                 if (!firstResponse.ok) {
                     const detail = await firstResponse.json().catch(() => ({}));
@@ -101,8 +100,7 @@ export default function AddProduct() {
                 const totalPages = Number(firstPage.totalPages) || 1;
                 for (let page = 2; page <= totalPages; page += 1) {
                     const response = await fetch(`${CATEGORIES_URL}?page=${page}`, {
-                        signal: controller.signal,
-                        credentials: 'include'
+                        signal: controller.signal
                     });
                     if (!response.ok) {
                         const detail = await response.json().catch(() => ({}));
