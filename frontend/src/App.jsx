@@ -37,7 +37,7 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/Becomesupplier" element={<Becomesupplier />} />
         <Route path='/SupplierLogin' element={<SupplierLogin />} />
-        <Route path='/signuppage' element={<StartSelling />} />
+        <Route path='/StartSelling' element={<StartSelling />} />
         <Route path='/Inverster' element={<Inverster />} />
         <Route path='/HowitWorks' element={<HowitWorks />} />
         <Route path='/PricingCommision' element={<PricingCommision />} />

@@ -198,17 +198,24 @@ export const verifyOTP = async (req, res) => {
     }
 }
 
-const authenticateUser = async (req, res, { adminOnly = false, cookieSession = false } = {}) => {
+const authenticateUser = async (req, res, {
+    adminOnly = false,
+    sellerOnly = false,
+    cookieSession = false
+} = {}) => {
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
+        const { email, phone, password } = req.body;
+        const identifier = email || phone;
+        if (!identifier || !password) {
             return res.status(400).json({
                 message: "please enter email and password",
                 success: false
             });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({
+            $or: [{ email: identifier }, { phone: identifier }]
+        });
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -228,6 +235,13 @@ const authenticateUser = async (req, res, { adminOnly = false, cookieSession = f
         if (adminOnly && String(user.role).toLowerCase() !== "admin") {
             return res.status(403).json({
                 message: "Admin access required",
+                success: false
+            });
+        }
+
+        if (sellerOnly && String(user.role).toLowerCase() !== "seller") {
+            return res.status(403).json({
+                message: "Seller access required",
                 success: false
             });
         }
@@ -284,10 +298,37 @@ const authenticateUser = async (req, res, { adminOnly = false, cookieSession = f
     }
 };
 
-export const login = (req, res) => authenticateUser(req, res);
+export const login = (req, res) =>
+    authenticateUser(req, res, { sellerOnly: true, cookieSession: true });
 
 export const adminLogin = (req, res) =>
     authenticateUser(req, res, { adminOnly: true, cookieSession: true });
+
+export const getUserSession = (req, res) => res.status(200).json({
+    success: true,
+    data: {
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+    }
+});
+
+export const logoutUser = async (req, res) => {
+    try {
+        req.user.isLogin = false;
+        await req.user.save();
+        const secure = req.secure || process.env.NODE_ENV === "production";
+        res.clearCookie("AccessToken", {
+            httpOnly: true,
+            secure,
+            sameSite: secure ? "none" : "lax",
+            path: "/"
+        });
+        return res.status(200).json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 export const getAdminSession = (req, res) => res.status(200).json({
     success: true,
@@ -298,16 +339,7 @@ export const getAdminSession = (req, res) => res.status(200).json({
     }
 });
 
-export const logoutAdmin = (req, res) => {
-    const secure = req.secure || process.env.NODE_ENV === "production";
-    res.clearCookie("AccessToken", {
-        httpOnly: true,
-        secure,
-        sameSite: secure ? "none" : "lax",
-        path: "/"
-    });
-    return res.status(200).json({ success: true, message: "Logged out successfully" });
-};
+export const logoutAdmin = logoutUser;
 
 export const logout = async (req, res) => {
 

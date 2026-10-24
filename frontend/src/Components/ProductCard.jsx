@@ -1,54 +1,103 @@
-import React from 'react'
-import amit from './Images/amit.jpg'
-import mallimg from './Images/mallimg.jpg'
-import { IoMdStar } from 'react-icons/io'
+import { useEffect, useState } from 'react';
+import { IoMdStar } from 'react-icons/io';
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  'https://e-com-project-b3ci.onrender.com/api'
+).replace(/\/$/, '');
+
+const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 export default function ProductCard() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadProducts = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/product/get`, {
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        if (!response.ok || payload.success === false) {
+          throw new Error(payload.message || `Could not load products (${response.status}).`);
+        }
+        if (!Array.isArray(payload.data)) {
+          throw new Error('The products API response did not include a product list.');
+        }
+        setProducts(payload.data);
+      } catch (loadError) {
+        if (loadError.name !== 'AbortError') {
+          setError(loadError.message || 'Could not load products.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
+    loadProducts();
+    return () => controller.abort();
+  }, []);
+
   return (
-    <section className="productlisting">
-      <aside className="productlistleft">
-        <div className="product-filter">
-          <h2 className="product-filter-heading">Filters</h2>
-          <div className="leftfilter">
-            <div className="listdropdown">
-              <div className="subdropdownlist">
-                <p className="dropdownlistpera">Sort by:</p>
-                <span className="dropdownlistspan">Relevance</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
+    <section className="productlisting" aria-label="Products">
       <div className="productlistright">
-        <div className="productcontainer">
-          <a className="product-card-link" href="/">
-            <article className="productCard">
-              <div className="subproductcard">
-                <picture>
-                  <img src={amit} alt="Bellavita perfumes for men" />
-                </picture>
-              </div>
-              <div className="aboutcard">
-                <div className="productname">
-                  <p className="productnamepera">Bellavita perfumes for men 20ml</p>
-                  <img src={mallimg} width={52} height={28} alt="Mall" />
-                </div>
-                <div className="productdesc">
-                  <h5 className="productprice">₹180</h5>
-                  <p className="pricewithoutdescount">₹748</p>
-                  <span className="productdescount">76% off</span>
-                </div>
-                <div className="product-rating">
-                  <span className="rating">
-                    4.3 <IoMdStar color="white" fontSize={16} />
-                  </span>
-                  <span className="review">267941 Reviews</span>
-                </div>
-              </div>
-            </article>
-          </a>
-        </div>
+        {loading ? (
+          <p className="product-list-message" role="status">Loading products…</p>
+        ) : error ? (
+          <p className="product-list-message product-list-error" role="alert">{error}</p>
+        ) : products.length === 0 ? (
+          <p className="product-list-message">No products are available yet.</p>
+        ) : (
+          <div className="productcontainer">
+            {products.map((product) => {
+              const discount = Number(product.discountPercent) || 0;
+              const discountedPrice = Number(product.discountPrice) || Number(product.price);
+              const hasDiscount = discount > 0 && discountedPrice < Number(product.price);
+              const rating = Number(product.rating);
+
+              return (
+                <article className="productCard" key={product._id}>
+                  <div className="subproductcard">
+                    <img
+                      src={product.image}
+                      alt={product.name || 'Product'}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="aboutcard">
+                    <p className="productnamepera" title={product.name}>
+                      {product.name}
+                    </p>
+                    <div className="productdesc">
+                      <h2 className="productprice">
+                        {inr(hasDiscount ? discountedPrice : product.price)}
+                      </h2>
+                      {hasDiscount && (
+                        <>
+                          <p className="pricewithoutdescount">{inr(product.price)}</p>
+                          <span className="productdescount">{discount}% off</span>
+                        </>
+                      )}
+                    </div>
+                    {Number.isFinite(rating) && rating > 0 && (
+                      <div className="product-rating">
+                        <span className="rating">
+                          {rating.toFixed(1)} <IoMdStar aria-hidden="true" />
+                        </span>
+                        <span className="review">Customer rating</span>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
-  )
+  );
 }

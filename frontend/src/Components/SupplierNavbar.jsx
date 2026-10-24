@@ -1,6 +1,6 @@
-import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import meeshoLogo from './Images/meeshoLogo.svg'
+import ProfileMenu from './ProfileMenu';
 
 export default function SupplierNavbar() {
     let navigate = useNavigate()
@@ -39,10 +39,11 @@ export default function SupplierNavbar() {
                         <a style={{ cursor: "pointer" }} onClick={Grow}>Grow Business</a>
                         <a style={{ cursor: "pointer" }} onClick={GST}>Don’t have GST?</a>
                         <div className='supplierbuttons'>
+                            <ProfileMenu variant="supplier" />
                             <Link className="supplier-login" to="/SupplierLogin">
                                 Login
                             </Link>
-                            <Link className="supplier-start-selling" to="/StartSelling">Start Selling</Link>
+                            <Link className="supplier-start-selling" to="/signuppage">Start Selling</Link>
                         </div>
                     </nav>
                 </div>

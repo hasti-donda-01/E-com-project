@@ -52,10 +52,10 @@ export const auth = (role) => async (req, res, next) => {
         }
         req.user = user
         const allowed = [].concat(role).map(r => r.toLowerCase());
-        if (!allowed.includes(String(decode.role).toLowerCase())) {
+        if (!allowed.includes(String(user.role).toLowerCase())) {
             return res.status(403).json({
                 success: false,
-                message: 'Unauthorized user'
+                message: `This account does not have the required role: ${allowed.join(" or ")}`
             })
         }
         // console.log(decode, "decode")
@@ -68,4 +68,3 @@ export const auth = (role) => async (req, res, next) => {
         })
     }
 }
-

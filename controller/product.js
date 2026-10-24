@@ -61,7 +61,7 @@ export const createProduct = async (req, res) => {
 export const getproducts = async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
-    const perPage = 3;
+    const perPage = 12;
 
     const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts / perPage);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import { useNavigate } from 'react-router-dom'
 
@@ -76,25 +76,68 @@ export default function SupplierLogin() {
     const [hoverLogin, setHoverLogin] = useState(false)
     const [hoverCreate, setHoverCreate] = useState(false)
     const [hoverForgot, setHoverForgot] = useState(false)
+    const [loginError, setLoginError] = useState('')
+    const [loginLoading, setLoginLoading] = useState(false)
 
     const canSubmit = emailOrPhone.trim() !== '' && password !== ''
 
-    let navigate = useNavigate()
+    const navigate = useNavigate()
+    const API_BASE_URL = (
+        import.meta.env.VITE_API_URL ||
+        'https://e-com-project-b3ci.onrender.com/api'
+    ).replace(/\/$/, '')
 
     const signuppage = () => {
         navigate('/signuppage')
 
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!canSubmit) return
-        console.log({ emailOrPhone, password })
-        // TODO: call your login API here
-    }
-    const toLogin = () => {
-        navigate('/SupplierDashboard')
-        
+        if (!canSubmit || loginLoading) return
+        setLoginError('')
+        setLoginLoading(true)
+        try {
+            const identifier = emailOrPhone.trim()
+            const response = await fetch(`${API_BASE_URL}/seller/login`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(
+                    identifier.includes('@')
+                        ? { email: identifier, password }
+                        : { phone: identifier, password }
+                )
+            })
+            const payload = await response.json()
+            if (!response.ok || payload.success === false) {
+                throw new Error(payload.message || `Login failed (${response.status}).`)
+            }
+            if (String(payload.data?.role).toLowerCase() !== 'seller') {
+                throw new Error(
+                    'The server did not confirm a seller login. Update the backend and verify your seller account before signing in.'
+                )
+            }
+
+            const sessionResponse = await fetch(`${API_BASE_URL}/seller/session`, {
+                credentials: 'include'
+            })
+            const sessionPayload = await sessionResponse.json()
+            if (
+                !sessionResponse.ok ||
+                !sessionPayload.success ||
+                String(sessionPayload.data?.role).toLowerCase() !== 'seller'
+            ) {
+                throw new Error(
+                    'Seller login was not saved in this browser. Verify the account and update the backend, then try again.'
+                )
+            }
+            navigate('/SupplierDashboard')
+        } catch (error) {
+            setLoginError(error.message || 'Could not sign in. Please try again.')
+        } finally {
+            setLoginLoading(false)
+        }
     }
     return (
         <section style={{ minHeight: '100vh', background: '#eeebff', fontFamily: 'inherit' }}>
@@ -144,7 +187,6 @@ export default function SupplierLogin() {
                             />
 
                             <a
-
                                 onMouseEnter={() => setHoverForgot(true)}
                                 onMouseLeave={() => setHoverForgot(false)}
                                 style={{
@@ -155,21 +197,26 @@ export default function SupplierLogin() {
                                 Forgot password?
                             </a>
 
+                            {loginError && (
+                                <p className="supplier-login-error" role="alert">
+                                    {loginError}
+                                </p>
+                            )}
+
                             <button
                                 type="submit"
-                                disabled={!canSubmit}
-                                onClick={toLogin}
+                                disabled={!canSubmit || loginLoading}
                                 onMouseEnter={() => setHoverLogin(true)}
                                 onMouseLeave={() => setHoverLogin(false)}
                                 style={{
                                     marginTop: 24, height: 48, width: '100%', border: 'none', borderRadius: 2,
                                     fontSize: 15, fontWeight: 600, color: '#fff', fontFamily: 'inherit',
                                     transition: 'background 0.2s',
-                                    cursor: canSubmit ? 'pointer' : 'not-allowed',
-                                    background: canSubmit ? (hoverLogin ? '#8a1b76' : PINK) : '#c7cbd1'
+                                    cursor: canSubmit && !loginLoading ? 'pointer' : 'not-allowed',
+                                    background: canSubmit && !loginLoading ? (hoverLogin ? '#8a1b76' : PINK) : '#c7cbd1'
                                 }}
                             >
-                                Log in
+                                {loginLoading ? 'Logging in…' : 'Log in'}
                             </button>
                         </form>
                     </div>

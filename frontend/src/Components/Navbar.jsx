@@ -1,21 +1,16 @@
 
-import React from 'react';
-import { BsCart, BsCart2 } from 'react-icons/bs';
+import { BsCart2 } from 'react-icons/bs';
 import { CiSearch } from 'react-icons/ci';
 import meeshologo from './Images/meeshologo.svg'
 import headerimg from './Images/headerimg.jpg'
-import { CgProfile } from 'react-icons/cg';
 import { GiReturnArrow } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import { GiPriceTag } from 'react-icons/gi';
+import ProfileMenu from './ProfileMenu';
 export default function Navbar() {
 
     let navigate = useNavigate();
-    const signupbtn = () => {
-        navigate('/customer-signup');
-    }
-
     const supplier = () => {
         navigate('/Becomesupplier');
     }
@@ -70,19 +65,8 @@ export default function Navbar() {
                     <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
 
                     {/* Profile */}
-                    <div className="sc-kFkjun ghANen TabWrapper-sc-1edf3ww-0 Header__StyledProfileMenu-sc-1qdannb-2 jtaRdY fRxfrv profile">
-                        <CgProfile height={25} width={25} color='#222' />
-
-                        <span className="sc-dOfePm kBqyGz hover header-right profile">
-                            Profile
-                        </span>
-                        <div className='profile-dropdown'>
-                            <h5>Hello User</h5>
-                            <div className='profile-dropdown-item'>To access your Meesho Account</div>
-                            <button className='signupbtn' onClick={signupbtn}>Sign Up</button>
-                            <div className='profile-dropdown-items'>My Orders</div>
-                            <div className='profile-dropdown-items'>Delete Account</div>
-                        </div>
+                    <div className="sc-kFkjun ghANen TabWrapper-sc-1edf3ww-0 Header__StyledProfileMenu-sc-1qdannb-2 jtaRdY fRxfrv">
+                        <ProfileMenu />
                     </div>
 
                     {/* Cart */}

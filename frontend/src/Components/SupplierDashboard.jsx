@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import meeshoLogo from './Images/meeshoLogo.svg';
 import SupplierProducts from './SupplierProducts';
+import ProfileMenu from './ProfileMenu';
 import {
     FiHome,
     FiPlus,
@@ -18,7 +19,6 @@ import {
     FiRefreshCw,
     FiMenu,
     FiX,
-    FiDollarSign,
     FiExternalLink
 } from 'react-icons/fi';
 
@@ -256,9 +256,7 @@ export default function SupplierDashboard() {
                     <img src={meeshoLogo} alt="Meesho" className="h-6 object-contain" />
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9f2089] text-xs font-bold text-white">
-                        MS
-                    </div>
+                    <ProfileMenu variant="dashboard" />
                 </div>
             </div>
 
@@ -316,14 +314,8 @@ export default function SupplierDashboard() {
                             <span>Customer Store</span>
                             <FiExternalLink className="text-xs" />
                         </Link>
-                        <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#9f2089] text-xs font-bold text-white shadow-2xs">
-                                MS
-                            </div>
-                            <div className="text-left">
-                                <p className="text-xs font-bold text-slate-900 leading-tight">Meera Ethnic Hub</p>
-                                <p className="text-[10px] text-slate-400">GST: 24AAACG1234F1Z8</p>
-                            </div>
+                        <div className="pl-3 border-l border-slate-200">
+                            <ProfileMenu variant="dashboard" />
                         </div>
                     </div>
                 </div>

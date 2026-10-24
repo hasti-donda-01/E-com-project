@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiUploadCloud, FiX, FiCheckCircle, FiAlertCircle, FiStar } from 'react-icons/fi';
 
 /* ---------- Config ---------- */
@@ -68,9 +68,11 @@ export default function AddProduct() {
     const [categoryLoadAttempt, setCategoryLoadAttempt] = useState(0);
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
+    const [switchingAccount, setSwitchingAccount] = useState(false);
     const [result, setResult] = useState(null);
     const fileRef = useRef(null);
     const imageRef = useRef(image);
+    const navigate = useNavigate();
 
     useEffect(() => {
         imageRef.current = image;
@@ -217,12 +219,10 @@ export default function AddProduct() {
 
         setSubmitting(true);
         try {
-            const token = localStorage.getItem('token');
             const res = await fetch(API_URL, {
                 method: 'POST',
                 body,
                 credentials: 'include',
-                headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             let response;
             try {
@@ -231,7 +231,9 @@ export default function AddProduct() {
                 throw new Error(`The server returned an invalid response (${res.status}).`);
             }
             if (!res.ok) {
-                throw new Error(response.message || `Request failed (${res.status})`);
+                const error = new Error(response.message || `Request failed (${res.status})`);
+                error.status = res.status;
+                throw error;
             }
             if (!response.success) {
                 throw new Error(response.message || 'The server did not confirm that the product was saved.');
@@ -241,9 +243,41 @@ export default function AddProduct() {
             setForm(initialForm);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
-            setResult({ type: 'error', text: `Couldn’t save the product. ${err.message}` });
+            const requiresSellerLogin = err.status === 403 &&
+                /required role|unauthorized/i.test(err.message);
+            setResult({
+                type: 'error',
+                text: requiresSellerLogin
+                    ? 'This account is not signed in as a seller. Sign out and log in with your seller account to add products.'
+                    : `Couldn’t save the product. ${err.message}`,
+                requiresSellerLogin
+            });
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const switchToSellerLogin = async () => {
+        if (switchingAccount) return;
+        setSwitchingAccount(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/seller/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.success === false) {
+                throw new Error(payload.message || `Sign out failed (${response.status}).`);
+            }
+            navigate('/SupplierLogin', { replace: true });
+        } catch (error) {
+            setResult({
+                type: 'error',
+                text: `Could not switch accounts. ${error.message || 'Please try again.'}`,
+                requiresSellerLogin: true
+            });
+        } finally {
+            setSwitchingAccount(false);
         }
     };
 
@@ -277,7 +311,19 @@ export default function AddProduct() {
                         ) : (
                             <FiAlertCircle className="mt-0.5 shrink-0 text-lg" />
                         )}
-                        <span>{result.text}</span>
+                        <div>
+                            <p>{result.text}</p>
+                            {result.requiresSellerLogin && (
+                                <button
+                                    type="button"
+                                    onClick={switchToSellerLogin}
+                                    disabled={switchingAccount}
+                                    className="mt-2 font-semibold underline disabled:opacity-60"
+                                >
+                                    {switchingAccount ? 'Signing out…' : 'Sign out and log in as seller'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 

@@ -4,11 +4,6 @@ import { FiArrowLeft, FiEdit2, FiPackage, FiPlus, FiTrash2, FiX } from 'react-ic
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
 
-const getHeaders = () => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 const getErrorMessage = async (response) => {
     try {
         const payload = await response.json();
@@ -36,8 +31,7 @@ export default function SupplierProducts({ embedded = false }) {
         setError('');
         try {
             const response = await fetch(`${API_BASE_URL}/sellerp/getmyproducts?page=${page}`, {
-                credentials: 'include',
-                headers: getHeaders()
+                credentials: 'include'
             });
             if (!response.ok) throw new Error(await getErrorMessage(response));
 
@@ -65,8 +59,7 @@ export default function SupplierProducts({ embedded = false }) {
         try {
             const response = await fetch(`${API_BASE_URL}/product/delete/${product._id}`, {
                 method: 'DELETE',
-                credentials: 'include',
-                headers: getHeaders()
+                credentials: 'include'
             });
             const payload = await response.json();
             if (!response.ok || !payload.success) {
@@ -102,7 +95,7 @@ export default function SupplierProducts({ embedded = false }) {
             const response = await fetch(`${API_BASE_URL}/product/update/${editingProduct._id}`, {
                 method: 'POST',
                 credentials: 'include',
-                headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productDetails)
             });
             const payload = await response.json();

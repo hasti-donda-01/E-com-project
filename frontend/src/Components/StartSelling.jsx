@@ -42,9 +42,8 @@ export default function StartSelling() {
         'https://e-com-project-b3ci.onrender.com/api'
     ).replace(/\/$/, '')
 
-    // Confirm this endpoint against your backend router.
-    const REGISTER_URL = `${API_BASE_URL}/seller/register`
-    const VERIFY_OTP_URL = `${API_BASE_URL}/seller/verify-otp`
+    const REGISTER_URL = `${API_BASE_URL}/seller/create`
+    const VERIFY_OTP_URL = `${API_BASE_URL}/seller/verifyOTP`
 
     const toLogin = () => {
         navigate('/SupplierLogin')

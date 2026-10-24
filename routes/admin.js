@@ -22,7 +22,7 @@ import { adminLogin, getAdminSession, logoutAdmin } from '../auth/seller.js';
 const router = express.Router();
 
 router.post('/login', adminLogin);
-router.post('/logout', logoutAdmin);
+router.post('/logout', auth(["Admin"]), logoutAdmin);
 router.get('/session', auth(["Admin"]), getAdminSession);
 router.get('/getallsellers', auth(["Admin"]), getallseller);
 router.get('/getalluser', auth(["Admin"]), getalluser);
