@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiCheckCircle, FiRefreshCw, FiShield, FiTruck } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle, FiHeart, FiRefreshCw, FiShield, FiTruck } from 'react-icons/fi';
 import { IoMdStar } from 'react-icons/io';
 
 const API_BASE_URL = (
@@ -27,6 +27,9 @@ export default function ProductDetails() {
   const [cartMessage, setCartMessage] = useState('');
   const [cartError, setCartError] = useState('');
   const [addingToCart, setAddingToCart] = useState(false);
+  const [wishlistMessage, setWishlistMessage] = useState('');
+  const [wishlistError, setWishlistError] = useState('');
+  const [addingToWishlist, setAddingToWishlist] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,11 +84,14 @@ export default function ProductDetails() {
     return () => controller.abort();
   }, [id]);
 
-  const addToCart = useCallback(async () => {
+  const addToCart = useCallback(async (buyNow = false) => {
     const customerToken = sessionStorage.getItem('customerAccessToken');
     if (!customerToken) {
       navigate('/customer-login', {
-        state: { returnTo: location.pathname, resumeAddToCart: true }
+        state: {
+          returnTo: location.pathname,
+          ...(buyNow ? { resumeBuyNow: true } : { resumeAddToCart: true })
+        }
       });
       return;
     }
@@ -113,13 +119,22 @@ export default function ProductDetails() {
         ) {
           sessionStorage.removeItem('customerAccessToken');
           navigate('/customer-login', {
-            state: { returnTo: location.pathname, resumeAddToCart: true }
+            state: {
+              returnTo: location.pathname,
+              ...(buyNow ? { resumeBuyNow: true } : { resumeAddToCart: true })
+            }
           });
           return;
         }
         throw new Error(payload.message || `Could not add this product to your cart (${response.status}).`);
       }
-      navigate('/cart', { state: { cartNotice: payload.message || 'Added to your cart.' } });
+      navigate('/cart', {
+        state: {
+          cartNotice: buyNow
+            ? 'Product added. Review your order to continue.'
+            : payload.message || 'Added to your cart.'
+        }
+      });
     } catch (addError) {
       setCartError(addError.message || 'Could not add this product to your cart.');
     } finally {
@@ -127,13 +142,70 @@ export default function ProductDetails() {
     }
   }, [location.pathname, navigate, product]);
 
+  const addToWishlist = useCallback(async () => {
+    const customerToken = sessionStorage.getItem('customerAccessToken');
+    if (!customerToken) {
+      navigate('/customer-login', {
+        state: { returnTo: location.pathname, resumeAddToWishlist: true }
+      });
+      return;
+    }
+
+    setAddingToWishlist(true);
+    setWishlistMessage('');
+    setWishlistError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/wish/addtowish`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${customerToken}`
+        },
+        body: JSON.stringify({ product: product._id })
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.success === false) {
+        if (
+          (response.status === 400 && payload.message === 'Token Required') ||
+          (response.status === 403 && payload.message?.includes('required role: customer')) ||
+          (response.status === 404 && payload.message?.toLowerCase() === 'user not found')
+        ) {
+          sessionStorage.removeItem('customerAccessToken');
+          navigate('/customer-login', {
+            state: { returnTo: location.pathname, resumeAddToWishlist: true }
+          });
+          return;
+        }
+        throw new Error(payload.message || `Could not save this product (${response.status}).`);
+      }
+      setWishlistMessage(payload.message || 'Added to your wishlist.');
+    } catch (wishlistAddError) {
+      setWishlistError(wishlistAddError.message || 'Could not add this product to your wishlist.');
+    } finally {
+      setAddingToWishlist(false);
+    }
+  }, [location.pathname, navigate, product]);
+
   useEffect(() => {
-    if (product && location.state?.resumeAddToCart && !resumedCartAction.current) {
+    if (
+      product &&
+      (location.state?.resumeAddToCart || location.state?.resumeBuyNow) &&
+      !resumedCartAction.current
+    ) {
       resumedCartAction.current = true;
       navigate(location.pathname, { replace: true, state: null });
-      addToCart();
+      addToCart(Boolean(location.state?.resumeBuyNow));
     }
   }, [addToCart, location.pathname, location.state, navigate, product]);
+
+  useEffect(() => {
+    if (product && location.state?.resumeAddToWishlist && !resumedCartAction.current) {
+      resumedCartAction.current = true;
+      navigate(location.pathname, { replace: true, state: null });
+      addToWishlist();
+    }
+  }, [addToWishlist, location.pathname, location.state, navigate, product]);
 
   if (loading) {
     return <main className="product-details-page"><p className="product-details-message" role="status">Loading product…</p></main>;
@@ -175,6 +247,14 @@ export default function ProductDetails() {
           </div>
           <div className="product-detail-actions">
             <button
+              className="product-buy-button"
+              type="button"
+              onClick={() => addToCart(true)}
+              disabled={addingToCart || Number(product.stock) < 1}
+            >
+              {addingToCart ? 'Processing…' : Number(product.stock) < 1 ? 'Out of stock' : 'Buy Now'}
+            </button>
+            <button
               className="product-add-button"
               type="button"
               onClick={addToCart}
@@ -182,9 +262,20 @@ export default function ProductDetails() {
             >
               {addingToCart ? 'Adding…' : Number(product.stock) < 1 ? 'Out of stock' : 'Add to Cart'}
             </button>
+            <button
+              className="product-wishlist-button"
+              type="button"
+              onClick={addToWishlist}
+              disabled={addingToWishlist}
+            >
+              <FiHeart aria-hidden="true" />
+              {addingToWishlist ? 'Saving…' : 'Add to Wishlist'}
+            </button>
           </div>
           {cartMessage && <p className="product-cart-message" role="status">{cartMessage}</p>}
           {cartError && <p className="product-cart-error" role="alert">{cartError}</p>}
+          {wishlistMessage && <p className="product-cart-message" role="status">{wishlistMessage}</p>}
+          {wishlistError && <p className="product-cart-error" role="alert">{wishlistError}</p>}
         </section>
 
         <div className="product-details-info">

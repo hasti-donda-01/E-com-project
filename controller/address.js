@@ -1,6 +1,4 @@
 import { Address } from "../models/address.js";
-import { User } from "../models/user.js";
-import mongoose from 'mongoose'
 
 export const add_address = async (req, res) => {
     try {
@@ -15,10 +13,11 @@ export const add_address = async (req, res) => {
         const payload = {
             user: req.user.id, city, pincode, state, country, addressline, type
         }
-        await Address.create(payload);
+        const address = await Address.create(payload);
         return res.status(201).json({
             message: "Address Add successfully",
-            success: true
+            success: true,
+            data: address
         })
     } catch (error) {
         return res.status(500).json({
@@ -70,43 +69,13 @@ export const update_address = async (req, res) => {
 
 export const getaddressofuser = async (req, res) => {
     try {
-        const hello = await Address.aggregate([
-            {
-                $match: {
-                    user: new mongoose.Types.ObjectId(req.user.id)
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "users"
-                }
-            },
-            {
-                $unwind: "$users"
-            },
-            {
-                $project: {
-                    city: 1,
-                    state: 1,
-                    country: 1,
-                    type: 1,
-                    addressline: 1,
-                    username: "$users.name",
-                    userEmail: "$users.email",
-                    user_mobile: "$users.phone"
-                }
-            }
-        ]);
-
-        // const user = await User.findOne({ _id: hello.user });
-        // console.log(user, "user")
+        const addresses = await Address.find({ user: req.user.id })
+            .sort({ isDefault: -1, _id: -1 })
+            .lean();
         return res.status(200).json({
-            message: "Done",
+            message: "Addresses loaded",
             success: true,
-            data: hello
+            data: addresses
         })
     } catch (error) {
         return res.status(500).json({
@@ -127,12 +96,13 @@ export const setdefaultAddress = async (req, res) => {
         }
 
         const userId = req.user.id;
-        const finuser = await User.findById(userId);
-        if (!finuser) {
-            return res.status(404).json({ message: "User not found" });
-        }
         const a = await Address.findOneAndUpdate({ _id: addressId, user: userId }, { $set: { isDefault: true } }, { new: true });
-        console.log(a)
+        if (!a) {
+            return res.status(404).json({
+                message: "Address not found",
+                success: false
+            });
+        }
         return res.status(200).json({
             message: `${a.type} address set as default address`,
             success: true

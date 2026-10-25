@@ -1,5 +1,6 @@
 
 import { BsCart2 } from 'react-icons/bs';
+import { FiHeart } from 'react-icons/fi';
 import { CiSearch } from 'react-icons/ci';
 import meeshologo from './Images/meeshologo.svg'
 import headerimg from './Images/headerimg.jpg'
@@ -68,6 +69,13 @@ export default function Navbar() {
                     <div className="sc-kFkjun ghANen TabWrapper-sc-1edf3ww-0 Header__StyledProfileMenu-sc-1qdannb-2 jtaRdY fRxfrv">
                         <ProfileMenu />
                     </div>
+
+                    <button type="button" className="cart-nav-button wishlist-nav-button" onClick={() => navigate('/wishlist')}>
+                        <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
+                            <FiHeart aria-hidden="true" />
+                            <span className="sc-dOfePm kBqyGz hover header-right">Wishlist</span>
+                        </div>
+                    </button>
 
                     {/* Cart */}
                     <button type="button" className="cart-nav-button" onClick={() => navigate('/cart')}>

@@ -18,7 +18,9 @@ export default function CutomerSignUp() {
                 state: {
                     phoneNumber,
                     returnTo: location.state?.returnTo,
-                    resumeAddToCart: location.state?.resumeAddToCart
+                    resumeAddToCart: location.state?.resumeAddToCart,
+                    resumeBuyNow: location.state?.resumeBuyNow,
+                    resumeAddToWishlist: location.state?.resumeAddToWishlist
                 }
             })
         } catch {

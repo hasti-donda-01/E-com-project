@@ -84,7 +84,13 @@ export default function VerifyOtp() {
         try {
             await dispatch(verifyCustomer({ phone: phoneNumber, otp: code })).unwrap()
             navigate(location.state?.returnTo || '/', {
-                state: location.state?.resumeAddToCart ? { resumeAddToCart: true } : null,
+                state: location.state?.resumeAddToCart
+                    ? { resumeAddToCart: true }
+                    : location.state?.resumeBuyNow
+                        ? { resumeBuyNow: true }
+                        : location.state?.resumeAddToWishlist
+                            ? { resumeAddToWishlist: true }
+                            : null,
                 replace: true
             })
         } catch {

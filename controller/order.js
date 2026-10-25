@@ -4,6 +4,7 @@ import { Order } from "../models/order.js";
 import { Payment } from "../models/payment.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
+import { Customer } from "../models/customer.js";
 
 // export const createOrder = async (req, res) => {
 
@@ -130,7 +131,7 @@ export const createOrder = async (req, res) => {
         const { product, paymentMethod, quantity, orderStatus, buyNow, address } = req.body;
         const userId = req.user.id;
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId) || await Customer.findById(userId);
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
@@ -196,7 +197,6 @@ export const createOrder = async (req, res) => {
 
         else {
             const cartItems = await Cart.find({ user: userId }).populate('product');
-            //                                                  
 
             if (cartItems.length === 0) {
                 return res.status(400).json({
@@ -205,28 +205,50 @@ export const createOrder = async (req, res) => {
                 });
             }
 
-            const orders = await Promise.all(
-                cartItems.map(async (item) => {
+            const orderItems = [];
+            for (const item of cartItems) {
+                const itemQuantity = Number(item.quantity);
+                if (!item.product || !Number.isInteger(itemQuantity) || itemQuantity < 1) {
+                    return res.status(400).json({
+                        message: "A cart item is no longer available. Please refresh your cart.",
+                        success: false
+                    });
+                }
+                if (item.product.stock < itemQuantity) {
+                    return res.status(400).json({
+                        message: `${item.product.name} does not have enough stock.`,
+                        success: false
+                    });
+                }
+                const unitPrice = Number(item.product.discountPrice) || Number(item.product.price);
+                orderItems.push({
+                    product: item.product,
+                    quantity: itemQuantity,
+                    totalAmount: unitPrice * itemQuantity
+                });
+            }
 
+            const orders = await Promise.all(
+                orderItems.map(async ({ product: productDoc, quantity: itemQuantity, totalAmount }) => {
                     const order = await Order.create({
-                        product: item.product._id,
+                        product: productDoc._id,
                         userId: userId,
-                        sellerId: item.product.user,
-                        quantity: item.quantity,
-                        totalAmount: item.total,
+                        sellerId: productDoc.user,
+                        quantity: itemQuantity,
+                        totalAmount,
                         address: deliveryAddress._id,
                         paymentMethod,
                         orderStatus
                     });
 
-                    await Product.findByIdAndUpdate(item.product._id, {
-                        $inc: { stock: -item.quantity }
+                    await Product.findByIdAndUpdate(productDoc._id, {
+                        $inc: { stock: -itemQuantity }
                     });
 
                     await Payment.create({
                         order: order._id,
                         user: userId,
-                        amount: item.total,
+                        amount: totalAmount,
                         paymentMethod,
                     });
 
@@ -573,5 +595,3 @@ export const revenue = async (req, res) => {
         return res.status(500).json({ message: error.message, success: false });
     }
 };
-
-

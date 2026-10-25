@@ -26,6 +26,13 @@ export default function ShoppingCart() {
   const [notice, setNotice] = useState(location.state?.cartNotice || '');
   const [checkoutMessage, setCheckoutMessage] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
+  const [checkoutMode, setCheckoutMode] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [completedOrder, setCompletedOrder] = useState(null);
 
   const goToLogin = useCallback(() => {
     sessionStorage.removeItem('customerAccessToken');
@@ -78,6 +85,126 @@ export default function ShoppingCart() {
     return summary;
   }, { totalBill: 0, totalAmount: 0 }), [items]);
   const discount = Math.max(0, totals.totalBill - totals.totalAmount);
+
+  const beginCheckout = async () => {
+    setCheckoutLoading(true);
+    setError('');
+    setCheckoutMessage('');
+    try {
+      const customerToken = sessionStorage.getItem('customerAccessToken');
+      if (!customerToken) {
+        goToLogin();
+        return;
+      }
+      const response = await fetch(`${API_BASE_URL}/address/getaddressofuser`, {
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${customerToken}` }
+      });
+      const payload = await response.json();
+      if (requiresCustomerLogin(response, payload)) {
+        goToLogin();
+        return;
+      }
+      if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
+        throw new Error(payload.message || `Could not load your addresses (${response.status}).`);
+      }
+      setAddresses(payload.data);
+      setSelectedAddressId(
+        (currentId) => currentId || String(payload.data.find((address) => address.isDefault)?._id || payload.data[0]?._id || '')
+      );
+      setShowAddressForm(payload.data.length === 0);
+      setCheckoutMode(true);
+    } catch (checkoutError) {
+      setError(checkoutError.message || 'Could not start checkout.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const saveAddress = async (event) => {
+    event.preventDefault();
+    setCheckoutLoading(true);
+    setError('');
+    try {
+      const form = new FormData(event.currentTarget);
+      const addressDetails = Object.fromEntries(form.entries());
+      const customerToken = sessionStorage.getItem('customerAccessToken');
+      if (!customerToken) {
+        goToLogin();
+        return;
+      }
+      const response = await fetch(`${API_BASE_URL}/address/add`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${customerToken}`
+        },
+        body: JSON.stringify(addressDetails)
+      });
+      const payload = await response.json();
+      if (requiresCustomerLogin(response, payload)) {
+        goToLogin();
+        return;
+      }
+      if (!response.ok || payload.success === false || !payload.data?._id) {
+        throw new Error(payload.message || `Could not save this address (${response.status}).`);
+      }
+      setAddresses((currentAddresses) => [...currentAddresses, payload.data]);
+      setSelectedAddressId(String(payload.data._id));
+      setShowAddressForm(false);
+      setCheckoutMessage('Delivery address saved.');
+    } catch (saveError) {
+      setError(saveError.message || 'Could not save this address.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const placeOrder = async () => {
+    if (!selectedAddressId) {
+      setError('Select or add a delivery address to continue.');
+      return;
+    }
+    setPlacingOrder(true);
+    setError('');
+    try {
+      const customerToken = sessionStorage.getItem('customerAccessToken');
+      if (!customerToken) {
+        goToLogin();
+        return;
+      }
+      const response = await fetch(`${API_BASE_URL}/order/place`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${customerToken}`
+        },
+        body: JSON.stringify({
+          address: selectedAddressId,
+          paymentMethod: 'COD',
+          orderStatus: 'placed',
+          buyNow: false
+        })
+      });
+      const payload = await response.json();
+      if (requiresCustomerLogin(response, payload)) {
+        goToLogin();
+        return;
+      }
+      if (!response.ok || payload.success === false) {
+        throw new Error(payload.message || `Could not place your order (${response.status}).`);
+      }
+      setCompletedOrder(payload);
+      setItems([]);
+      setCheckoutMessage('');
+    } catch (orderError) {
+      setError(orderError.message || 'Could not place your order.');
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
 
   const removeItem = async (item) => {
     setUpdatingId(item._id);
@@ -176,6 +303,8 @@ export default function ShoppingCart() {
     }
   };
 
+  const activeCheckoutStep = completedOrder ? 3 : checkoutMode ? 1 : 0;
+
   return (
     <main className="shopping-cart-page">
       <header className="shopping-cart-header">
@@ -183,10 +312,15 @@ export default function ShoppingCart() {
           <img src={meeshoLogo} alt="Meesho" />
         </Link>
         <ol className="checkout-steps" aria-label="Checkout progress">
-          <li className="is-current"><span>1</span><strong>Cart</strong></li>
-          <li><span>2</span><strong>Address</strong></li>
-          <li><span>3</span><strong>Payment</strong></li>
-          <li><span>4</span><strong>Summary</strong></li>
+          {['Cart', 'Address', 'Payment', 'Summary'].map((step, index) => (
+            <li
+              className={index === activeCheckoutStep ? 'is-current' : index < activeCheckoutStep ? 'is-complete' : ''}
+              key={step}
+            >
+              <span>{index < activeCheckoutStep ? <FiCheck aria-hidden="true" /> : index + 1}</span>
+              <strong>{step}</strong>
+            </li>
+          ))}
         </ol>
         <button type="button" className="cart-logout" onClick={logOut} disabled={loggingOut}>
           {loggingOut ? 'Logging out…' : 'Log Out'}
@@ -194,9 +328,21 @@ export default function ShoppingCart() {
       </header>
 
       <div className="shopping-cart-content">
+        {completedOrder ? (
+          <section className="order-confirmation">
+            <span className="order-confirmation-icon"><FiCheck aria-hidden="true" /></span>
+            <h1>Order placed successfully</h1>
+            <p>Your order has been placed with Cash on Delivery.</p>
+            {completedOrder.orders?.length > 0 && (
+              <p>Order reference: {completedOrder.orders.map((order) => order._id).join(', ')}</p>
+            )}
+            <Link to="/">Continue shopping</Link>
+          </section>
+        ) : (
+          <>
         <section className="cart-items-section" aria-label="Shopping cart items">
           <div className="cart-section-heading">
-            <h1>Shopping Cart</h1>
+            <h1>{checkoutMode ? 'Delivery address' : 'Shopping Cart'}</h1>
             <span>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
           </div>
 
@@ -210,6 +356,60 @@ export default function ShoppingCart() {
               <h2>Your cart is empty</h2>
               <p>Find something you love and add it to your cart.</p>
               <Link to="/">Continue shopping</Link>
+            </div>
+          ) : checkoutMode ? (
+            <div className="checkout-address-panel">
+              <h2>Select a delivery address</h2>
+              {addresses.map((address) => (
+                <label className={`checkout-address-option${selectedAddressId === String(address._id) ? ' is-selected' : ''}`} key={address._id}>
+                  <input
+                    type="radio"
+                    name="deliveryAddress"
+                    value={address._id}
+                    checked={selectedAddressId === String(address._id)}
+                    onChange={() => setSelectedAddressId(String(address._id))}
+                  />
+                  <span>
+                    <strong>{address.type || 'Home'}</strong>
+                    <span>{address.addressline}{address.addressline2 ? `, ${address.addressline2}` : ''}</span>
+                    <span>{address.city}, {address.state} {address.pincode}</span>
+                    <span>{address.country}</span>
+                  </span>
+                </label>
+              ))}
+              {!showAddressForm && (
+                <button
+                  type="button"
+                  className="checkout-add-address-toggle"
+                  onClick={() => setShowAddressForm(true)}
+                >
+                  <FiPlus aria-hidden="true" /> Add a new address
+                </button>
+              )}
+              {showAddressForm && (
+                <form className="checkout-address-form" onSubmit={saveAddress}>
+                  <h3>Add delivery address</h3>
+                  <label>Address<input name="addressline" autoComplete="street-address" required /></label>
+                  <label>Apartment, suite, etc. (optional)<input name="addressline2" autoComplete="address-line2" /></label>
+                  <div className="checkout-address-fields">
+                    <label>City<input name="city" autoComplete="address-level2" required /></label>
+                    <label>State<input name="state" autoComplete="address-level1" required /></label>
+                    <label>PIN code<input name="pincode" inputMode="numeric" autoComplete="postal-code" required /></label>
+                    <label>Country<input name="country" defaultValue="India" autoComplete="country-name" required /></label>
+                  </div>
+                  <label>Address type
+                    <select name="type" defaultValue="home">
+                      <option value="home">Home</option>
+                      <option value="work">Work</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+                  <button type="submit" className="checkout-add-address-toggle" disabled={checkoutLoading}>
+                    {checkoutLoading ? 'Saving…' : 'Save address'}
+                  </button>
+                </form>
+              )}
+              <p className="checkout-payment-note">Payment method: Cash on Delivery</p>
             </div>
           ) : (
             <div className="cart-items-grid">
@@ -271,12 +471,21 @@ export default function ShoppingCart() {
           <button
             type="button"
             className="cart-continue-button"
-            disabled={loading || items.length === 0}
-            onClick={() => setCheckoutMessage('Checkout is not available yet. Your cart has been saved.')}
+            disabled={loading || items.length === 0 || checkoutLoading || placingOrder}
+            onClick={checkoutMode ? placeOrder : beginCheckout}
           >
-            <FiCheck aria-hidden="true" /> Continue
+            <FiCheck aria-hidden="true" />
+            {placingOrder
+              ? 'Placing order…'
+              : checkoutLoading
+                ? 'Please wait…'
+                : checkoutMode
+                  ? 'Place Order (Cash on Delivery)'
+                  : 'Continue'}
           </button>
         </aside>
+          </>
+        )}
       </div>
     </main>
   );

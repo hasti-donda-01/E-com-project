@@ -25,6 +25,7 @@ import SupplierDashboard from './Components/SupplierDashboard'
 import AddProduct from './Components/AddProduct'
 import SupplierProducts from './Components/SupplierProducts'
 import AdminPanel from './Components/AdminPanel'
+import Wishlist from './Components/Wishlist'
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<><Navbar /><ProductGrid /><Brand /><ProductCard /></>} />
         <Route path="/product/:id" element={<><Navbar /><ProductDetails /></>} />
         <Route path="/cart" element={<ShoppingCart />} />
+        <Route path="/wishlist" element={<><Navbar /><Wishlist /></>} />
         <Route path="/customer-signup" element={<CutomerSignUp />} />
         <Route path="/customer-login" element={<CutomerSignUp />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />

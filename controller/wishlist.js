@@ -1,16 +1,25 @@
 import { Cart } from "../models/cart.js";
+import { Product } from "../models/product.js";
 import { Wishlist } from "../models/wishlist.js"
 
 export const addtowish = async (req, res) => {
     try {
-        // const add = await Wishlist.create(req.body);
-        const products = await Wishlist.findOne({ user: req.body.user, product: req.body.product });
-
-        console.log(products, "products")
+        if (!req.body.product) {
+            return res.status(400).json({
+                message: "Product is required",
+                success: false
+            });
+        }
+        const products = await Wishlist.findOne({
+            user: req.user.id,
+            product: req.body.product
+        });
 
         if (products) {
             return res.status(200).json({
-                message: "already in your cart"
+                message: "Product is already in your wishlist",
+                success: true,
+                data: products
             })
         }
 
@@ -21,6 +30,7 @@ export const addtowish = async (req, res) => {
 
         return res.status(201).json({
             message: "Product added to wishlist",
+            success: true,
             data: newWishlist
         });
 
@@ -54,20 +64,13 @@ export const removefromwishlist = async (req, res) => {
 
 export const getproducts = async (req, res) => {
     try {
-
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Wishlist.countDocuments({ user: req.user.id });
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
-            return res.status(404).json({
-                message: "page not found",
-                success: false
-            })
-        }
-        const products = await Wishlist.find({ user: req.params.id }).skip((page - 1) * perPage).limit(perPage).exec();
+        const products = await Wishlist.find({ user: req.user.id })
+            .populate("product")
+            .sort({ _id: -1 })
+            .lean();
         return res.status(200).json({
-            data: [products, "totalpages : " + totalpage, "page : " + page]
+            success: true,
+            data: products
         })
     } catch (error) {
         return res.status(500).json({
@@ -79,7 +82,7 @@ export const getproducts = async (req, res) => {
 
 export const clearwishlist = async (req, res) => {
     try {
-        const products = await Wishlist.deleteMany({ user: req.params.id });
+        await Wishlist.deleteMany({ user: req.user.id });
         return res.status(200).json({
             message: "WishList is Empty now!",
             success: true
@@ -136,7 +139,7 @@ export const movetocart = async (req, res) => {
             user: req.user.id,
             product: wishlistItem.product,
             quantity: 1,
-            total: product.price
+            total: Number(product.discountPrice) || Number(product.price)
         });
 
         await Wishlist.findOneAndDelete({ _id: req.params.id });
@@ -153,5 +156,3 @@ export const movetocart = async (req, res) => {
         })
     }
 }
-
-
