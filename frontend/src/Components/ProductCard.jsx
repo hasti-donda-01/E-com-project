@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IoMdStar } from 'react-icons/io';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
@@ -11,6 +11,7 @@ const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 export default function ProductCard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -56,7 +57,7 @@ export default function ProductCard() {
         if (!categoryResponse.ok || categoryPayload.success === false || !Array.isArray(categoryPayload.data)) {
           throw new Error(categoryPayload.message || `Could not load categories (${categoryResponse.status}).`);
         }
-        setCategories(categoryPayload.data);
+        setCategories(categoryPayload.data.filter((category) => category.isActive !== false));
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
           setError(loadError.message || 'Could not load products.');
@@ -70,6 +71,8 @@ export default function ProductCard() {
     return () => controller.abort();
   }, []);
 
+  const routeCategoryId = searchParams.get('category');
+  const activeCategoryIds = routeCategoryId ? [routeCategoryId] : selectedCategories;
   const getCategoryId = (product) =>
     String(product.categoryId?._id || product.categoryId || '');
   const availableCategories = categories
@@ -80,7 +83,7 @@ export default function ProductCard() {
 
   const filteredProducts = products
     .filter((product) =>
-      selectedCategories.length === 0 || selectedCategories.includes(getCategoryId(product))
+      activeCategoryIds.length === 0 || activeCategoryIds.includes(getCategoryId(product))
     )
     .sort((first, second) => {
       if (sort === 'price-low') {
@@ -94,15 +97,17 @@ export default function ProductCard() {
     });
 
   const toggleCategory = (categoryId) => {
-    setSelectedCategories((selected) =>
-      selected.includes(categoryId)
-        ? selected.filter((id) => id !== categoryId)
-        : [...selected, categoryId]
+    const currentSelection = routeCategoryId ? [routeCategoryId] : selectedCategories;
+    setSelectedCategories(
+      currentSelection.includes(categoryId)
+        ? currentSelection.filter((id) => id !== categoryId)
+        : [...currentSelection, categoryId]
     );
+    if (routeCategoryId) setSearchParams({}, { replace: true });
   };
 
   return (
-    <section className="products-page" aria-label="Products">
+    <section className="products-page" id="products-catalog" aria-label="Products">
       <h1 className="products-page-title">Products For You</h1>
       <div className="productlisting">
         <aside className="productlistleft" aria-label="Product filters">
@@ -141,7 +146,7 @@ export default function ProductCard() {
                 <label className="category-filter-option" key={category._id}>
                   <input
                     type="checkbox"
-                    checked={selectedCategories.includes(String(category._id))}
+                    checked={activeCategoryIds.includes(String(category._id))}
                     onChange={() => toggleCategory(String(category._id))}
                   />
                   <span>{category.category_name}</span>
@@ -153,11 +158,14 @@ export default function ProductCard() {
                 </p>
               )}
             </div>
-            {selectedCategories.length > 0 && (
+            {activeCategoryIds.length > 0 && (
               <button
                 type="button"
                 className="clear-product-filters"
-                onClick={() => setSelectedCategories([])}
+                onClick={() => {
+                  setSelectedCategories([]);
+                  if (routeCategoryId) setSearchParams({}, { replace: true });
+                }}
               >
                 Clear filters
               </button>

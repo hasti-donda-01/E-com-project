@@ -38,6 +38,10 @@ export default function AdminPanel() {
   const [categoryActionLoading, setCategoryActionLoading] = useState(false);
   const [categoryActionError, setCategoryActionError] = useState('');
   const [categoryNotice, setCategoryNotice] = useState('');
+  const [sellers, setSellers] = useState([]);
+  const [sellersLoading, setSellersLoading] = useState(false);
+  const [sellersError, setSellersError] = useState('');
+  const [sellerLoadAttempt, setSellerLoadAttempt] = useState(0);
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState('');
@@ -111,6 +115,62 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, categoryLoadAttempt]);
 
+  useEffect(() => {
+    if (activePage !== 'Sellers') return undefined;
+
+    const controller = new AbortController();
+    const loadSellers = async () => {
+      setSellersLoading(true);
+      setSellersError('');
+      try {
+        const readSellerPage = async (page) => {
+          const response = await fetch(`${API_BASE_URL}/admin/getallsellers?page=${page}`, {
+            credentials: 'include',
+            signal: controller.signal
+          });
+          const payload = await response.json();
+          if (
+            page === 1 &&
+            response.status === 404 &&
+            payload.message?.toLowerCase() === 'page not found'
+          ) {
+            return { sellers: [], totalPages: 0 };
+          }
+          if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
+            throw new Error(payload.message || `Could not load sellers (${response.status}).`);
+          }
+
+          if (Array.isArray(payload.data[0])) {
+            const legacyTotalPages = Number(payload.data[1]?.match(/\d+/)?.[0]) || 1;
+            return { sellers: payload.data[0], totalPages: legacyTotalPages };
+          }
+
+          return {
+            sellers: payload.data,
+            totalPages: Math.max(1, Number(payload.pagination?.totalPages) || 1)
+          };
+        };
+
+        const firstPage = await readSellerPage(1);
+        const allSellers = [...firstPage.sellers];
+        for (let page = 2; page <= firstPage.totalPages; page += 1) {
+          const nextPage = await readSellerPage(page);
+          allSellers.push(...nextPage.sellers);
+        }
+        setSellers(allSellers);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setSellersError(error.message || 'Could not load sellers.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setSellersLoading(false);
+      }
+    };
+
+    loadSellers();
+    return () => controller.abort();
+  }, [activePage, sellerLoadAttempt]);
+
   const filteredOrders = orders.filter((order) =>
     `${order.id} ${order.customer} ${order.product} ${order.status}`
       .toLowerCase()
@@ -118,6 +178,11 @@ export default function AdminPanel() {
   );
   const filteredCategories = categories.filter((category) =>
     `${category.category_name || ''} ${category.description || ''} ${category.isActive === false ? 'inactive' : 'active'}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+  const filteredSellers = sellers.filter((seller) =>
+    `${seller.name || ''} ${seller.email || ''} ${seller.phone || ''} ${seller.storeName || ''} ${seller.category || ''} ${seller.businessType || ''}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -584,6 +649,94 @@ export default function AdminPanel() {
                 {!categoriesLoading && !categoriesError && categories.length > 0 && (
                   <p className="admin-category-count">
                     Showing {filteredCategories.length} of {categories.length} categories
+                  </p>
+                )}
+              </>
+            ) : activePage === 'Sellers' ? (
+              <>
+                <div className="admin-category-toolbar">
+                  <input
+                    className="admin-search"
+                    type="search"
+                    placeholder="Search sellers, stores or contact details..."
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    aria-label="Search sellers"
+                  />
+                  <button
+                    className="admin-primary-btn"
+                    type="button"
+                    onClick={() => setSellerLoadAttempt((attempt) => attempt + 1)}
+                    disabled={sellersLoading}
+                  >
+                    {sellersLoading ? 'Loading…' : 'Refresh'}
+                  </button>
+                </div>
+
+                {sellersError && (
+                  <div className="admin-category-error" role="alert">
+                    <span>{sellersError}</span>
+                    <button
+                      className="admin-category-retry"
+                      type="button"
+                      onClick={() => setSellerLoadAttempt((attempt) => attempt + 1)}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+
+                <div className="admin-table-wrapper">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>SELLER</th>
+                        <th>STORE</th>
+                        <th>CONTACT</th>
+                        <th>BUSINESS</th>
+                        <th>VERIFICATION</th>
+                        <th>ACCOUNT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sellersLoading && sellers.length === 0 ? (
+                        <tr><td colSpan="6" className="admin-empty">Loading sellers…</td></tr>
+                      ) : sellersError && sellers.length === 0 ? (
+                        <tr><td colSpan="6" className="admin-empty">Sellers could not be loaded.</td></tr>
+                      ) : filteredSellers.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="admin-empty">
+                            {sellers.length === 0 ? 'No sellers found.' : 'No sellers match your search.'}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredSellers.map((seller) => (
+                          <tr key={seller._id}>
+                            <td>
+                              <strong>{seller.name || '—'}</strong>
+                              <div>{seller.email || '—'}</div>
+                            </td>
+                            <td>
+                              <strong>{seller.storeName || '—'}</strong>
+                              <div>{seller.category || '—'}</div>
+                            </td>
+                            <td>{seller.phone || '—'}</td>
+                            <td>{seller.businessType || '—'}</td>
+                            <td>
+                              <span className={`admin-category-status ${seller.isApproved ? 'active' : seller.isRejected ? 'inactive' : ''}`}>
+                                {seller.isApproved ? 'Approved' : seller.isRejected ? 'Rejected' : 'Pending'}
+                              </span>
+                            </td>
+                            <td>{seller.accountStatus || (seller.isActive ? 'Active' : 'Inactive')}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {!sellersLoading && !sellersError && sellers.length > 0 && (
+                  <p className="admin-category-count">
+                    Showing {filteredSellers.length} of {sellers.length} sellers
                   </p>
                 )}
               </>

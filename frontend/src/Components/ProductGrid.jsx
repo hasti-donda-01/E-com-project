@@ -1,28 +1,45 @@
-import React from 'react';
-import athenic from './Images/athenic.jpg';
-import menswear from './Images/menswear.jpg';
-import western from './Images/western.jpg';
-import footwear from './Images/footwear.jpg';
-import beauty from './Images/beauty.jpg';
-import decor from './Images/decor.jpg';
-import grocery from './Images/grocery.jpg';
-import accessories from './Images/accesorries.jpg';
+import { useEffect, useState } from 'react';
 import gold from './Images/gold.jpg';
 import lehangas from './Images/lehangas.jpg';
 import jewellery from './Images/jewellery.jpg';
 import mensweargold from './Images/mensweargold.jpg';
 import saress from './Images/saress.jpg';
+import { useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = (
+    import.meta.env.VITE_API_URL ||
+    'https://e-com-project-b3ci.onrender.com/api'
+).replace(/\/$/, '');
+
 export default function ProductGrid() {
-    const items = [
-        { image: athenic, name: 'Ethnic Wear' },
-        { image: western, name: 'Western Dresses' },
-        { image: menswear, name: 'Menswear' },
-        { image: footwear, name: 'Footwear' },
-        { image: decor, name: 'Home Decor' },
-        { image: beauty, name: 'Beauty' },
-        { image: accessories, name: 'Accessories' },
-        { image: grocery, name: 'Grocery' },
-    ];
+    const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [categoryError, setCategoryError] = useState('');
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const loadCategories = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/category/get`, {
+                    signal: controller.signal
+                });
+                const payload = await response.json();
+                if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
+                    throw new Error(payload.message || `Could not load categories (${response.status}).`);
+                }
+                setCategories(payload.data.filter((category) => category.isActive !== false));
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    setCategoryError(error.message || 'Could not load categories.');
+                }
+            } finally {
+                if (!controller.signal.aborted) setLoadingCategories(false);
+            }
+        };
+        loadCategories();
+        return () => controller.abort();
+    }, []);
 
     let golditems = [
         {image: lehangas, name: 'Lehangas'},
@@ -48,16 +65,34 @@ export default function ProductGrid() {
                 </div>
             </section>
             <section className="grid-container">
-                <div className="grid-items">
-                    {items.map((x, i) => (
-                        <a href="/" key={i}>
-                            <div className="grid-item">
-                                <img src={x.image} alt={x.name} />
-                                <div className="grid-item-name">{x.name}</div>
-                            </div>
-                        </a>
-                    ))}
-                </div>
+                {loadingCategories ? (
+                    <p role="status">Loading categories…</p>
+                ) : categoryError ? (
+                    <p role="alert">{categoryError}</p>
+                ) : categories.length === 0 ? (
+                    <p>No categories are available yet.</p>
+                ) : (
+                    <div className="grid-items">
+                        {categories.map((category) => (
+                            <button
+                                className="grid-category-button"
+                                key={category._id}
+                                type="button"
+                                onClick={() => {
+                                    navigate(`/?category=${encodeURIComponent(category._id)}#products-catalog`);
+                                    document.getElementById('products-catalog')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                            >
+                                <div className="grid-item">
+                                    {category.category_Image && (
+                                        <img src={category.category_Image} alt={category.category_name} />
+                                    )}
+                                    <div className="grid-item-name">{category.category_name}</div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
             </section>
         </>
     );

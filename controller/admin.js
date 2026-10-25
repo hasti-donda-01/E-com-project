@@ -8,16 +8,16 @@ import { Payment } from "../models/payment.js";
 
 export const getallseller = async (req, res) => {
     try {
-
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Seller.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
+        const requestedPage = Number.parseInt(req.query.page, 10) || 1;
+        const page = Math.max(requestedPage, 1);
+        const perPage = 20;
+        const total = await Seller.countDocuments();
+        const totalPages = Math.ceil(total / perPage);
+        if (totalPages > 0 && page > totalPages) {
             return res.status(404).json({
-                message: "page not found",
+                message: "Page not found",
                 success: false
-            })
+            });
         }
 
         const sellers = await Seller.aggregate([
@@ -34,7 +34,7 @@ export const getallseller = async (req, res) => {
             },
             {
                 $project: {
-                    // specification(s)
+                    _id: 1,
                     userId: 1,
                     storeName: 1,
                     storeDesc: 1,
@@ -42,19 +42,28 @@ export const getallseller = async (req, res) => {
                     businessType: 1,
                     gstin: 1,
                     panNumber: 1,
+                    isApproved: 1,
+                    isRejected: 1,
+                    rejectionReason: 1,
                     name: "$result.name",
                     email: "$result.email",
                     phone: "$result.phone",
-                    role: "$result.seller"
+                    isActive: "$result.isActive",
+                    accountStatus: "$result.status"
                 }
             }
-        ]).skip((page - 1) * perPage).limit(perPage).exec();
-        console.log(sellers, "seller")
-        res.status(200).json({
+        ]).skip((page - 1) * perPage).limit(perPage);
+        return res.status(200).json({
             message: "All sellers get successfully",
             success: true,
-            data: [sellers, "Total Pages : " + totalpage, "Page : " + page]
-        })
+            data: sellers,
+            pagination: {
+                page,
+                perPage,
+                total,
+                totalPages
+            }
+        });
     } catch (error) {
         return res.status(500).json({
             message: error.message,

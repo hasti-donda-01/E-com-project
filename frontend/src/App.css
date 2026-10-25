@@ -800,6 +800,17 @@ img {
 
 }
 
+.grid-category-button {
+  display: block;
+  min-width: 120px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .grid-items a img {
   width: 120px;
   aspect-ratio: 1 / 1;
@@ -807,6 +818,14 @@ img {
   border-radius: 8px;
   display: block;
 
+}
+
+.grid-category-button img {
+  width: 120px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
 }
 
 .grid-item-name {
@@ -817,7 +836,8 @@ img {
   font-style: normal;
 }
 
-.grid-item:hover {
+.grid-item:hover,
+.grid-category-button:hover .grid-item {
   transform: translateY(-4px);
 }
 
