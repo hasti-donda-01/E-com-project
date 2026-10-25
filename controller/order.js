@@ -1,10 +1,331 @@
+import crypto from "node:crypto";
+import Razorpay from "razorpay";
 import { Address } from "../models/address.js";
 import { Cart } from "../models/cart.js";
 import { Order } from "../models/order.js";
 import { Payment } from "../models/payment.js";
+import { PaymentAttempt } from "../models/paymentAttempt.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 import { Customer } from "../models/customer.js";
+
+const getRazorpayClient = () => {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+        return null;
+    }
+    return new Razorpay({ key_id: keyId, key_secret: keySecret });
+};
+
+export const createRazorpayOrder = async (req, res) => {
+    try {
+        const razorpay = getRazorpayClient();
+        if (!razorpay) {
+            return res.status(503).json({
+                message: "UPI checkout is not configured. Set the Razorpay keys on the server.",
+                success: false
+            });
+        }
+
+        const userId = req.user.id;
+        const { address } = req.body;
+        const deliveryAddress = await Address.findOne({ _id: address, user: userId });
+        if (!deliveryAddress) {
+            return res.status(404).json({
+                message: "Address not found",
+                success: false
+            });
+        }
+
+        const cartItems = await Cart.find({ user: userId }).populate("product");
+        if (cartItems.length === 0) {
+            return res.status(400).json({ message: "Cart is empty", success: false });
+        }
+
+        const items = [];
+        let amountPaise = 0;
+        for (const cartItem of cartItems) {
+            const quantity = Number(cartItem.quantity);
+            if (!cartItem.product || !Number.isInteger(quantity) || quantity < 1) {
+                return res.status(400).json({
+                    message: "A cart item is no longer available. Please refresh your cart.",
+                    success: false
+                });
+            }
+            if (cartItem.product.stock < quantity) {
+                return res.status(400).json({
+                    message: `${cartItem.product.name} does not have enough stock.`,
+                    success: false
+                });
+            }
+
+            const unitPrice = Number(cartItem.product.discountPrice) || Number(cartItem.product.price);
+            amountPaise += Math.round(unitPrice * 100) * quantity;
+            items.push({
+                cartItem: cartItem._id,
+                product: cartItem.product._id,
+                quantity,
+                unitPrice
+            });
+        }
+        if (!Number.isSafeInteger(amountPaise) || amountPaise < 1) {
+            return res.status(400).json({
+                message: "The cart total is invalid.",
+                success: false
+            });
+        }
+
+        const gatewayOrder = await razorpay.orders.create({
+            amount: amountPaise,
+            currency: "INR",
+            receipt: `cart_${String(userId).slice(-12)}_${Date.now()}`
+        });
+        await PaymentAttempt.create({
+            user: userId,
+            address: deliveryAddress._id,
+            items,
+            amountPaise,
+            razorpayOrderId: gatewayOrder.id
+        });
+
+        return res.status(201).json({
+            success: true,
+            data: {
+                keyId: process.env.RAZORPAY_KEY_ID,
+                orderId: gatewayOrder.id,
+                amount: gatewayOrder.amount,
+                currency: gatewayOrder.currency
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Could not start UPI checkout.",
+            success: false
+        });
+    }
+};
+
+export const verifyRazorpayPayment = async (req, res) => {
+    let attempt;
+    let razorpay;
+    let claimed = false;
+    let paymentCaptured = false;
+    const decrementedProducts = [];
+    const createdOrders = [];
+    const createdOrderDocs = [];
+    const createdPayments = [];
+    let paymentId;
+
+    try {
+        const { razorpay_order_id: orderId, razorpay_payment_id, razorpay_signature: signature } = req.body;
+        paymentId = razorpay_payment_id;
+        if (!orderId || !paymentId || !signature) {
+            return res.status(400).json({
+                message: "Razorpay payment details are required.",
+                success: false
+            });
+        }
+
+        razorpay = getRazorpayClient();
+        if (!razorpay) {
+            return res.status(503).json({
+                message: "UPI checkout is not configured on the server.",
+                success: false
+            });
+        }
+
+        attempt = await PaymentAttempt.findOne({ razorpayOrderId: orderId, user: req.user.id });
+        if (!attempt) {
+            return res.status(404).json({ message: "Payment attempt not found.", success: false });
+        }
+        if (attempt.status === "paid") {
+            if (attempt.razorpayPaymentId !== paymentId) {
+                return res.status(400).json({ message: "Payment does not match this order.", success: false });
+            }
+            const orders = await Order.find({ _id: { $in: attempt.orders } });
+            return res.status(200).json({
+                message: "Payment was already confirmed.",
+                success: true,
+                totalOrders: orders.length,
+                orders
+            });
+        }
+        if (attempt.status !== "pending") {
+            return res.status(409).json({
+                message: "This payment attempt is already being processed or has failed.",
+                success: false
+            });
+        }
+
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(`${orderId}|${paymentId}`)
+            .digest();
+        const receivedSignature = Buffer.from(signature, "hex");
+        if (
+            receivedSignature.length !== expectedSignature.length ||
+            !crypto.timingSafeEqual(receivedSignature, expectedSignature)
+        ) {
+            return res.status(400).json({ message: "Payment signature is invalid.", success: false });
+        }
+
+        const [gatewayOrder, payment] = await Promise.all([
+            razorpay.orders.fetch(orderId),
+            razorpay.payments.fetch(paymentId)
+        ]);
+        if (
+            gatewayOrder.amount !== attempt.amountPaise ||
+            gatewayOrder.currency !== "INR" ||
+            payment.order_id !== orderId ||
+            payment.amount !== attempt.amountPaise ||
+            payment.currency !== "INR"
+        ) {
+            return res.status(400).json({ message: "Payment amount could not be verified.", success: false });
+        }
+
+        if (!["authorized", "captured"].includes(payment.status)) {
+            return res.status(400).json({
+                message: "UPI payment has not been captured. Please try again.",
+                success: false
+            });
+        }
+
+        const claimedAttempt = await PaymentAttempt.findOneAndUpdate(
+            { _id: attempt._id, status: "pending" },
+            { $set: { status: "processing", razorpayPaymentId: paymentId } },
+            { new: true }
+        );
+        if (!claimedAttempt) {
+            return res.status(409).json({
+                message: "This payment attempt is already being processed.",
+                success: false
+            });
+        }
+        claimed = true;
+
+        let capturedPayment = payment;
+        if (payment.status === "authorized") {
+            capturedPayment = await razorpay.payments.capture(paymentId, attempt.amountPaise, "INR");
+        }
+        if (capturedPayment.status !== "captured") {
+            throw new Error("UPI payment could not be captured. Please try again.");
+        }
+        paymentCaptured = true;
+
+        const productIds = attempt.items.map((item) => item.product);
+        const products = await Product.find({ _id: { $in: productIds } });
+        const productsById = new Map(products.map((productDoc) => [String(productDoc._id), productDoc]));
+
+        for (const item of attempt.items) {
+            const productDoc = productsById.get(String(item.product));
+            if (!productDoc) {
+                throw new Error("A purchased product is no longer available.");
+            }
+            const updatedProduct = await Product.findOneAndUpdate(
+                { _id: item.product, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity } },
+                { new: true }
+            );
+            if (!updatedProduct) {
+                throw new Error(`${productDoc.name} is now out of stock. Please contact support for a refund.`);
+            }
+            decrementedProducts.push({ product: item.product, quantity: item.quantity });
+
+            const totalAmount = Math.round(item.unitPrice * 100) * item.quantity / 100;
+            const order = await Order.create({
+                product: productDoc._id,
+                userId: req.user.id,
+                sellerId: productDoc.user,
+                quantity: item.quantity,
+                totalAmount,
+                address: attempt.address,
+                paymentMethod: "upi",
+                paymentStatus: "paid",
+                orderStatus: "placed"
+            });
+            createdOrders.push(order._id);
+            createdOrderDocs.push(order);
+
+            const paymentRecord = await Payment.create({
+                order: order._id,
+                user: req.user.id,
+                amount: totalAmount,
+                paymentMethod: "upi",
+                status: "success",
+                transactionId: paymentId,
+                gatewayOrderId: orderId
+            });
+            createdPayments.push(paymentRecord._id);
+        }
+
+        await Cart.deleteMany({
+            user: req.user.id,
+            _id: { $in: attempt.items.map((item) => item.cartItem) }
+        });
+        attempt.status = "paid";
+        attempt.razorpayPaymentId = paymentId;
+        attempt.orders = createdOrders;
+        await attempt.save();
+
+        return res.status(200).json({
+            message: "UPI payment successful and order placed.",
+            success: true,
+            totalOrders: createdOrders.length,
+            orders: createdOrderDocs
+        });
+    } catch (error) {
+        if (claimed) {
+            try {
+                await Promise.all([
+                    Order.deleteMany({ _id: { $in: createdOrders } }),
+                    Payment.deleteMany({ _id: { $in: createdPayments } }),
+                    ...decrementedProducts.map(({ product, quantity }) =>
+                        Product.updateOne({ _id: product }, { $inc: { stock: quantity } })
+                    )
+                ]);
+            } catch (cleanupError) {
+                console.error("Unable to roll back a failed Razorpay order:", cleanupError);
+            }
+
+            if (paymentCaptured) {
+                try {
+                    const refund = await razorpay.payments.refund(paymentId, {
+                        amount: attempt.amountPaise,
+                        notes: { reason: "Order could not be placed" }
+                    });
+                    try {
+                        await PaymentAttempt.updateOne(
+                            { _id: attempt._id },
+                            { $set: { status: "failed", razorpayPaymentId: paymentId } }
+                        );
+                    } catch (attemptUpdateError) {
+                        console.error("Unable to update the refunded Razorpay attempt:", attemptUpdateError);
+                    }
+                    return res.status(409).json({
+                        message: `Payment was received but the order could not be placed. A refund has been initiated (${refund.id}).`,
+                        success: false
+                    });
+                } catch (refundError) {
+                    console.error("Automatic Razorpay refund failed:", refundError);
+                    return res.status(502).json({
+                        message: "Payment was captured but the order could not be confirmed. Please contact support with your Razorpay payment ID.",
+                        success: false
+                    });
+                }
+            }
+
+            await PaymentAttempt.updateOne(
+                { _id: attempt._id, status: "processing" },
+                { $set: { status: "pending" } }
+            );
+        }
+        return res.status(500).json({
+            message: error.message || "Could not confirm the UPI payment.",
+            success: false
+        });
+    }
+};
 
 // export const createOrder = async (req, res) => {
 
@@ -128,8 +449,15 @@ import { Customer } from "../models/customer.js";
 
 export const createOrder = async (req, res) => {
     try {
-        const { product, paymentMethod, quantity, orderStatus, buyNow, address } = req.body;
+        const { product, paymentMethod, quantity, buyNow, address } = req.body;
         const userId = req.user.id;
+
+        if (paymentMethod !== "COD") {
+            return res.status(400).json({
+                message: "Online payments must be completed through the payment gateway.",
+                success: false
+            });
+        }
 
         const user = await User.findById(userId) || await Customer.findById(userId);
         if (!user) {
@@ -172,7 +500,8 @@ export const createOrder = async (req, res) => {
                 quantity,
                 address: deliveryAddress._id,
                 paymentMethod,
-                orderStatus
+                orderStatus: "placed",
+                paymentStatus: "pending"
             });
 
             await Product.findByIdAndUpdate(productDoc._id, {
@@ -238,7 +567,8 @@ export const createOrder = async (req, res) => {
                         totalAmount,
                         address: deliveryAddress._id,
                         paymentMethod,
-                        orderStatus
+                        orderStatus: "placed",
+                        paymentStatus: "pending"
                     });
 
                     await Product.findByIdAndUpdate(productDoc._id, {
@@ -250,6 +580,7 @@ export const createOrder = async (req, res) => {
                         user: userId,
                         amount: totalAmount,
                         paymentMethod,
+                        status: "pending",
                     });
 
                     return order;

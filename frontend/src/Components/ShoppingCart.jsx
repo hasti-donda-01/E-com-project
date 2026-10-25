@@ -11,6 +11,18 @@ const API_BASE_URL = (
 const inr = (value) =>
   `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
+const loadRazorpayCheckout = () => new Promise((resolve, reject) => {
+  if (window.Razorpay) {
+    resolve();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.onload = () => resolve();
+  script.onerror = () => reject(new Error('Could not load the Razorpay checkout.'));
+  document.body.appendChild(script);
+});
+
 const requiresCustomerLogin = (response, payload) =>
   (response.status === 400 && payload.message === 'Token Required') ||
   (response.status === 403 && payload.message?.includes('required role: customer')) ||
@@ -33,6 +45,7 @@ export default function ShoppingCart() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const goToLogin = useCallback(() => {
     sessionStorage.removeItem('customerAccessToken');
@@ -174,6 +187,90 @@ export default function ShoppingCart() {
         goToLogin();
         return;
       }
+      if (paymentMethod === 'upi') {
+        const createResponse = await fetch(`${API_BASE_URL}/order/razorpay/create`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${customerToken}`
+          },
+          body: JSON.stringify({ address: selectedAddressId })
+        });
+        const createPayload = await createResponse.json();
+        if (requiresCustomerLogin(createResponse, createPayload)) {
+          goToLogin();
+          return;
+        }
+        if (!createResponse.ok || createPayload.success === false || !createPayload.data?.orderId) {
+          throw new Error(createPayload.message || `Could not start UPI payment (${createResponse.status}).`);
+        }
+
+        await loadRazorpayCheckout();
+        const paymentResult = await new Promise((resolve, reject) => {
+          const checkout = new window.Razorpay({
+            key: createPayload.data.keyId,
+            amount: createPayload.data.amount,
+            currency: createPayload.data.currency,
+            name: 'Meesho-like Store',
+            description: 'Cart checkout',
+            order_id: createPayload.data.orderId,
+            config: {
+              display: {
+                blocks: {
+                  upi: {
+                    name: 'Pay using UPI',
+                    instruments: [{ method: 'upi' }]
+                  }
+                },
+                sequence: ['block.upi'],
+                preferences: { show_default_blocks: false }
+              }
+            },
+            handler: async (razorpayResponse) => {
+              try {
+                const verifyResponse = await fetch(`${API_BASE_URL}/order/razorpay/verify`, {
+                  method: 'POST',
+                  credentials: 'include',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${customerToken}`
+                  },
+                  body: JSON.stringify(razorpayResponse)
+                });
+                const verifyPayload = await verifyResponse.json();
+                if (requiresCustomerLogin(verifyResponse, verifyPayload)) {
+                  goToLogin();
+                  resolve(null);
+                  return;
+                }
+                if (!verifyResponse.ok || verifyPayload.success === false) {
+                  reject(new Error(verifyPayload.message || `Could not verify payment (${verifyResponse.status}).`));
+                  return;
+                }
+                resolve(verifyPayload);
+              } catch (verifyError) {
+                reject(verifyError);
+              }
+            },
+            modal: {
+              ondismiss: () => resolve(null)
+            },
+            theme: { color: '#9f2089' }
+          });
+          checkout.on('payment.failed', (event) => {
+            reject(new Error(event.error?.description || 'UPI payment failed. Please try again.'));
+          });
+          checkout.open();
+        });
+        if (paymentResult) {
+          setCompletedOrder({ ...paymentResult, paymentMethod: 'upi' });
+          setItems([]);
+          setCheckoutMessage('');
+        }
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/order/place`, {
         method: 'POST',
         credentials: 'include',
@@ -196,7 +293,7 @@ export default function ShoppingCart() {
       if (!response.ok || payload.success === false) {
         throw new Error(payload.message || `Could not place your order (${response.status}).`);
       }
-      setCompletedOrder(payload);
+      setCompletedOrder({ ...payload, paymentMethod: 'COD' });
       setItems([]);
       setCheckoutMessage('');
     } catch (orderError) {
@@ -332,7 +429,11 @@ export default function ShoppingCart() {
           <section className="order-confirmation">
             <span className="order-confirmation-icon"><FiCheck aria-hidden="true" /></span>
             <h1>Order placed successfully</h1>
-            <p>Your order has been placed with Cash on Delivery.</p>
+            <p>
+              {completedOrder.paymentMethod === 'upi'
+                ? 'Your UPI payment was successful.'
+                : 'Your order has been placed with Cash on Delivery.'}
+            </p>
             {completedOrder.orders?.length > 0 && (
               <p>Order reference: {completedOrder.orders.map((order) => order._id).join(', ')}</p>
             )}
@@ -409,7 +510,29 @@ export default function ShoppingCart() {
                   </button>
                 </form>
               )}
-              <p className="checkout-payment-note">Payment method: Cash on Delivery</p>
+              <fieldset className="checkout-payment-options">
+                <legend>Choose payment method</legend>
+                <label className={paymentMethod === 'upi' ? 'is-selected' : ''}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="upi"
+                    checked={paymentMethod === 'upi'}
+                    onChange={() => setPaymentMethod('upi')}
+                  />
+                  <span><strong>UPI</strong><small>Pay securely with Razorpay</small></span>
+                </label>
+                <label className={paymentMethod === 'COD' ? 'is-selected' : ''}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === 'COD'}
+                    onChange={() => setPaymentMethod('COD')}
+                  />
+                  <span><strong>Cash on Delivery</strong><small>Pay when your order arrives</small></span>
+                </label>
+              </fieldset>
             </div>
           ) : (
             <div className="cart-items-grid">
@@ -480,7 +603,7 @@ export default function ShoppingCart() {
               : checkoutLoading
                 ? 'Please wait…'
                 : checkoutMode
-                  ? 'Place Order (Cash on Delivery)'
+                  ? paymentMethod === 'upi' ? 'Pay with UPI' : 'Place Order (Cash on Delivery)'
                   : 'Continue'}
           </button>
         </aside>

@@ -1,11 +1,13 @@
 import express from 'express';
-import { cancelOrder, createOrder, revenue, trackOrder, trackpayment, updatepaymentstatus, vieworderhistory } from '../controller/order.js';
+import { cancelOrder, createOrder, createRazorpayOrder, revenue, trackOrder, trackpayment, updatepaymentstatus, verifyRazorpayPayment, vieworderhistory } from '../controller/order.js';
 import { auth } from '../middleware/auth.js';
 import { adjustPaymentRecord, approvereq, getSellerRefundRequests, requestReturn, sellerHandleRefund, trackrefund } from '../controller/return.js';
 
 
 const router = express.Router();
 router.post('/place', auth(["customer"]), createOrder);
+router.post('/razorpay/create', auth(["customer"]), createRazorpayOrder);
+router.post('/razorpay/verify', auth(["customer"]), verifyRazorpayPayment);
 router.delete('/cancel/:id',auth(["customer"]), cancelOrder)
 router.get('/track/:id', trackOrder);
 router.get('/viewhistory/:id', vieworderhistory)

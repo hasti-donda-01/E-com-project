@@ -5950,6 +5950,53 @@ body {
   font-weight: 600;
 }
 
+.checkout-payment-options {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 15px 0 0;
+  border: 0;
+  border-top: 1px solid #e5e5e5;
+}
+
+.checkout-payment-options legend {
+  padding: 0;
+  color: #242424;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.checkout-payment-options label {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid #e2e2ee;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.checkout-payment-options label.is-selected {
+  border-color: #9f2089;
+  background: #fff9fd;
+}
+
+.checkout-payment-options input {
+  accent-color: #9f2089;
+}
+
+.checkout-payment-options label > span {
+  display: grid;
+  gap: 4px;
+  color: #242424;
+  font-size: 13px;
+}
+
+.checkout-payment-options small {
+  color: #777;
+  font-size: 12px;
+}
+
 .order-confirmation {
   grid-column: 1 / -1;
   display: flex;
