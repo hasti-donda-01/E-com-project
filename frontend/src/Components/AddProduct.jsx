@@ -8,6 +8,7 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3c
 const API_URL = `${API_BASE_URL}/product/create`; // POST multipart/form-data
 const CATEGORIES_URL = `${API_BASE_URL}/category/get`;
 const MAX_IMAGE_MB = 5;
+const supportedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 const initialForm = {
     name: '',
@@ -174,7 +175,7 @@ export default function AddProduct() {
     /* ----- Image ----- */
     const pickImage = (file) => {
         if (!file) return;
-        if (!file.type.startsWith('image/')) {
+        if (!supportedImageTypes.has(file.type)) {
             setErrors((er) => ({ ...er, image: 'Choose an image file (JPG, PNG or WebP).' }));
             return;
         }
@@ -550,7 +551,7 @@ export default function AddProduct() {
                             <input
                                 ref={fileRef}
                                 type="file"
-                                accept="image/*"
+                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                 className="hidden"
                                 onChange={(e) => {
                                     pickImage(e.target.files[0]);

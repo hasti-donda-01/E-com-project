@@ -42,6 +42,10 @@ export default function AdminPanel() {
   const [sellersLoading, setSellersLoading] = useState(false);
   const [sellersError, setSellersError] = useState('');
   const [sellerLoadAttempt, setSellerLoadAttempt] = useState(0);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState('');
+  const [productLoadAttempt, setProductLoadAttempt] = useState(0);
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState('');
@@ -171,6 +175,62 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, sellerLoadAttempt]);
 
+  useEffect(() => {
+    if (activePage !== 'Products') return undefined;
+
+    const controller = new AbortController();
+    const loadProducts = async () => {
+      setProductsLoading(true);
+      setProductsError('');
+
+      try {
+        const firstResponse = await fetch(`${API_BASE_URL}/admin/getallproducts?page=1`, {
+          credentials: 'include',
+          signal: controller.signal
+        });
+        let firstPayload;
+        try {
+          firstPayload = await firstResponse.json();
+        } catch {
+          throw new Error(`The products API returned an invalid response (${firstResponse.status}).`);
+        }
+        if (!firstResponse.ok || firstPayload.success === false || !Array.isArray(firstPayload.data)) {
+          throw new Error(firstPayload.message || `Could not load products (${firstResponse.status}).`);
+        }
+
+        const allProducts = [...firstPayload.data];
+        const totalPages = Math.max(1, Number(firstPayload.pagination?.totalPages) || 1);
+        for (let page = 2; page <= totalPages; page += 1) {
+          const response = await fetch(`${API_BASE_URL}/admin/getallproducts?page=${page}`, {
+            credentials: 'include',
+            signal: controller.signal
+          });
+          let payload;
+          try {
+            payload = await response.json();
+          } catch {
+            throw new Error(`The products API returned an invalid response (${response.status}).`);
+          }
+          if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
+            throw new Error(payload.message || `Could not load products (${response.status}).`);
+          }
+          allProducts.push(...payload.data);
+        }
+
+        setProducts(allProducts);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setProductsError(error.message || 'Could not load products.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setProductsLoading(false);
+      }
+    };
+
+    loadProducts();
+    return () => controller.abort();
+  }, [activePage, productLoadAttempt]);
+
   const filteredOrders = orders.filter((order) =>
     `${order.id} ${order.customer} ${order.product} ${order.status}`
       .toLowerCase()
@@ -183,6 +243,11 @@ export default function AdminPanel() {
   );
   const filteredSellers = sellers.filter((seller) =>
     `${seller.name || ''} ${seller.email || ''} ${seller.phone || ''} ${seller.storeName || ''} ${seller.category || ''} ${seller.businessType || ''}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+  const filteredProducts = products.filter((product) =>
+    `${product.name || ''} ${product.brand || ''} ${product.category_name || product.categoryId?.category_name || ''}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -516,7 +581,100 @@ export default function AdminPanel() {
               </div>
             </div>
 
-            {activePage === 'Categories' ? (
+            {activePage === 'Products' ? (
+              <>
+                <div className="admin-category-toolbar">
+                  <input
+                    className="admin-search"
+                    type="search"
+                    placeholder="Search products, brands or categories..."
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    aria-label="Search products"
+                  />
+                  <button
+                    className="admin-primary-btn"
+                    type="button"
+                    onClick={() => setProductLoadAttempt((attempt) => attempt + 1)}
+                    disabled={productsLoading}
+                  >
+                    {productsLoading ? 'Loading…' : 'Refresh'}
+                  </button>
+                </div>
+
+                {productsError && (
+                  <div className="admin-category-error" role="alert">
+                    <span>{productsError}</span>
+                    <button
+                      className="admin-category-retry"
+                      type="button"
+                      onClick={() => setProductLoadAttempt((attempt) => attempt + 1)}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+
+                <div className="admin-table-wrapper">
+                  <table className="admin-table admin-product-table">
+                    <thead>
+                      <tr>
+                        <th>PRODUCT</th>
+                        <th>BRAND</th>
+                        <th>CATEGORY</th>
+                        <th>PRICE</th>
+                        <th>STOCK</th>
+                        <th>CREATED</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productsLoading && products.length === 0 ? (
+                        <tr><td colSpan="6" className="admin-empty">Loading products…</td></tr>
+                      ) : productsError && products.length === 0 ? (
+                        <tr><td colSpan="6" className="admin-empty">Products could not be loaded.</td></tr>
+                      ) : filteredProducts.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="admin-empty">
+                            {products.length === 0 ? 'No products found.' : 'No products match your search.'}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredProducts.map((product) => (
+                          <tr key={product._id}>
+                            <td className="admin-product-name">
+                              {product.image ? (
+                                <img className="admin-product-image" src={product.image} alt="" loading="lazy" />
+                              ) : (
+                                <span className="admin-product-image-placeholder">—</span>
+                              )}
+                              <span>{product.name || 'Unnamed product'}</span>
+                            </td>
+                            <td>{product.brand || '—'}</td>
+                            <td>{product.category_name || product.categoryId?.category_name || 'Uncategorized'}</td>
+                            <td>
+                              {Number.isFinite(Number(product.price))
+                                ? `₹${Number(product.price).toLocaleString('en-IN')}`
+                                : '—'}
+                            </td>
+                            <td>{Number.isFinite(Number(product.stock)) ? product.stock : '—'}</td>
+                            <td>
+                              {product.createdAt
+                                ? new Date(product.createdAt).toLocaleDateString('en-IN')
+                                : '—'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {!productsLoading && !productsError && products.length > 0 && (
+                  <p className="admin-category-count">
+                    Showing {filteredProducts.length} of {products.length} products
+                  </p>
+                )}
+              </>
+            ) : activePage === 'Categories' ? (
               <>
                 <div className="admin-category-toolbar">
                   <input
@@ -761,7 +919,7 @@ export default function AdminPanel() {
                   here. Connect your backend API to display real data.
                 </p>
 
-                {['Products', 'Categories', 'Sellers', 'Customers'].includes(
+                {['Categories', 'Sellers', 'Customers'].includes(
                   activePage
                 ) && (
                   <button

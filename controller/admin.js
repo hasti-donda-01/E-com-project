@@ -101,54 +101,37 @@ export const getalluser = async (req, res) => {
 
 export const getallproducts = async (req, res) => {
     try {
+        const parsedPage = Number.parseInt(req.query.page, 10);
+        const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+        const perPage = 24;
+        const totalProducts = await Product.countDocuments();
+        const totalPages = Math.ceil(totalProducts / perPage);
+        const products = await Product.find()
+            .populate('categoryId', 'category_name')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .lean();
 
-
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 3;
-        const totlaPost = await Product.countDocuments();
-        const totalpage = Math.ceil(totlaPost / perPage);
-        if (page > totalpage) {
-            return res.status(404).json({
-                message: "page not found",
-                success: false
-            })
-        }
-
-        const products = await Product.aggregate([
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "categoryId",
-                    foreignField: "_id",
-                    as: "result"
-                }
-            },
-            {
-                $unwind: "$result"
-            },
-            {
-                $project: {
-                    price: 1,
-                    brand: 1,
-                    image: 1,
-                    category_name: "$result.category_name",
-                    category_Image: "$result.category_Image",
-                    createdAt: 1,
-                    updatedAt: 1
-                }
-            }
-        ]).skip((page - 1) * perPage).limit(perPage).exec();
-        console.log(products)
         return res.status(200).json({
-            message: "products get successfully",
-            data: [products, "totalpage :  " + totalpage, "page : " + page],
+            message: "Products fetched successfully",
+            data: products.map((product) => ({
+                ...product,
+                category_name: product.categoryId?.category_name || null
+            })),
+            pagination: {
+                page,
+                perPage,
+                totalProducts,
+                totalPages
+            },
             success: true
-        })
+        });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: error.message
-        })
+        });
     }
 }
 
