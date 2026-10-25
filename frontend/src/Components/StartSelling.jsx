@@ -177,6 +177,7 @@ export default function StartSelling() {
         try {
             const res = await fetch(VERIFY_OTP_URL, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -193,8 +194,13 @@ export default function StartSelling() {
                 return
             }
 
-            setMessage('Email verified successfully! You can now log in.')
-            setTimeout(() => navigate('/SupplierLogin'), 1200)
+            if (String(data.data?.role).toLowerCase() === 'seller') {
+                setMessage('Email verified. Your seller account is active and you are now signed in.')
+                setTimeout(() => navigate('/SupplierDashboard', { replace: true }), 800)
+            } else {
+                setMessage('Email verified successfully! You can now log in.')
+                setTimeout(() => navigate('/SupplierLogin'), 1200)
+            }
         } catch {
             setMessage('Unable to verify OTP. Please try again.')
         } finally {

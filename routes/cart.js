@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/addtocart', auth(["customer"]), addtocart);
 router.delete('/removeproductfromcart/:id', auth(["customer"]), removeproductfromcart)
 router.get('/getcartofuser', auth(["customer"]), getcartofuser)
-router.get('/updatequantity/:id', auth(["customer"]), updatequantity);
+router.patch('/updatequantity/:id', auth(["customer"]), updatequantity);
 router.delete('/clearcart', auth(["customer"]), clearcart)
 
 

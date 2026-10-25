@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { User } from '../models/user.js';
+import { Customer } from '../models/customer.js';
 
 export const auth = (role) => async (req, res, next) => {
     try {
@@ -37,22 +38,27 @@ export const auth = (role) => async (req, res, next) => {
         }
 
         const decode = jwt.verify(token, process.env.PRIVATEKEY);
-        const user = await User.findOne({ _id: decode.id })
+        const isCustomerToken = String(decode.role).toLowerCase() === 'customer';
+        let user = isCustomerToken
+            ? await Customer.findById(decode.id)
+            : await User.findById(decode.id);
+        if (!user && isCustomerToken) user = await User.findById(decode.id);
         if (!user) {
             return res.status(404).json({
                 message: "user not found",
                 success: false
             })
         }
-        if (user.isActive == false) {
+        if (user.isActive === false) {
             return res.status(403).json({
                 message: "Your account is blocked",
                 success: false
             })
         }
         req.user = user
+        req.authRole = decode.role || user.role;
         const allowed = [].concat(role).map(r => r.toLowerCase());
-        if (!allowed.includes(String(user.role).toLowerCase())) {
+        if (!allowed.includes(String(req.authRole).toLowerCase())) {
             return res.status(403).json({
                 success: false,
                 message: `This account does not have the required role: ${allowed.join(" or ")}`

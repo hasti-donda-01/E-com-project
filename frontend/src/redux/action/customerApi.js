@@ -7,7 +7,8 @@ export const addCustomer = createAsyncThunk("customer/addCustomer", async (data,
     try {
         const response = await axios.post(
             `${API_BASE_URL.replace(/\/$/, '')}/seller/customer/send-otp`,
-            data
+            data,
+            { withCredentials: true }
         )
         return response.data
     } catch (error) {
@@ -21,8 +22,13 @@ export const verifyCustomer = createAsyncThunk("customer/verifyCustomer", async 
     try {
         const response = await axios.post(
             `${API_BASE_URL.replace(/\/$/, '')}/seller/customer/verify-otp`,
-            data
+            data,
+            { withCredentials: true }
         )
+        if (!response.data?.token) {
+            throw new Error('Customer login did not return an access token.')
+        }
+        sessionStorage.setItem('customerAccessToken', response.data.token)
         return response.data
     } catch (error) {
         return rejectWithValue(

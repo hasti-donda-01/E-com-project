@@ -182,14 +182,42 @@ export const verifyOTP = async (req, res) => {
                 success: false
             });
         }
-        await seller.updateOne({
-            otp: null, otpExpireAt: null,
-            isVerify: true, isActive: true
-        })
+        seller.otp = null;
+        seller.otpExpireAt = null;
+        seller.isVerify = true;
+        seller.isActive = true;
+
+        const isSeller = String(seller.role).toLowerCase() === "seller";
+        if (isSeller) {
+            seller.isLogin = true;
+        }
+        await seller.save();
+
+        if (isSeller) {
+            const token = jwt.sign(
+                { email: seller.email, id: seller._id, name: seller.name, role: seller.role },
+                process.env.PRIVATEKEY,
+                { expiresIn: "1d" }
+            );
+            const secure = req.secure || process.env.NODE_ENV === "production";
+            res.cookie("AccessToken", token, {
+                httpOnly: true,
+                secure,
+                sameSite: secure ? "none" : "lax",
+                maxAge: 24 * 60 * 60 * 1000,
+                path: "/"
+            });
+        }
+
         return res.status(200).json({
-            messsage: "OTP Verified",
-            success: true
-        })
+            message: isSeller ? "Seller verified and logged in successfully" : "OTP Verified",
+            success: true,
+            data: {
+                name: seller.name,
+                email: seller.email,
+                role: seller.role
+            }
+        });
     } catch (error) {
         return res.status(500).json({
             message: error.message,
@@ -309,14 +337,17 @@ export const getUserSession = (req, res) => res.status(200).json({
     data: {
         name: req.user.name,
         email: req.user.email,
-        role: req.user.role
+        phone: req.user.phone,
+        role: req.authRole || req.user.role
     }
 });
 
 export const logoutUser = async (req, res) => {
     try {
-        req.user.isLogin = false;
-        await req.user.save();
+        if (req.user.schema.path("isLogin")) {
+            req.user.isLogin = false;
+            await req.user.save();
+        }
         const secure = req.secure || process.env.NODE_ENV === "production";
         res.clearCookie("AccessToken", {
             httpOnly: true,

@@ -39,7 +39,7 @@ export default function VerifyOtp() {
             setSeconds(60)
             setShowOtp(true)
             // navigate('/')
-        } catch (e) {
+        } catch {
             // error is shown from redux state below
         }
     }
@@ -73,7 +73,9 @@ export default function VerifyOtp() {
         try {
             await dispatch(addCustomer({ phone: phoneNumber })).unwrap()
             setSeconds(60)
-        } catch (e) { }
+        } catch {
+            // The rejected request message is displayed from Redux state.
+        }
     }
 
     const verifyOtp = async () => {
@@ -81,8 +83,12 @@ export default function VerifyOtp() {
         if (code.length !== 6) return
         try {
             await dispatch(verifyCustomer({ phone: phoneNumber, otp: code })).unwrap()
-            navigate('/')
+            navigate(location.state?.returnTo || '/', {
+                state: location.state?.resumeAddToCart ? { resumeAddToCart: true } : null,
+                replace: true
+            })
         } catch {
+            // The rejected request message is displayed from Redux state.
         }
     }
 
@@ -130,7 +136,7 @@ export default function VerifyOtp() {
 
                     {!showOtp ? (
                         <>
-                            <h6 font-size="20px" font-weight="bold" color="greyBase" className="sc-dOfePm bzKJDM">Sign Up to view your profile</h6><div className="sc-kFkjun cuomGy Authstyled__StyledCard-sc-2hunyy-2 icAkSj" color="white"><div className="CountryDropdown__StyledWrapper-sc-xzyn0c-0 eIhKkE"><span font-size="10px" font-weight="book" color="greyT2" className="sc-dOfePm czKNKx">Country</span><span font-size="16px" font-weight="demi" color="greyBase" className="sc-dOfePm fJsHQf">🇮🇳 +91</span><div className="sc-jXuTBK kUFBUY"></div></div>                <div className="Input__InputContainer-sc-1goybxj-0 gcwUCC"><input placeholder=" phone number" type="tel" maxLength="10" autoComplete="off" className="Input__InputField-sc-1goybxj-1 chAFGe" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value.replace(/\D/g, '').slice(0, 10))} /></div></div>
+                            <h6 font-size="20px" font-weight="bold" color="greyBase" className="sc-dOfePm bzKJDM">Login or sign up to continue</h6><div className="sc-kFkjun cuomGy Authstyled__StyledCard-sc-2hunyy-2 icAkSj" color="white"><div className="CountryDropdown__StyledWrapper-sc-xzyn0c-0 eIhKkE"><span font-size="10px" font-weight="book" color="greyT2" className="sc-dOfePm czKNKx">Country</span><span font-size="16px" font-weight="demi" color="greyBase" className="sc-dOfePm fJsHQf">🇮🇳 +91</span><div className="sc-jXuTBK kUFBUY"></div></div>                <div className="Input__InputContainer-sc-1goybxj-0 gcwUCC"><input placeholder=" phone number" type="tel" maxLength="10" autoComplete="off" className="Input__InputField-sc-1goybxj-1 chAFGe" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value.replace(/\D/g, '').slice(0, 10))} /></div></div>
 
                             <button type="submit" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" font-size="15px" onClick={submitData} disabled={status === 'loading'}><div className="sc-jOTjWM knCwk"><span font-size="18px" font-weight="demi" color="#ffffff" className="sc-dOfePm lgUtFF">{status === 'loading' ? 'Saving...' : 'Continue'}</span></div></button>
                             {error && <p role="alert">{error}</p>}

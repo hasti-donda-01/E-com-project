@@ -150,6 +150,14 @@ export const verifyCustomerOtp = async (req, res) => {
             { expiresIn: "7d" }
         );
 
+        const secure = req.secure || process.env.NODE_ENV === "production";
+        res.cookie("AccessToken", token, {
+            httpOnly: true,
+            secure,
+            sameSite: secure ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/"
+        });
         return res.status(200).json({
             message: "Logged in successfully",
             success: true,

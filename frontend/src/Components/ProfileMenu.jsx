@@ -19,8 +19,12 @@ export default function ProfileMenu({ variant = 'customer' }) {
 
         const loadSession = async () => {
             try {
+                const customerToken = sessionStorage.getItem('customerAccessToken');
                 const response = await fetch(`${API_BASE_URL}/seller/session`, {
                     credentials: 'include',
+                    headers: customerToken
+                        ? { Authorization: `Bearer ${customerToken}` }
+                        : undefined,
                     signal: controller.signal
                 });
                 if (response.ok) {
@@ -29,6 +33,11 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         throw new Error('The account session response was invalid.');
                     }
                     setUser(payload.data);
+                } else if (
+                    response.status === 404 &&
+                    sessionStorage.getItem('customerAccessToken')
+                ) {
+                    sessionStorage.removeItem('customerAccessToken');
                 } else if (![400, 401, 403].includes(response.status)) {
                     throw new Error(`Could not check account session (${response.status}).`);
                 }
@@ -50,15 +59,22 @@ export default function ProfileMenu({ variant = 'customer' }) {
         setError('');
         setSigningOut(true);
         try {
+            const customerToken = sessionStorage.getItem('customerAccessToken');
             const response = await fetch(`${API_BASE_URL}/seller/logout`, {
                 method: 'POST',
-                credentials: 'include'
+                credentials: 'include',
+                headers: customerToken
+                    ? { Authorization: `Bearer ${customerToken}` }
+                    : undefined
             });
             const payload = await response.json();
             if (!response.ok || payload.success === false) {
                 throw new Error(payload.message || `Sign out failed (${response.status}).`);
             }
             const isAdmin = String(user?.role).toLowerCase() === 'admin';
+            if (String(user?.role).toLowerCase() === 'customer') {
+                sessionStorage.removeItem('customerAccessToken');
+            }
             setUser(null);
             navigate(isAdmin ? '/admin' : '/', { replace: true });
         } catch (signOutError) {
@@ -88,7 +104,14 @@ export default function ProfileMenu({ variant = 'customer' }) {
             <div className="account-menu-dropdown">
                 {user ? (
                     <>
-                        <h3>Hello, {user.name || 'there'}</h3>
+                        <h3>
+                            {String(user.role).toLowerCase() === 'customer'
+                                ? 'Your account'
+                                : `Hello, ${user.name || 'there'}`}
+                        </h3>
+                        {String(user.role).toLowerCase() === 'customer' && user.phone && (
+                            <p className="account-menu-help">Mobile number: {user.phone}</p>
+                        )}
                         {error && <p className="account-menu-error" role="alert">{error}</p>}
                         <button
                             className="account-menu-signout"
@@ -109,7 +132,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
                             type="button"
                             onClick={() => navigate('/customer-signup')}
                         >
-                            Sign Up
+                            Login / Sign up
                         </button>
                         <div className="profile-dropdown-items">My Orders</div>
                         <div className="profile-dropdown-items">Delete Account</div>

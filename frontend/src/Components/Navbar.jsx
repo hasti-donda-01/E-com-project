@@ -70,15 +70,15 @@ export default function Navbar() {
                     </div>
 
                     {/* Cart */}
-                    <a onClick={supplier}>
+                    <button type="button" className="cart-nav-button" onClick={() => navigate('/cart')}>
                         <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
                             <BsCart2 height={25} width={25} color='#222' />
 
-                            <span  className="sc-dOfePm kBqyGz hover header-right">
+                            <span className="sc-dOfePm kBqyGz hover header-right">
                                 Cart
                             </span>
                         </div>
-                    </a>
+                    </button>
                 </div>
             </div>
 
