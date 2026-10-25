@@ -54,6 +54,11 @@ const productSchema = mongoose.Schema({
         max: 5,
         default: null
     },
+    attributes: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
 
 }, {
     timestamps: true

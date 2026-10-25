@@ -16,8 +16,35 @@ const initialForm = {
     price: '',
     discount: '',
     stock: '',
-    rating: ''
+    rating: '',
+    attributes: {}
 };
+
+const productFilterAttributes = [
+    ['gender', 'Gender'],
+    ['color', 'Color'],
+    ['fabric', 'Fabric'],
+    ['size', 'Size'],
+    ['occasion', 'Occasion'],
+    ['combo', 'Combo'],
+    ['meeshoDeal', 'Meesho Deal'],
+    ['meeshoMall', 'Meesho Mall'],
+    ['fitShape', 'Fit / Shape'],
+    ['countryOfOrigin', 'Country of Origin'],
+    ['material', 'Material'],
+    ['bottomLength', 'Bottom Length'],
+    ['printPatternType', 'Print or Pattern Type'],
+    ['ornamentation', 'Ornamentation'],
+    ['bottomPatternType', 'Bottom Pattern Type'],
+    ['surfaceStyling', 'Surface Styling'],
+    ['neckType', 'Neck Type'],
+    ['loomType', 'Loom Type'],
+    ['compatibleModels', 'Compatible Models'],
+    ['waistRise', 'Waist Rise'],
+    ['bottomType', 'Bottom Type'],
+    ['dialDesign', 'Dial Design'],
+    ['type', 'Type']
+];
 
 const inr = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
@@ -215,6 +242,16 @@ export default function AddProduct() {
         body.append('discount', form.discount);
         body.append('rating', form.rating);
         body.append('categoryId', form.categoryId.trim());
+        body.append('attributes', JSON.stringify(
+            Object.fromEntries(
+                Object.entries(form.attributes)
+                    .map(([key, value]) => [
+                        key,
+                        value.split(',').map((item) => item.trim()).filter(Boolean)
+                    ])
+                    .filter(([, values]) => values.length > 0)
+            )
+        ));
         body.append('image', image.file);
 
         setSubmitting(true);
@@ -449,6 +486,31 @@ export default function AddProduct() {
                                         className={inputClass(errors.rating)}
                                     />
                                 </Field>
+                            </div>
+                        </Card>
+
+                        <Card
+                            title="Product attributes"
+                            hint="Optional. Add comma-separated values so customers can find this product with filters."
+                        >
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {productFilterAttributes.map(([key, label]) => (
+                                    <label key={key} className="block text-sm font-semibold text-slate-700">
+                                        {label}
+                                        <input
+                                            value={form.attributes[key] || ''}
+                                            onChange={(event) => setForm((current) => ({
+                                                ...current,
+                                                attributes: {
+                                                    ...current.attributes,
+                                                    [key]: event.target.value
+                                                }
+                                            }))}
+                                            placeholder={key === 'gender' ? 'e.g. Women, Girls' : 'Optional'}
+                                            className={`${inputClass(false)} mt-1`}
+                                        />
+                                    </label>
+                                ))}
                             </div>
                         </Card>
 

@@ -9,6 +9,44 @@ const API_BASE_URL = (
 
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
+const attributeFilterGroups = [
+  ['gender', 'Gender'],
+  ['color', 'Color'],
+  ['fabric', 'Fabric'],
+  ['size', 'Size'],
+  ['occasion', 'Occasion'],
+  ['combo', 'Combo'],
+  ['meeshoDeal', 'Meesho Deal'],
+  ['meeshoMall', 'Meesho Mall'],
+  ['fitShape', 'Fit / Shape'],
+  ['countryOfOrigin', 'Country of Origin'],
+  ['material', 'Material'],
+  ['bottomLength', 'Bottom Length'],
+  ['printPatternType', 'Print or Pattern Type'],
+  ['ornamentation', 'Ornamentation'],
+  ['bottomPatternType', 'Bottom Pattern Type'],
+  ['surfaceStyling', 'Surface Styling'],
+  ['neckType', 'Neck Type'],
+  ['loomType', 'Loom Type'],
+  ['compatibleModels', 'Compatible Models'],
+  ['waistRise', 'Waist Rise'],
+  ['bottomType', 'Bottom Type'],
+  ['dialDesign', 'Dial Design'],
+  ['type', 'Type']
+];
+
+const getAttributeValues = (product, key) => {
+  const attributes = product.attributes instanceof Map
+    ? Object.fromEntries(product.attributes)
+    : product.attributes || {};
+  const value = attributes[key] ?? product[key];
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (value === undefined || value === null || value === '') return [];
+  return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+};
+
+const normalizeFilterValue = (value) => String(value).trim().toLowerCase();
+
 export default function ProductCard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,6 +54,12 @@ export default function ProductCard() {
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState('');
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [attributeFilters, setAttributeFilters] = useState({});
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minimumRating, setMinimumRating] = useState('');
+  const [minimumDiscount, setMinimumDiscount] = useState('');
   const [sort, setSort] = useState('relevance');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,10 +125,31 @@ export default function ProductCard() {
       String(category.category_name || '').toLowerCase().includes(categorySearch.trim().toLowerCase())
     );
 
+  const allPrices = products
+    .map((product) => Number(product.discountPrice) || Number(product.price))
+    .filter((price) => Number.isFinite(price) && price > 0);
+  const priceBounds = {
+    min: allPrices.length ? Math.floor(allPrices.reduce((min, price) => Math.min(min, price), Infinity)) : 0,
+    max: allPrices.length ? Math.ceil(allPrices.reduce((max, price) => Math.max(max, price), -Infinity)) : 10000
+  };
+
   const filteredProducts = products
     .filter((product) =>
       activeCategoryIds.length === 0 || activeCategoryIds.includes(getCategoryId(product))
     )
+    .filter((product) => {
+      const currentPrice = Number(product.discountPrice) || Number(product.price) || 0;
+      return (!minPrice || currentPrice >= Number(minPrice)) &&
+        (!maxPrice || currentPrice <= Number(maxPrice));
+    })
+    .filter((product) => !minimumRating || Number(product.rating || 0) >= Number(minimumRating))
+    .filter((product) => !minimumDiscount || Number(product.discountPercent || 0) >= Number(minimumDiscount))
+    .filter((product) => attributeFilterGroups.every(([key]) => {
+      const selectedValues = attributeFilters[key] || [];
+      if (selectedValues.length === 0) return true;
+      const productValues = getAttributeValues(product, key).map(normalizeFilterValue);
+      return selectedValues.some((value) => productValues.includes(normalizeFilterValue(value)));
+    }))
     .sort((first, second) => {
       if (sort === 'price-low') {
         return Number(first.discountPrice || first.price) - Number(second.discountPrice || second.price);
@@ -106,6 +171,56 @@ export default function ProductCard() {
     if (routeCategoryId) setSearchParams({}, { replace: true });
   };
 
+  const toggleAttributeFilter = (key, value) => {
+    setAttributeFilters((current) => {
+      const selected = current[key] || [];
+      const next = selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected, value];
+      return { ...current, [key]: next };
+    });
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setAttributeFilters({});
+    setMinPrice('');
+    setMaxPrice('');
+    setMinimumRating('');
+    setMinimumDiscount('');
+    if (routeCategoryId) setSearchParams({}, { replace: true });
+  };
+
+  const hasActiveFilters = activeCategoryIds.length > 0 ||
+    Object.values(attributeFilters).some((values) => values.length > 0) ||
+    Boolean(minPrice || maxPrice || minimumRating || minimumDiscount);
+
+  const renderAttributeFilterGroup = ([key, label]) => {
+    const values = [...new Set(products.flatMap((product) => getAttributeValues(product, key)))]
+      .sort((first, second) => first.localeCompare(second));
+    return (
+      <details className="product-filter-group" key={key}>
+        <summary>{label}</summary>
+        {values.length ? (
+          <div className="attribute-filter-list">
+            {values.map((value) => (
+              <label className="category-filter-option" key={value}>
+                <input
+                  type="checkbox"
+                  checked={(attributeFilters[key] || []).includes(value)}
+                  onChange={() => toggleAttributeFilter(key, value)}
+                />
+                <span>{value}</span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <p className="category-filter-empty">No filter values available yet.</p>
+        )}
+      </details>
+    );
+  };
+
   return (
     <section className="products-page" id="products-catalog" aria-label="Products">
       <h1 className="products-page-title">Products For You</h1>
@@ -125,49 +240,143 @@ export default function ProductCard() {
           <div className="product-filter">
             <div className="product-filter-heading">
               <h2>FILTERS</h2>
-              <p>{loading ? 'Loading products…' : `${products.length} Products`}</p>
+              <p>{loading ? 'Loading products…' : `${filteredProducts.length} Products`}</p>
             </div>
-            <div className="product-category-heading">
-              <h3>Category</h3>
-              <span aria-hidden="true">⌃</span>
-            </div>
-            <label className="category-search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                type="search"
-                placeholder="Search"
-                value={categorySearch}
-                onChange={(event) => setCategorySearch(event.target.value)}
-                aria-label="Search categories"
-              />
-            </label>
-            <div className="category-filter-list">
-              {availableCategories.map((category) => (
-                <label className="category-filter-option" key={category._id}>
-                  <input
-                    type="checkbox"
-                    checked={activeCategoryIds.includes(String(category._id))}
-                    onChange={() => toggleCategory(String(category._id))}
-                  />
-                  <span>{category.category_name}</span>
-                </label>
-              ))}
-              {!loading && !error && availableCategories.length === 0 && (
-                <p className="category-filter-empty">
-                  {categorySearch ? 'No matching categories.' : 'No categories found.'}
-                </p>
+            <details className="product-filter-group" open>
+              <summary>Category</summary>
+              <label className="category-search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  type="search"
+                  placeholder="Search"
+                  value={categorySearch}
+                  onChange={(event) => setCategorySearch(event.target.value)}
+                  aria-label="Search categories"
+                />
+              </label>
+              <div className="category-filter-list">
+                {(showAllCategories ? availableCategories : availableCategories.slice(0, 6)).map((category) => (
+                  <label className="category-filter-option" key={category._id}>
+                    <input
+                      type="checkbox"
+                      checked={activeCategoryIds.includes(String(category._id))}
+                      onChange={() => toggleCategory(String(category._id))}
+                    />
+                    <span>{category.category_name}</span>
+                  </label>
+                ))}
+                {!loading && !error && availableCategories.length === 0 && (
+                  <p className="category-filter-empty">
+                    {categorySearch ? 'No matching categories.' : 'No categories found.'}
+                  </p>
+                )}
+              </div>
+              {availableCategories.length > 6 && (
+                <button
+                  type="button"
+                  className="show-more-filters"
+                  onClick={() => setShowAllCategories((show) => !show)}
+                >
+                  {showAllCategories ? 'Show Less' : 'Show More'}
+                </button>
               )}
-            </div>
-            {activeCategoryIds.length > 0 && (
-              <button
-                type="button"
-                className="clear-product-filters"
-                onClick={() => {
-                  setSelectedCategories([]);
-                  if (routeCategoryId) setSearchParams({}, { replace: true });
-                }}
-              >
-                Clear filters
+            </details>
+
+            <details className="product-filter-group">
+              <summary>Gender</summary>
+              <div className="gender-filter-options">
+                {['Boys', 'Girls', 'Men', 'Women'].map((gender) => (
+                  <label key={gender}>
+                    <input
+                      type="checkbox"
+                      checked={(attributeFilters.gender || []).includes(gender)}
+                      onChange={() => toggleAttributeFilter('gender', gender)}
+                    />
+                    <span>{gender}</span>
+                  </label>
+                ))}
+              </div>
+            </details>
+
+            {attributeFilterGroups.slice(1, 4).map(renderAttributeFilterGroup)}
+
+            <details className="product-filter-group">
+              <summary>Price</summary>
+              <div className="price-filter-fields">
+                <label>
+                  Min
+                  <input
+                    type="number"
+                    min={priceBounds.min}
+                    max={priceBounds.max}
+                    placeholder={String(priceBounds.min)}
+                    value={minPrice}
+                    onChange={(event) => setMinPrice(event.target.value)}
+                  />
+                </label>
+                <span>to</span>
+                <label>
+                  Max
+                  <input
+                    type="number"
+                    min={priceBounds.min}
+                    max={priceBounds.max}
+                    placeholder={String(priceBounds.max)}
+                    value={maxPrice}
+                    onChange={(event) => setMaxPrice(event.target.value)}
+                  />
+                </label>
+              </div>
+            </details>
+
+            <details className="product-filter-group">
+              <summary>Rating</summary>
+              <div className="attribute-filter-list">
+                {[4, 3, 2, 1].map((rating) => (
+                  <label className="category-filter-option" key={rating}>
+                    <input
+                      type="radio"
+                      name="minimum-rating"
+                      checked={minimumRating === String(rating)}
+                      onChange={() => setMinimumRating(String(rating))}
+                    />
+                    <span>{rating}+ stars</span>
+                  </label>
+                ))}
+                {minimumRating && (
+                  <button type="button" className="show-more-filters" onClick={() => setMinimumRating('')}>
+                    Clear rating
+                  </button>
+                )}
+              </div>
+            </details>
+
+            <details className="product-filter-group">
+              <summary>Discount</summary>
+              <div className="attribute-filter-list">
+                {[10, 20, 30, 50].map((discount) => (
+                  <label className="category-filter-option" key={discount}>
+                    <input
+                      type="radio"
+                      name="minimum-discount"
+                      checked={minimumDiscount === String(discount)}
+                      onChange={() => setMinimumDiscount(String(discount))}
+                    />
+                    <span>{discount}% or more</span>
+                  </label>
+                ))}
+                {minimumDiscount && (
+                  <button type="button" className="show-more-filters" onClick={() => setMinimumDiscount('')}>
+                    Clear discount
+                  </button>
+                )}
+              </div>
+            </details>
+
+            {attributeFilterGroups.slice(4).map(renderAttributeFilterGroup)}
+            {hasActiveFilters && (
+              <button type="button" className="clear-product-filters" onClick={clearAllFilters}>
+                Clear all filters
               </button>
             )}
           </div>

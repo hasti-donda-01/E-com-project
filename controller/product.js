@@ -1,9 +1,16 @@
 import { Product } from "../models/product.js";
 import { cloudinary } from "../config/cloudinary.js";
 
+const productFilterAttributeKeys = new Set([
+    "gender", "color", "fabric", "size", "occasion", "combo", "meeshoDeal", "meeshoMall",
+    "fitShape", "countryOfOrigin", "material", "bottomLength", "printPatternType",
+    "ornamentation", "bottomPatternType", "surfaceStyling", "neckType", "loomType",
+    "compatibleModels", "waistRise", "bottomType", "dialDesign", "type"
+]);
+
 export const createProduct = async (req, res) => {
     try {
-        const { name, price, brand, stock, categoryId, discount, rating } = req.body;
+        const { name, price, brand, stock, categoryId, discount, rating, attributes: attributesJson } = req.body;
 
         if (!req.file) {
             return res.status(400).json({
@@ -16,6 +23,37 @@ export const createProduct = async (req, res) => {
         const numericStock = Number(stock);
         const numericDiscount = Number(discount);
         const numericRating = Number(rating);
+        let attributes = {};
+        if (attributesJson) {
+            try {
+                attributes = JSON.parse(attributesJson);
+            } catch {
+                return res.status(400).json({
+                    success: false,
+                    message: "Product attributes must be valid JSON."
+                });
+            }
+            if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Product attributes must be an object."
+                });
+            }
+        }
+        const cleanAttributes = {};
+        for (const [key, value] of Object.entries(attributes)) {
+            if (!productFilterAttributeKeys.has(key)) continue;
+            if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Product attribute "${key}" must be a list of text values.`
+                });
+            }
+            cleanAttributes[key] = value
+                .map((item) => item.trim().slice(0, 80))
+                .filter(Boolean)
+                .slice(0, 30);
+        }
 
         if (!name?.trim() || !brand?.trim() || !categoryId ||
             !Number.isFinite(numericPrice) || numericPrice <= 0 ||
@@ -39,7 +77,8 @@ export const createProduct = async (req, res) => {
             imagename: req.file.filename,
             discountPrice: numericPrice * (1 - numericDiscount / 100),
             discountPercent: numericDiscount,
-            rating: numericRating
+            rating: numericRating,
+            attributes: cleanAttributes
         };
 
         const product = await Product.create(payload);
