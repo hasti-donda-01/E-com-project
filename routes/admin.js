@@ -30,11 +30,15 @@ router.get('/getallproducts', auth(["Admin"]), getallproducts);
 router.delete('/deleteProduct/:id', auth(["Admin"]), deleteProduct)
 router.patch('/updateProduct/:id', auth(["Admin"]), updateAdminProduct);
 router.get('/accountstatus/:id', auth(["Admin"]), accountstatus);//block unblock user
+router.post('/accountstatus/:id', auth(["Admin"]), accountstatus);
+router.patch('/accountstatus/:id', auth(["Admin"]), accountstatus);
 router.get('/getallorder', auth(["Admin"]), monitorallorder);
 router.get('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);
 router.get('/getcustomerdetail/:id', auth(["Admin"]), getCustomerDetails);//monitor customer activity
 router.post('/sellerapprove/:id', auth(["Admin"]), approveSeller);
+router.patch('/sellerapprove/:id', auth(["Admin"]), approveSeller);
 router.post('/sellerreject/:id', auth(["Admin"]), rejectSeller);
+router.patch('/sellerreject/:id', auth(["Admin"]), rejectSeller);
 router.get('/verifySeller/:id', auth(["Admin"]), verifySeller);
 
 router.get('/getAllSellerPayments', auth(["Admin"]), getAllSellerPayments)

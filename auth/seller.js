@@ -281,9 +281,9 @@ const authenticateUser = async (req, res, {
             });
         }
 
-        if (user.isActive === false) {
+        if (user.isActive === false || user.status === "blocked") {
             return res.status(403).json({
-                message: "Your account is blocked. Contact admin.",
+                message: "Your seller account has been blocked by admin. Contact support.",
                 success: false
             });
         }
@@ -332,15 +332,37 @@ export const login = (req, res) =>
 export const adminLogin = (req, res) =>
     authenticateUser(req, res, { adminOnly: true, cookieSession: true });
 
-export const getUserSession = (req, res) => res.status(200).json({
-    success: true,
-    data: {
-        name: req.user.name,
-        email: req.user.email,
-        phone: req.user.phone,
-        role: req.authRole || req.user.role
+export const getUserSession = async (req, res) => {
+    try {
+        let sellerInfo = null;
+        const role = String(req.authRole || req.user.role).toLowerCase();
+        if (role === 'seller') {
+            sellerInfo = await Seller.findOne({ userId: req.user._id });
+        }
+        return res.status(200).json({
+            success: true,
+            data: {
+                id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                phone: req.user.phone,
+                role: req.authRole || req.user.role,
+                status: req.user.status || 'unblocked',
+                isActive: req.user.isActive ?? true,
+                isApproved: sellerInfo ? sellerInfo.isApproved : true,
+                isRejected: sellerInfo ? sellerInfo.isRejected : false,
+                rejectionReason: sellerInfo ? sellerInfo.rejectionReason : null,
+                storeName: sellerInfo ? sellerInfo.storeName : null,
+                sellerId: sellerInfo ? sellerInfo._id : null
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-});
+};
 
 export const logoutUser = async (req, res) => {
     try {

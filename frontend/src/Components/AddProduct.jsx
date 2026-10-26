@@ -98,9 +98,27 @@ export default function AddProduct() {
     const [submitting, setSubmitting] = useState(false);
     const [switchingAccount, setSwitchingAccount] = useState(false);
     const [result, setResult] = useState(null);
+    const [sellerSession, setSellerSession] = useState(null);
     const fileRef = useRef(null);
     const imageRef = useRef(image);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const loadSellerSession = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/seller/session`, {
+                    credentials: 'include'
+                });
+                const payload = await res.json();
+                if (res.ok && payload.success) {
+                    setSellerSession(payload.data);
+                }
+            } catch {
+                // Ignore network error on session check
+            }
+        };
+        loadSellerSession();
+    }, []);
 
     useEffect(() => {
         imageRef.current = image;
@@ -334,6 +352,43 @@ export default function AddProduct() {
                     <h1 className="mt-2 text-2xl font-extrabold tracking-tight">Add product</h1>
                     <p className="mt-1 text-sm text-slate-500">All fields are required.</p>
                 </div>
+
+                {/* Seller approval & block status warning banners */}
+                {sellerSession && !sellerSession.isApproved && !sellerSession.isRejected && (
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                        <span className="text-xl shrink-0 mt-0.5">⏳</span>
+                        <div>
+                            <p className="font-bold">Seller Account Pending Admin Approval</p>
+                            <p className="mt-0.5 text-xs text-amber-700">
+                                Your seller registration is awaiting review and approval by the platform admin. Adding new products will be activated once your store is approved.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {sellerSession && (sellerSession.status === 'blocked' || sellerSession.isActive === false) && (
+                    <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                        <span className="text-xl shrink-0 mt-0.5">🚫</span>
+                        <div>
+                            <p className="font-bold">Seller Account Blocked</p>
+                            <p className="mt-0.5 text-xs text-rose-700">
+                                This seller account is currently blocked by administrator. Adding products is disabled. Please contact support.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {sellerSession?.isRejected && (
+                    <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                        <span className="text-xl shrink-0 mt-0.5">✕</span>
+                        <div>
+                            <p className="font-bold">Seller Registration Rejected</p>
+                            <p className="mt-0.5 text-xs text-rose-700">
+                                Your seller application was rejected. {sellerSession.rejectionReason ? `Reason: ${sellerSession.rejectionReason}.` : ''} Please contact admin.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {result && (
                     <div
@@ -599,13 +654,39 @@ export default function AddProduct() {
                                 </div>
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full rounded-xl bg-[#9f2089] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#831b71] disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {submitting ? 'Saving…' : 'Add product'}
-                            </button>
+                            {(() => {
+                                const isBlocked = sellerSession?.status === 'blocked' || sellerSession?.isActive === false;
+                                const isPending = sellerSession && !sellerSession.isApproved && !sellerSession.isRejected;
+                                const isRejected = Boolean(sellerSession?.isRejected);
+                                const isDisabled = submitting || isBlocked || isPending || isRejected;
+
+                                return (
+                                    <button
+                                        type="submit"
+                                        disabled={isDisabled}
+                                        className="w-full rounded-xl bg-[#9f2089] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#831b71] disabled:cursor-not-allowed disabled:opacity-60"
+                                        title={
+                                            isPending
+                                                ? 'Account pending admin approval'
+                                                : isBlocked
+                                                    ? 'Account is blocked by admin'
+                                                    : isRejected
+                                                        ? 'Account rejected by admin'
+                                                        : 'Add product'
+                                        }
+                                    >
+                                        {submitting
+                                            ? 'Saving…'
+                                            : isPending
+                                                ? 'Pending Admin Approval'
+                                                : isBlocked
+                                                    ? 'Account Blocked'
+                                                    : isRejected
+                                                        ? 'Application Rejected'
+                                                        : 'Add product'}
+                                    </button>
+                                );
+                            })()}
                             <Link
                                 to="/supplier/products"
                                 className="block w-full rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-600 hover:bg-slate-50"

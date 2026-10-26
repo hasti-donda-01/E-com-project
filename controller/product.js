@@ -1,4 +1,5 @@
 import { Product } from "../models/product.js";
+import { Seller } from "../models/seller.js";
 import { cloudinary } from "../config/cloudinary.js";
 
 const productFilterAttributeKeys = new Set([
@@ -10,6 +11,25 @@ const productFilterAttributeKeys = new Set([
 
 export const createProduct = async (req, res) => {
     try {
+        // Verify seller approval and status
+        if (req.user && String(req.user.role).toLowerCase() === 'seller') {
+            if (req.user.status === 'blocked' || req.user.isActive === false) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Your seller account has been blocked by admin. You cannot add products."
+                });
+            }
+            const seller = await Seller.findOne({ userId: req.user._id || req.user.id });
+            if (seller && !seller.isApproved) {
+                return res.status(403).json({
+                    success: false,
+                    message: seller.isRejected
+                        ? `Your seller application was rejected: ${seller.rejectionReason || "Please contact admin"}`
+                        : "Your seller account is pending admin approval. You can add products once approved."
+                });
+            }
+        }
+
         const { name, price, brand, stock, categoryId, discount, rating, attributes: attributesJson } = req.body;
 
         if (!req.file) {

@@ -1,89 +1,133 @@
-import React, { useState } from 'react'
-import mlogo from './Images/mlogo.svg'
+import { useState } from 'react';
+import { FiArrowRight, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
+import InvestorFooter from './InvestorFooter';
+import InvestorHeader from './InvestorHeader';
+import stakeholderAmit from './Images/amit.jpg';
+import stakeholderMohit from './Images/mohit.jpg';
+import stakeholderSuman from './Images/suman.jpg';
+import appPreview from './Images/mallimg.jpg';
 
-const MAROON = '#570d48'
-const PINK = '#9f2089'
+const stakeholders = [
+    { name: 'Users', detail: 'Everyday entrepreneurs', image: stakeholderAmit },
+    { name: 'Sellers', detail: 'Small businesses', image: stakeholderMohit },
+    { name: 'Logistics Providers', detail: 'Delivery partners', image: stakeholderSuman },
+    { name: 'Content Creators', detail: 'Creator community', image: stakeholderAmit }
+];
 
-const NAV_ITEMS = [
-    { label: 'Home', href: '/investor-relations' },
-    { label: 'Financials', href: '/investor-relations/financials' },
-    { label: 'Governance', href: '/investor-relations/governance' },
-    { label: 'Announcements', href: '/investor-relations/announcements' },
-    { label: 'Resources', href: '/investor-relations/resources' },
-]
-
-/* Meesho app-style logo: maroon rounded square, orange "m", small white "meesho" */
-const MeeshoMark = () => (
-    <svg width="58" height="58" viewBox="0 0 58 58" fill="none" aria-hidden="true">
-        <rect width="58" height="58" rx="9" fill={MAROON} />
-        <path
-            d="M13 36V25.5c0-4.2 2.6-7 6.2-7 2.6 0 4.3 1.3 5.3 3.2 1-1.9 2.7-3.2 5.3-3.2 3.7 0 6.2 2.8 6.2 7V36"
-            stroke="#f9a11b"
-            strokeWidth="5.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            transform="translate(2.5 0)"
-        />
-        <text x="29" y="48" textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#fff" fontFamily="inherit">
-            meesho
-        </text>
-    </svg>
-)
+const experiences = {
+    Consumer: {
+        description: 'Discover quality products across fashion, home, beauty and more at affordable prices.',
+        features: ['Assisted Shopping', 'Entertainment', 'Hyper personalisation + Value Retail', 'Vernacular'],
+        imageAlt: 'Preview of the Meesho shopping experience'
+    },
+    Seller: {
+        description: 'Grow your business online with tools that help you reach customers across India.',
+        features: ['Easy onboarding', 'Manage your catalogue', 'Track your orders', 'Business insights'],
+        imageAlt: 'Preview of tools for Meesho sellers'
+    }
+};
 
 export default function Inverster() {
-    const [active, setActive] = useState('Home')
-    const [hovered, setHovered] = useState('')
+    const [activeExperience, setActiveExperience] = useState('Consumer');
+    const experience = experiences[activeExperience];
 
     return (
-        <header style={{ width: '100%', background: '#fff', borderBottom: '1px solid #e5e5e5', fontFamily: 'inherit' }}>
-            <div
-                style={{
-                    maxWidth: 1186, margin: '0 auto',marginLeft:320, height: 110, padding: '0 20px', boxSizing: 'border-box',
-                    display: 'flex', alignItems: 'center', gap:100
-                }}
-            >
-                {/* Left: logo + title */}
-                <a
-                    href="/investor-relations"
-                    style={{ display: 'flex', alignItems: 'center', gap: 15, textDecoration: 'none' }}
-                >
-                    <img src={mlogo} alt="" style={{width:"50px"}}/>
-                    <span style={{ fontSize: 24, fontWeight: 600, lineHeight: '30px', color: '#1a1a1a', width: 110 }}>
-                        Investor Relations
-                    </span>
-                </a>
+        <div className="investor-page">
+            <InvestorHeader />
+            <main>
+                <section className="investor-intro" id="home">
+                    <p className="investor-eyebrow">MEESHO INVESTOR RELATIONS</p>
+                    <h1>Meesho is democratising internet commerce for everyone</h1>
+                    <p>
+                        For every Indian household and small business, Meesho is building
+                        accessible and affordable commerce for a billion Indians.
+                    </p>
+                </section>
 
-                {/* Right: nav links */}
-                <nav style={{ display: 'flex', alignItems: 'center', gap: 39 }}>
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = active === item.label
-                        const isHover = hovered === item.label
-                        return (
-                            <a
-                                key={item.label}
-                                href={item.href}
-                                onClick={() => setActive(item.label)}
-                                onMouseEnter={() => setHovered(item.label)}
-                                onMouseLeave={() => setHovered('')}
-                                style={{
-                                    position: 'relative', fontSize: 17, textDecoration: 'none',
-                                    color: isActive || isHover ? PINK : '#1a1a1a',
-                                    paddingBottom: 6, transition: 'color 0.2s'
-                                }}
+                <section className="investor-presentation" id="financials" aria-label="Company presentation">
+                    <div className="investor-presentation-cover">
+                        <span className="investor-presentation-mark">m</span>
+                        <div>
+                            <p>MEESHO</p>
+                            <h2>Company<br />Presentation</h2>
+                            <span>July 2026</span>
+                        </div>
+                        <div className="investor-presentation-phone">
+                            <img src={appPreview} alt="Meesho app preview" />
+                        </div>
+                    </div>
+                    <div className="investor-presentation-controls">
+                        <button type="button" aria-label="Previous presentation slide"><FiChevronLeft /></button>
+                        <span>1</span><span>/</span><span>5</span>
+                        <button type="button" aria-label="Next presentation slide"><FiChevronRight /></button>
+                        <a href="#stakeholders"><FiDownload aria-hidden="true" /> Presentation</a>
+                    </div>
+                </section>
+
+                <section className="investor-stakeholders" id="governance">
+                    <div className="investor-section-heading">
+                        <p className="investor-eyebrow">OUR COMMUNITY</p>
+                        <h2>Built With Our Stakeholders</h2>
+                    </div>
+                    <div className="investor-stakeholder-grid">
+                        {stakeholders.map((stakeholder) => (
+                            <article className="investor-stakeholder-card" key={stakeholder.name}>
+                                <img src={stakeholder.image} alt="" loading="lazy" />
+                                <div>
+                                    <h3>{stakeholder.name}</h3>
+                                    <p>{stakeholder.detail}</p>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="investor-experience" id="announcements">
+                    <div className="investor-section-heading">
+                        <p className="investor-eyebrow">COMMERCE FOR EVERYONE</p>
+                        <h2>Our App Experience</h2>
+                    </div>
+                    <div className="investor-experience-tabs" role="tablist" aria-label="App experience">
+                        {Object.keys(experiences).map((name) => (
+                            <button
+                                key={name}
+                                type="button"
+                                role="tab"
+                                aria-selected={activeExperience === name}
+                                className={activeExperience === name ? 'is-active' : ''}
+                                onClick={() => setActiveExperience(name)}
                             >
-                                {item.label}
-                                <span
-                                    style={{
-                                        position: 'absolute', left: 0, right: 0, bottom: 0, height: 2,
-                                        background: PINK, transform: isActive ? 'scaleX(1)' : 'scaleX(0)',
-                                        transformOrigin: 'left', transition: 'transform 0.2s'
-                                    }}
-                                />
-                            </a>
-                        )
-                    })}
-                </nav>
-            </div>
-        </header>
-    )
+                                {name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="investor-experience-panel" id="resources">
+                        <ul>
+                            {experience.features.map((feature) => (
+                                <li key={feature}>
+                                    <span aria-hidden="true">✦</span>
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="investor-phone-preview">
+                            <div className="investor-phone-speaker" />
+                            <img src={appPreview} alt={experience.imageAlt} loading="lazy" />
+                        </div>
+                        <p className="investor-experience-description">{experience.description}</p>
+                    </div>
+                </section>
+
+                <section className="investor-download-banner">
+                    <div>
+                        <p className="investor-eyebrow">MADE FOR INDIA</p>
+                        <h2>Discover commerce that works for everyone</h2>
+                        <p>Explore how Meesho is creating opportunities across India.</p>
+                    </div>
+                    <a href="/"><span>Explore Meesho</span><FiArrowRight aria-hidden="true" /></a>
+                </section>
+            </main>
+            <InvestorFooter />
+        </div>
+    );
 }

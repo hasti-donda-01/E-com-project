@@ -42,6 +42,8 @@ const sellerSchema = mongoose.Schema({
         type: String,
         default: null
     }
+}, {
+    timestamps: true
 });
 
-export const Seller = mongoose.model('Seller', sellerSchema)
+export const Seller = mongoose.model('Seller', sellerSchema);

@@ -49,9 +49,9 @@ export const auth = (role) => async (req, res, next) => {
                 success: false
             })
         }
-        if (user.isActive === false) {
+        if (user.isActive === false || user.status === 'blocked') {
             return res.status(403).json({
-                message: "Your account is blocked",
+                message: "Your account is blocked. Please contact admin.",
                 success: false
             })
         }

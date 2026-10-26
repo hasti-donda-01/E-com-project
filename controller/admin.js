@@ -30,7 +30,10 @@ export const getallseller = async (req, res) => {
                 }
             },
             {
-                $unwind: "$result"
+                $unwind: {
+                    path: "$result",
+                    preserveNullAndEmptyArrays: true
+                }
             },
             {
                 $project: {
@@ -45,12 +48,16 @@ export const getallseller = async (req, res) => {
                     isApproved: 1,
                     isRejected: 1,
                     rejectionReason: 1,
-                    name: "$result.name",
-                    email: "$result.email",
-                    phone: "$result.phone",
-                    isActive: "$result.isActive",
-                    accountStatus: "$result.status"
+                    name: { $ifNull: ["$result.name", "—"] },
+                    email: { $ifNull: ["$result.email", "—"] },
+                    phone: { $ifNull: ["$result.phone", "—"] },
+                    isActive: { $ifNull: ["$result.isActive", true] },
+                    accountStatus: { $ifNull: ["$result.status", "unblocked"] },
+                    createdAt: 1
                 }
+            },
+            {
+                $sort: { createdAt: -1, _id: -1 }
             }
         ]).skip((page - 1) * perPage).limit(perPage);
         return res.status(200).json({
@@ -216,43 +223,60 @@ export const updateAdminProduct = async (req, res) => {
 };
 
 
-//block - unblock user
+// block - unblock user / seller
 export const accountstatus = async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params.id });
-        console.log(user);
+        const id = req.params.id;
+        let user = null;
+        if (mongoose.isValidObjectId(id)) {
+            user = await User.findById(id);
+            if (!user) {
+                const seller = await Seller.findById(id);
+                if (seller && seller.userId) {
+                    user = await User.findById(seller.userId);
+                }
+            }
+        }
+
         if (!user) {
             return res.status(404).json({
-                messsage: "user ot found",
+                message: "User not found",
                 success: false
-            })
+            });
         }
 
-        if (user.role == 'Admin') {
+        if (String(user.role).toLowerCase() === 'admin') {
             return res.status(400).json({
-                message: 'You can not block or unblock admin',
+                message: 'You cannot block or unblock admin',
                 success: false
-            })
+            });
         }
-        if (user.status == 'blocked') {
+
+        const isCurrentlyBlocked = user.status === 'blocked' || user.isActive === false;
+        if (isCurrentlyBlocked) {
             user.status = "unblocked";
-            user.save()
-        }
-        else {
+            user.isActive = true;
+        } else {
             user.status = "blocked";
-            user.save()
+            user.isActive = false;
         }
+        await user.save();
 
         return res.status(200).json({
-            message: "done",
-            success: true
-        })
+            message: `Seller account ${user.status === 'blocked' ? 'blocked' : 'unblocked'} successfully`,
+            success: true,
+            data: {
+                userId: user._id,
+                status: user.status,
+                isActive: user.isActive
+            }
+        });
 
     } catch (error) {
         return res.status(500).json({
             message: error.message,
             success: false
-        })
+        });
     }
 }
 
@@ -383,25 +407,18 @@ export const getCustomerDetails = async (req, res) => {
 
 export const approveSeller = async (req, res) => {
     try {
-        const seller = await Seller.findOne({ userId: req.params.id });
+        const id = req.params.id;
+        let seller = null;
+        if (mongoose.isValidObjectId(id)) {
+            seller = await Seller.findById(id);
+            if (!seller) {
+                seller = await Seller.findOne({ userId: id });
+            }
+        }
 
         if (!seller) {
             return res.status(404).json({
                 message: "Seller not found",
-                success: false
-            });
-        }
-
-        if (seller.isApproved) {
-            return res.status(400).json({
-                message: "Seller is already approved",
-                success: false
-            });
-        }
-
-        if (seller.isRejected) {
-            return res.status(400).json({
-                message: "Seller was rejected. Reset their status before approving.",
                 success: false
             });
         }
@@ -411,9 +428,17 @@ export const approveSeller = async (req, res) => {
         seller.rejectionReason = null;
         await seller.save();
 
+        if (seller.userId) {
+            await User.findByIdAndUpdate(seller.userId, {
+                isActive: true,
+                status: "unblocked"
+            });
+        }
+
         return res.status(200).json({
             message: "Seller approved successfully",
-            success: true
+            success: true,
+            data: seller
         });
 
     } catch (error) {
@@ -426,16 +451,16 @@ export const approveSeller = async (req, res) => {
 
 export const rejectSeller = async (req, res) => {
     try {
+        const id = req.params.id;
         const { reason } = req.body;
 
-        if (!reason) {
-            return res.status(400).json({
-                message: "Please provide a rejection reason",
-                success: false
-            });
+        let seller = null;
+        if (mongoose.isValidObjectId(id)) {
+            seller = await Seller.findById(id);
+            if (!seller) {
+                seller = await Seller.findOne({ userId: id });
+            }
         }
-
-        const seller = await Seller.findOne({ userId: req.params.id });
 
         if (!seller) {
             return res.status(404).json({
@@ -444,23 +469,9 @@ export const rejectSeller = async (req, res) => {
             });
         }
 
-        if (seller.isApproved) {
-            return res.status(400).json({
-                message: "Seller is already approved. Revoke approval before rejecting.",
-                success: false
-            });
-        }
-
-        if (seller.isRejected) {
-            return res.status(400).json({
-                message: "Seller is already rejected",
-                success: false
-            });
-        }
-
         seller.isApproved = false;
         seller.isRejected = true;
-        seller.rejectionReason = reason;
+        seller.rejectionReason = reason || "Application rejected by admin";
         await seller.save();
 
         return res.status(200).json({

@@ -7,6 +7,10 @@ import makeup from './Images/makeup.jpg';
 import manperfume from './Images/menperfume.jpg';
 import bags from './Images/bags.jpg';
 import footwearbrand from './Images/footwearbrand.jpg';
+import trending from './productimages/trending.jpg'
+import budget from './productimages/budget.jpg'
+import daily from './productimages/daily.jpg'
+import picks from './productimages/picks.jpg'
 
 let brands = [
     { href: '/', image: personalcare, name: 'Personal Care' },
@@ -33,6 +37,25 @@ const featuredBrands = [
     { name: 'mi', className: 'mi' },
     { name: 'Bata', className: 'bata' },
     { name: 'WOW', className: 'wow' },
+];
+
+const promoCards = [
+    {
+        title: 'Trending Now',
+        image: trending,
+    },
+    {
+        title: 'Budget Buys',
+        image: budget
+    },
+    {
+        title: 'Top Rated Picks',
+        image: picks,
+    },
+    {
+        title: 'Daily Essentials',
+        image: daily,
+    },
 ];
 
 export default function Brand() {
@@ -72,6 +95,25 @@ export default function Brand() {
                     </div>
                 </div>
             </div>
+
+            <section className="promo-offer-section" aria-label="Shop offers">
+                <div className="promo-offer-copy">
+                    <p className="promo-offer-kicker">Up to</p>
+                    <h2>35% OFF</h2>
+                    <p className="promo-offer-subtitle">on first order</p>
+                    <p className="promo-offer-note">*Only on App</p>
+                    <button type="button" className="promo-download-btn">Download Now</button>
+                </div>
+
+                <div className="promo-offer-cards">
+                    {promoCards.map((card) => (
+                        <div key={card.title} className="promo-card">
+                            <img src={card.image} alt={card.title} />
+                            <div className="promo-card-label">{card.title}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
         </section>
     )
 }

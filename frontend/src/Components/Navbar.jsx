@@ -7,7 +7,7 @@ import meeshologo from './Images/meeshologo.svg'
 import headerimg from './Images/headerimg.jpg'
 import { GiReturnArrow } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GiPriceTag } from 'react-icons/gi';
 import ProfileMenu from './ProfileMenu';
 
@@ -352,7 +352,18 @@ const categoryMenus = {
 
 export default function Navbar() {
     const [activeCategoryMenu, setActiveCategoryMenu] = useState('');
-    let navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const routeSearch = searchParams.get('search') || '';
+    const [searchDraft, setSearchDraft] = useState({ route: routeSearch, value: routeSearch });
+    const searchTerm = searchDraft.route === routeSearch ? searchDraft.value : routeSearch;
+    const navigate = useNavigate();
+
+    const handleSearch = (event) => {
+        event.preventDefault();
+        const query = searchTerm.trim();
+        navigate(query ? `/?search=${encodeURIComponent(query)}#products-catalog` : '/');
+    };
+
     const supplier = () => {
         navigate('/Becomesupplier');
     }
@@ -361,139 +372,150 @@ export default function Navbar() {
     }
     return (
         <div className="sc-VHjGu DesktopHeader__ContainerStyled-sc-r0p6o1-0 bCjyid ggRIXx">
-            <div className="S_HeaderDesk-sc-1ha87h2-0 jZsrxH" style={{ paddingLeft: "64px", paddingRight: "64px" }}>
+            <div className="navbar-fixed-shell">
+                <div className="S_HeaderDesk-sc-1ha87h2-0 jZsrxH" style={{ paddingLeft: "64px", paddingRight: "64px" }}>
 
-                {/* Logo */}
-                <div className="header-logo-container">
-                    <img src={meeshologo} alt="logo" />
-                </div>
-                <div className="DesktopSearchStyled-sc-ap5mq9-0 hCAgBX search-component">
-                    <div className="sc-jMUKdB ccqFBY SearchInput__TextSearchStyled-sc-jwhbpx-0 jKpGtT">
-
-                        <div className="sc-kMXgdA eByzkT">
-                            <CiSearch fontSize={20} />
-
-                        </div>
-
-                        <input
-                            type="text"
-                            placeholder="Try Saree, Kurti or Search by Product Code"
-                            className="sc-dOfePm kBqyGz sc-buNqiq egrFLn search-input-elm"
-                        />
+                    {/* Logo */}
+                    <div className="header-logo-container">
+                        <img src={meeshologo} alt="logo" />
                     </div>
-                </div>
+                    <div className="DesktopSearchStyled-sc-ap5mq9-0 hCAgBX search-component">
+                        <form
+                            className="sc-jMUKdB ccqFBY SearchInput__TextSearchStyled-sc-jwhbpx-0 jKpGtT"
+                            role="search"
+                            onSubmit={handleSearch}
+                        >
 
-                {/* Right Section */}
-                <div
-                    className="sc-kFkjun ghANen Header__RightSection-sc-1qdannb-0 hhjbEx"
-                    color="white"
-                >
-                    {/* Supplier */}
-                    <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk">
-                        <span onClick={supplier} className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
-                            Become a Supplier
-                        </span>
+                            <div className="sc-kMXgdA eByzkT">
+                                <button className="navbar-search-submit" type="submit" aria-label="Search products">
+                                    <CiSearch fontSize={20} aria-hidden="true" />
+                                </button>
+
+                            </div>
+
+                            <input
+                                type="text"
+                                placeholder="Try Saree, Kurti or Search by Product Code"
+                                className="sc-dOfePm kBqyGz sc-buNqiq egrFLn search-input-elm"
+                                value={searchTerm}
+                                onChange={(event) => setSearchDraft({ route: routeSearch, value: event.target.value })}
+                                aria-label="Search products"
+                            />
+                        </form>
                     </div>
 
-                    <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
-
-                    {/* Investor Relations */}
-                    <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk" onClick={Inverster}>
-                        <span className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
-                            Investor Relations
-                        </span>
-                    </div>
-
-                    <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
-
-                    {/* Profile */}
-                    <div className="sc-kFkjun ghANen TabWrapper-sc-1edf3ww-0 Header__StyledProfileMenu-sc-1qdannb-2 jtaRdY fRxfrv">
-                        <ProfileMenu />
-                    </div>
-
-                    <button type="button" className="cart-nav-button wishlist-nav-button" onClick={() => navigate('/wishlist')}>
-                        <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
-                            <FiHeart aria-hidden="true" />
-                            <span className="sc-dOfePm kBqyGz hover header-right">Wishlist</span>
-                        </div>
-                    </button>
-
-                    {/* Cart */}
-                    <button type="button" className="cart-nav-button" onClick={() => navigate('/cart')}>
-                        <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
-                            <BsCart2 height={25} width={25} color='#222' />
-
-                            <span className="sc-dOfePm kBqyGz hover header-right">
-                                Cart
+                    {/* Right Section */}
+                    <div
+                        className="sc-kFkjun ghANen Header__RightSection-sc-1qdannb-0 hhjbEx"
+                        color="white"
+                    >
+                        {/* Supplier */}
+                        <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk text-[16px]">
+                            <span onClick={supplier} className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
+                                Become a Supplier
                             </span>
                         </div>
-                    </button>
-                </div>
-            </div>
 
-            <div
-                className="category-nav-shell"
-                onMouseLeave={() => setActiveCategoryMenu('')}
-                onBlur={(event) => {
-                    if (!event.currentTarget.contains(event.relatedTarget)) {
-                        setActiveCategoryMenu('');
-                    }
-                }}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') setActiveCategoryMenu('');
-                }}
-            >
-                <nav className="category-navbar" aria-label="Product categories">
-                    {[
-                        { label: 'Popular', menu: 'popular' },
-                        { label: 'Kurti, Saree & Lehenga', menu: 'ethnic' },
-                        { label: 'Women Western', menu: 'western' },
-                        { label: 'Lingerie', menu: 'lingerie' },
-                        { label: 'Men', menu: 'men' },
-                        { label: 'Kids & Toys', menu: 'kids' },
-                        { label: 'Home & Kitchen', menu: 'home' },
-                        { label: 'Beauty & Health', menu: 'beauty' },
-                        { label: 'Jewellery & Accessories', menu: 'jewellery' },
-                        { label: 'Bags & Footwear', menu: 'bags' },
-                        { label: 'Electronics', menu: 'electronics' },
-                        { label: 'Watches', menu: 'watches' },
-                        { label: 'Sports & Fitness', menu: 'sports' },
-                        { label: 'Car & Motorbike', menu: 'motorbike' },
-                        { label: 'Office Supplies & Stationery', menu: 'office' },
-                        { label: 'Grocery', menu: 'grocery' },
-                        { label: 'Books', menu: 'books' },
-                        { label: 'Pet Supplies', menu: 'pets' },
-                        { label: 'Musical Instruments', menu: 'musical' }
-                    ].map(({ label, menu }) => (
-                        <button
-                            type="button"
-                            key={menu}
-                            className={`header-category-item${activeCategoryMenu === menu ? ' is-active' : ''}`}
-                            aria-expanded={activeCategoryMenu === menu}
-                            aria-controls="category-mega-menu"
-                            onMouseEnter={() => setActiveCategoryMenu(menu)}
-                            onFocus={() => setActiveCategoryMenu(menu)}
-                            onClick={() => setActiveCategoryMenu(menu)}
-                        >
-                            {label}
+                        <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
+
+                        {/* Investor Relations */}
+                        <div className="sc-kFkjun dkFjew TabWrapper-sc-1edf3ww-0 fOtBsk" onClick={Inverster}>
+                            <span className="sc-dOfePm kBqyGz Header__StyledCaption-sc-1qdannb-3 jfvbxc hover header-right">
+                                Investor Relations
+                            </span>
+                        </div>
+
+                        <div className="sc-jXuTBK Header__StyledDivider-sc-1qdannb-1 gAjuKk sNGCt" />
+
+
+
+                        <button type="button" className="cart-nav-button wishlist-nav-button" onClick={() => navigate('/wishlist')}>
+                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
+                                <FiHeart aria-hidden="true" />
+                                <span className="sc-dOfePm kBqyGz hover header-right">Wishlist</span>
+                            </div>
                         </button>
-                    ))}
-                </nav>
+
+                        {/* Cart */}
+                        <button type="button" className="cart-nav-button" onClick={() => navigate('/cart')}>
+                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
+                                <BsCart2 height={25} width={25} color='#222' />
+
+                                <span className="sc-dOfePm kBqyGz hover header-right">
+                                    Cart
+                                </span>
+                            </div>
+                        </button>
+                        {/* Profile */}
+                        <div className="sc-kFkjun ghANen TabWrapper-sc-1edf3ww-0 Header__StyledProfileMenu-sc-1qdannb-2 jtaRdY fRxfrv">
+                            <ProfileMenu />
+                        </div>
+                    </div>
+                </div>
+
                 <div
-                    className={`category-mega-menu${activeCategoryMenu ? ` menu-${activeCategoryMenu} is-open` : ''}`}
-                    id="category-mega-menu"
-                    aria-hidden={!activeCategoryMenu}
+                    className="category-nav-shell"
+                    onMouseLeave={() => setActiveCategoryMenu('')}
+                    onBlur={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget)) {
+                            setActiveCategoryMenu('');
+                        }
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') setActiveCategoryMenu('');
+                    }}
                 >
-                    {activeCategoryMenu && categoryMenus[activeCategoryMenu]?.map((category) => (
+                    <nav className="category-navbar" aria-label="Product categories">
+                        {[
+                            { label: 'Popular', menu: 'popular' },
+                            { label: 'Kurti, Saree & Lehenga', menu: 'ethnic' },
+                            { label: 'Women Western', menu: 'western' },
+                            { label: 'Lingerie', menu: 'lingerie' },
+                            { label: 'Men', menu: 'men' },
+                            { label: 'Kids & Toys', menu: 'kids' },
+                            { label: 'Home & Kitchen', menu: 'home' },
+                            { label: 'Beauty & Health', menu: 'beauty' },
+                            { label: 'Jewellery & Accessories', menu: 'jewellery' },
+                            { label: 'Bags & Footwear', menu: 'bags' },
+                            { label: 'Electronics', menu: 'electronics' },
+                            { label: 'Watches', menu: 'watches' },
+                            { label: 'Sports & Fitness', menu: 'sports' },
+                            { label: 'Car & Motorbike', menu: 'motorbike' },
+                            { label: 'Office Supplies & Stationery', menu: 'office' },
+                            { label: 'Grocery', menu: 'grocery' },
+                            { label: 'Books', menu: 'books' },
+                            { label: 'Pet Supplies', menu: 'pets' },
+                            { label: 'Musical Instruments', menu: 'musical' }
+                        ].map(({ label, menu }) => (
+                            <button
+                                type="button"
+                                key={menu}
+                                className={`header-category-item${activeCategoryMenu === menu ? ' is-active' : ''}`}
+                                aria-expanded={activeCategoryMenu === menu}
+                                aria-controls="category-mega-menu"
+                                onMouseEnter={() => setActiveCategoryMenu(menu)}
+                                onFocus={() => setActiveCategoryMenu(menu)}
+                                onClick={() => setActiveCategoryMenu(menu)}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </nav>
+                    <div
+                        className={`category-mega-menu${activeCategoryMenu ? ` menu-${activeCategoryMenu} is-open` : ''}`}
+                        id="category-mega-menu"
+                        aria-hidden={!activeCategoryMenu}
+                    >
+                        {activeCategoryMenu && categoryMenus[activeCategoryMenu]?.map((category) => (
                             <section className="category-mega-column" key={category.title}>
                                 <h2>
-                                    <a href={`/?search=${encodeURIComponent(category.title)}#products-catalog`}>
+                                    <a href={`/?menuFilter=${encodeURIComponent(category.title)}#products-catalog`}>
                                         {category.title}
                                     </a>
                                 </h2>
                                 {category.items.map((item) => (
                                     <a
-                                        href={`/?search=${encodeURIComponent(
+                                        href={`/?menuFilter=${encodeURIComponent(
                                             /^view all$/i.test(item) ? category.title : item
                                         )}#products-catalog`}
                                         key={item}
@@ -503,6 +525,7 @@ export default function Navbar() {
                                 ))}
                             </section>
                         ))}
+                    </div>
                 </div>
             </div>
             <div>
@@ -515,16 +538,16 @@ export default function Navbar() {
                 <div className='feature-item'>
 
                     <div className="items">
-                            <GiReturnArrow  color="rgb(159, 32, 137)"/>
-                            <span className='items-name'>7 Days Easy Return</span> 
+                        <GiReturnArrow color="rgb(159, 32, 137)" />
+                        <span className='items-name'>7 Days Easy Return</span>
                     </div>
-                     <div className="items">
-                            <IoMdCash color="rgb(159, 32, 137)"  />
-                            <span className='items-name'>Cash on Delivery</span> 
+                    <div className="items">
+                        <IoMdCash color="rgb(159, 32, 137)" />
+                        <span className='items-name'>Cash on Delivery</span>
                     </div>
-                     <div className="items">
-                            <GiPriceTag color="rgb(159, 32, 137)" />
-                            <span className='items-name'>Lowest Prices</span> 
+                    <div className="items">
+                        <GiPriceTag color="rgb(159, 32, 137)" />
+                        <span className='items-name'>Lowest Prices</span>
                     </div>
                 </div>
             </section>

@@ -117,6 +117,7 @@ export default function ProductCard() {
 
   const routeCategoryId = searchParams.get('category');
   const routeSearch = searchParams.get('search')?.trim() || '';
+  const routeMenuFilter = searchParams.get('menuFilter')?.trim() || '';
   const activeCategoryIds = routeCategoryId ? [routeCategoryId] : selectedCategories;
   const getCategoryId = (product) =>
     String(product.categoryId?._id || product.categoryId || '');
@@ -139,6 +140,19 @@ export default function ProductCard() {
     ].filter(Boolean).join(' ').toLowerCase();
     return searchableText.includes(query.toLowerCase());
   };
+  const matchesMenuFilter = (product, query) => {
+    const categoryId = getCategoryId(product);
+    const categoryName = categories.find(
+      (category) => String(category._id) === categoryId
+    )?.category_name;
+    const searchableText = [
+      product.name,
+      product.category_name,
+      product.categoryId?.category_name,
+      categoryName
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchableText.includes(query.toLowerCase());
+  };
   const availableCategories = categories
     .filter((category) => products.some((product) => getCategoryId(product) === String(category._id)))
     .filter((category) =>
@@ -155,6 +169,7 @@ export default function ProductCard() {
 
   const filteredProducts = products
     .filter((product) => !routeSearch || matchesSearch(product, routeSearch))
+    .filter((product) => !routeMenuFilter || matchesMenuFilter(product, routeMenuFilter))
     .filter((product) =>
       activeCategoryIds.length === 0 || activeCategoryIds.includes(getCategoryId(product))
     )
@@ -215,10 +230,10 @@ export default function ProductCard() {
     setMaxPrice('');
     setMinimumRating('');
     setMinimumDiscount('');
-    if (routeCategoryId || routeSearch) setSearchParams({}, { replace: true });
+    if (routeCategoryId || routeSearch || routeMenuFilter) setSearchParams({}, { replace: true });
   };
 
-  const hasActiveFilters = Boolean(routeSearch) ||
+  const hasActiveFilters = Boolean(routeSearch || routeMenuFilter) ||
     activeCategoryIds.length > 0 ||
     Object.values(attributeFilters).some((values) => values.length > 0) ||
     Boolean(minPrice || maxPrice || minimumRating || minimumDiscount);
@@ -252,7 +267,11 @@ export default function ProductCard() {
   return (
     <section className="products-page" id="products-catalog" aria-label="Products">
       <h1 className="products-page-title">
-        {routeSearch ? `Products: ${routeSearch}` : 'Products For You'}
+        {routeMenuFilter
+          ? `Products: ${routeMenuFilter}`
+          : routeSearch
+            ? `Products: ${routeSearch}`
+            : 'Products For You'}
       </h1>
       <div className="productlisting">
         <aside className="productlistleft" aria-label="Product filters">

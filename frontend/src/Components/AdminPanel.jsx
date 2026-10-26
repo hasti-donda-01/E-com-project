@@ -42,6 +42,12 @@ export default function AdminPanel() {
   const [sellersLoading, setSellersLoading] = useState(false);
   const [sellersError, setSellersError] = useState('');
   const [sellerLoadAttempt, setSellerLoadAttempt] = useState(0);
+  const [sellerFilter, setSellerFilter] = useState('all');
+  const [sellerNotice, setSellerNotice] = useState('');
+  const [sellerActionLoadingId, setSellerActionLoadingId] = useState(null);
+  const [rejectModalSeller, setRejectModalSeller] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [selectedSellerDetail, setSelectedSellerDetail] = useState(null);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
@@ -246,11 +252,24 @@ export default function AdminPanel() {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  const filteredSellers = sellers.filter((seller) =>
-    `${seller.name || ''} ${seller.email || ''} ${seller.phone || ''} ${seller.storeName || ''} ${seller.category || ''} ${seller.businessType || ''}`
+  const pendingSellersCount = sellers.filter((s) => !s.isApproved && !s.isRejected).length;
+  const approvedSellersCount = sellers.filter((s) => Boolean(s.isApproved)).length;
+  const rejectedSellersCount = sellers.filter((s) => Boolean(s.isRejected)).length;
+  const blockedSellersCount = sellers.filter((s) => s.accountStatus === 'blocked' || s.isActive === false).length;
+
+  const filteredSellers = sellers.filter((seller) => {
+    const matchesSearch = `${seller.name || ''} ${seller.email || ''} ${seller.phone || ''} ${seller.storeName || ''} ${seller.category || ''} ${seller.businessType || ''} ${seller.gstin || ''} ${seller.panNumber || ''}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    if (sellerFilter === 'pending') return !seller.isApproved && !seller.isRejected;
+    if (sellerFilter === 'approved') return Boolean(seller.isApproved);
+    if (sellerFilter === 'rejected') return Boolean(seller.isRejected);
+    if (sellerFilter === 'blocked') return seller.accountStatus === 'blocked' || seller.isActive === false;
+    return true;
+  });
   const filteredProducts = products.filter((product) =>
     `${product.name || ''} ${product.brand || ''} ${product.category_name || product.categoryId?.category_name || ''}`
       .toLowerCase()
@@ -350,6 +369,109 @@ export default function AdminPanel() {
     setSelectedCategory(null);
     setCategoryModalMode('');
     setCategoryActionError('');
+  };
+
+  const handleApproveSeller = async (seller) => {
+    setSellerNotice('');
+    setSellersError('');
+    setSellerActionLoadingId(seller._id);
+    try {
+      const id = seller.userId || seller._id;
+      const response = await fetch(`${API_BASE_URL}/admin/sellerapprove/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || `Could not approve seller (${response.status})`);
+      }
+      setSellers((prev) =>
+        prev.map((s) =>
+          s._id === seller._id
+            ? { ...s, isApproved: true, isRejected: false, rejectionReason: null, accountStatus: 'unblocked', isActive: true }
+            : s
+        )
+      );
+      setSellerNotice(`Seller "${seller.storeName || seller.name}" has been approved successfully!`);
+    } catch (err) {
+      setSellersError(err.message || 'Could not approve seller.');
+    } finally {
+      setSellerActionLoadingId(null);
+    }
+  };
+
+  const handleRejectSellerSubmit = async (e) => {
+    e?.preventDefault();
+    if (!rejectModalSeller) return;
+    setSellerNotice('');
+    setSellersError('');
+    setSellerActionLoadingId(rejectModalSeller._id);
+    try {
+      const id = rejectModalSeller.userId || rejectModalSeller._id;
+      const reason = rejectionReason.trim() || 'Application rejected by admin';
+      const response = await fetch(`${API_BASE_URL}/admin/sellerreject/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || `Could not reject seller (${response.status})`);
+      }
+      setSellers((prev) =>
+        prev.map((s) =>
+          s._id === rejectModalSeller._id
+            ? { ...s, isApproved: false, isRejected: true, rejectionReason: reason }
+            : s
+        )
+      );
+      setSellerNotice(`Seller "${rejectModalSeller.storeName || rejectModalSeller.name}" has been rejected.`);
+      setRejectModalSeller(null);
+      setRejectionReason('');
+    } catch (err) {
+      setSellersError(err.message || 'Could not reject seller.');
+    } finally {
+      setSellerActionLoadingId(null);
+    }
+  };
+
+  const handleToggleSellerBlock = async (seller) => {
+    const isBlocked = seller.accountStatus === 'blocked' || seller.isActive === false;
+    const actionWord = isBlocked ? 'unblock' : 'block';
+    if (!window.confirm(`Are you sure you want to ${actionWord} seller "${seller.storeName || seller.name}"?`)) {
+      return;
+    }
+    setSellerNotice('');
+    setSellersError('');
+    setSellerActionLoadingId(seller._id);
+    try {
+      const id = seller.userId || seller._id;
+      const response = await fetch(`${API_BASE_URL}/admin/accountstatus/${id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || `Could not ${actionWord} seller (${response.status})`);
+      }
+      const newStatus = isBlocked ? 'unblocked' : 'blocked';
+      const newActive = isBlocked;
+      setSellers((prev) =>
+        prev.map((s) =>
+          s._id === seller._id
+            ? { ...s, accountStatus: newStatus, isActive: newActive }
+            : s
+        )
+      );
+      setSellerNotice(`Seller "${seller.storeName || seller.name}" has been ${newStatus} successfully!`);
+    } catch (err) {
+      setSellersError(err.message || `Could not ${actionWord} seller.`);
+    } finally {
+      setSellerActionLoadingId(null);
+    }
   };
 
   const handleAdminLogin = async (event) => {
@@ -924,27 +1046,123 @@ export default function AdminPanel() {
               </>
             ) : activePage === 'Sellers' ? (
               <>
-                <div className="admin-category-toolbar">
-                  <input
-                    className="admin-search"
-                    type="search"
-                    placeholder="Search sellers, stores or contact details..."
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    aria-label="Search sellers"
-                  />
-                  <button
-                    className="admin-primary-btn"
-                    type="button"
-                    onClick={() => setSellerLoadAttempt((attempt) => attempt + 1)}
-                    disabled={sellersLoading}
+                {sellerNotice && (
+                  <div className="admin-category-notice" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <span>✓ {sellerNotice}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSellerNotice('')}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 16, color: '#166534' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Seller Quick Stats */}
+                <div className="admin-seller-stat-grid">
+                  <div
+                    className={`admin-seller-stat-card ${sellerFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setSellerFilter('all')}
                   >
-                    {sellersLoading ? 'Loading…' : 'Refresh'}
-                  </button>
+                    <div className="stat-title">Total Sellers</div>
+                    <div className="stat-val">{sellers.length}</div>
+                    <div className="stat-hint">Registered on Meesho Hub</div>
+                  </div>
+                  <div
+                    className={`admin-seller-stat-card pending ${sellerFilter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setSellerFilter('pending')}
+                  >
+                    <div className="stat-title">Pending Approval</div>
+                    <div className="stat-val" style={{ color: '#d97706' }}>{pendingSellersCount}</div>
+                    <div className="stat-hint">
+                      {pendingSellersCount > 0 ? (
+                        <span style={{ color: '#b45309', fontWeight: 700 }}>⚠️ Action Required</span>
+                      ) : (
+                        'All caught up'
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className={`admin-seller-stat-card approved ${sellerFilter === 'approved' ? 'active' : ''}`}
+                    onClick={() => setSellerFilter('approved')}
+                  >
+                    <div className="stat-title">Approved Sellers</div>
+                    <div className="stat-val" style={{ color: '#059669' }}>{approvedSellersCount}</div>
+                    <div className="stat-hint">Authorized to sell products</div>
+                  </div>
+                  <div
+                    className={`admin-seller-stat-card blocked ${sellerFilter === 'blocked' ? 'active' : ''}`}
+                    onClick={() => setSellerFilter('blocked')}
+                  >
+                    <div className="stat-title">Blocked Sellers</div>
+                    <div className="stat-val" style={{ color: '#dc2626' }}>{blockedSellersCount}</div>
+                    <div className="stat-hint">Accounts suspended by admin</div>
+                  </div>
+                </div>
+
+                {/* Filter tabs and search bar */}
+                <div className="admin-seller-filter-row">
+                  <div className="admin-seller-filter-tabs">
+                    <button
+                      type="button"
+                      className={`admin-filter-pill ${sellerFilter === 'all' ? 'active' : ''}`}
+                      onClick={() => setSellerFilter('all')}
+                    >
+                      All ({sellers.length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-filter-pill ${sellerFilter === 'pending' ? 'active' : ''}`}
+                      onClick={() => setSellerFilter('pending')}
+                    >
+                      Pending Approval ({pendingSellersCount})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-filter-pill ${sellerFilter === 'approved' ? 'active' : ''}`}
+                      onClick={() => setSellerFilter('approved')}
+                    >
+                      Approved ({approvedSellersCount})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-filter-pill ${sellerFilter === 'rejected' ? 'active' : ''}`}
+                      onClick={() => setSellerFilter('rejected')}
+                    >
+                      Rejected ({rejectedSellersCount})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-filter-pill ${sellerFilter === 'blocked' ? 'active' : ''}`}
+                      onClick={() => setSellerFilter('blocked')}
+                    >
+                      Blocked ({blockedSellersCount})
+                    </button>
+                  </div>
+
+                  <div className="admin-category-toolbar" style={{ margin: 0 }}>
+                    <input
+                      className="admin-search"
+                      type="search"
+                      placeholder="Search sellers, stores, GSTIN or PAN..."
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      aria-label="Search sellers"
+                    />
+                    <button
+                      className="admin-primary-btn"
+                      type="button"
+                      onClick={() => setSellerLoadAttempt((attempt) => attempt + 1)}
+                      disabled={sellersLoading}
+                    >
+                      {sellersLoading ? 'Loading…' : 'Refresh'}
+                    </button>
+                  </div>
                 </div>
 
                 {sellersError && (
-                  <div className="admin-category-error" role="alert">
+                  <div className="admin-category-error" role="alert" style={{ marginTop: 12 }}>
                     <span>{sellersError}</span>
                     <button
                       className="admin-category-retry"
@@ -956,16 +1174,16 @@ export default function AdminPanel() {
                   </div>
                 )}
 
-                <div className="admin-table-wrapper">
+                <div className="admin-table-wrapper" style={{ marginTop: 16 }}>
                   <table className="admin-table">
                     <thead>
                       <tr>
                         <th>SELLER</th>
                         <th>STORE</th>
-                        <th>CONTACT</th>
-                        <th>BUSINESS</th>
-                        <th>VERIFICATION</th>
-                        <th>ACCOUNT</th>
+                        <th>BUSINESS & TAX</th>
+                        <th>APPROVAL STATUS</th>
+                        <th>ACCOUNT STATUS</th>
+                        <th style={{ textAlign: 'center' }}>ACTIONS</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -976,30 +1194,142 @@ export default function AdminPanel() {
                       ) : filteredSellers.length === 0 ? (
                         <tr>
                           <td colSpan="6" className="admin-empty">
-                            {sellers.length === 0 ? 'No sellers found.' : 'No sellers match your search.'}
+                            {sellers.length === 0 ? 'No sellers found.' : 'No sellers match your filter or search query.'}
                           </td>
                         </tr>
                       ) : (
-                        filteredSellers.map((seller) => (
-                          <tr key={seller._id}>
-                            <td>
-                              <strong>{seller.name || '—'}</strong>
-                              <div>{seller.email || '—'}</div>
-                            </td>
-                            <td>
-                              <strong>{seller.storeName || '—'}</strong>
-                              <div>{seller.category || '—'}</div>
-                            </td>
-                            <td>{seller.phone || '—'}</td>
-                            <td>{seller.businessType || '—'}</td>
-                            <td>
-                              <span className={`admin-category-status ${seller.isApproved ? 'active' : seller.isRejected ? 'inactive' : ''}`}>
-                                {seller.isApproved ? 'Approved' : seller.isRejected ? 'Rejected' : 'Pending'}
-                              </span>
-                            </td>
-                            <td>{seller.accountStatus || (seller.isActive ? 'Active' : 'Inactive')}</td>
-                          </tr>
-                        ))
+                        filteredSellers.map((seller) => {
+                          const isBlocked = seller.accountStatus === 'blocked' || seller.isActive === false;
+                          const isApproved = Boolean(seller.isApproved);
+                          const isRejected = Boolean(seller.isRejected);
+                          const isPending = !isApproved && !isRejected;
+                          const isLoadingThis = sellerActionLoadingId === seller._id;
+
+                          return (
+                            <tr key={seller._id}>
+                              <td>
+                                <strong>{seller.name || '—'}</strong>
+                                <div style={{ fontSize: '12px', color: '#64748b' }}>{seller.email || '—'}</div>
+                                <div style={{ fontSize: '11px', color: '#94a3b8' }}>📞 {seller.phone || '—'}</div>
+                              </td>
+                              <td>
+                                <strong>{seller.storeName || '—'}</strong>
+                                <div style={{ fontSize: '12px', color: '#64748b' }}>{seller.category || 'General'}</div>
+                              </td>
+                              <td>
+                                <div style={{ fontSize: '12px', fontWeight: 600 }}>{seller.businessType || 'Retail'}</div>
+                                <div style={{ fontSize: '11px', color: '#64748b' }}>GSTIN: <span style={{ fontFamily: 'monospace' }}>{seller.gstin || '—'}</span></div>
+                                <div style={{ fontSize: '11px', color: '#64748b' }}>PAN: <span style={{ fontFamily: 'monospace' }}>{seller.panNumber || '—'}</span></div>
+                              </td>
+                              <td>
+                                {isApproved ? (
+                                  <span className="admin-category-status active" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    ✓ Approved
+                                  </span>
+                                ) : isRejected ? (
+                                  <div>
+                                    <span className="admin-category-status inactive" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                      ✕ Rejected
+                                    </span>
+                                    {seller.rejectionReason && (
+                                      <div style={{ fontSize: '10px', color: '#e11d48', marginTop: 3, maxWidth: 160 }} title={seller.rejectionReason}>
+                                        Reason: {seller.rejectionReason}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span
+                                    className="admin-category-status pending"
+                                    style={{
+                                      background: '#fef3c7',
+                                      color: '#b45309',
+                                      border: '1px solid #fde68a',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 4
+                                    }}
+                                  >
+                                    ⏳ Pending Approval
+                                  </span>
+                                )}
+                              </td>
+                              <td>
+                                {isBlocked ? (
+                                  <span className="admin-category-status inactive" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    🚫 Blocked
+                                  </span>
+                                ) : (
+                                  <span className="admin-category-status active" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    ● Active
+                                  </span>
+                                )}
+                              </td>
+                              <td>
+                                <div className="admin-category-actions" style={{ flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+                                  {/* Approval / Rejection Actions */}
+                                  {!isApproved && (
+                                    <button
+                                      className="admin-category-action approve"
+                                      type="button"
+                                      disabled={isLoadingThis}
+                                      onClick={() => handleApproveSeller(seller)}
+                                      title="Approve this seller to start selling products"
+                                    >
+                                      {isLoadingThis ? '…' : '✓ Approve'}
+                                    </button>
+                                  )}
+
+                                  {!isRejected && (
+                                    <button
+                                      className="admin-category-action reject"
+                                      type="button"
+                                      disabled={isLoadingThis}
+                                      onClick={() => {
+                                        setRejectModalSeller(seller);
+                                        setRejectionReason('');
+                                      }}
+                                      title="Reject this seller's application"
+                                    >
+                                      {isLoadingThis ? '…' : '✕ Reject'}
+                                    </button>
+                                  )}
+
+                                  {/* Block / Unblock Action */}
+                                  {isBlocked ? (
+                                    <button
+                                      className="admin-category-action unblock"
+                                      type="button"
+                                      disabled={isLoadingThis}
+                                      onClick={() => handleToggleSellerBlock(seller)}
+                                      title="Unblock this seller account"
+                                    >
+                                      {isLoadingThis ? '…' : '🔓 Unblock'}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="admin-category-action block"
+                                      type="button"
+                                      disabled={isLoadingThis}
+                                      onClick={() => handleToggleSellerBlock(seller)}
+                                      title="Block this seller account"
+                                    >
+                                      {isLoadingThis ? '…' : '🚫 Block'}
+                                    </button>
+                                  )}
+
+                                  <button
+                                    className="admin-category-action view"
+                                    type="button"
+                                    onClick={() => setSelectedSellerDetail(seller)}
+                                    title="View full seller details"
+                                  >
+                                    Details
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -1206,6 +1536,199 @@ export default function AdminPanel() {
                 <button type="button" onClick={closeCategoryModal}>Close</button>
               </div>
             )}
+          </section>
+        </div>
+      )}
+
+      {/* Seller Rejection Modal */}
+      {rejectModalSeller && (
+        <div className="admin-category-modal-backdrop" onMouseDown={() => setRejectModalSeller(null)}>
+          <section
+            className="admin-category-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-reject-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            style={{ maxWidth: 480 }}
+          >
+            <div className="admin-category-modal-heading">
+              <div>
+                <p style={{ color: '#e11d48', fontWeight: 700 }}>SELLER APPLICATION REVIEW</p>
+                <h2 id="admin-reject-modal-title">Reject Seller Application</h2>
+              </div>
+              <button
+                type="button"
+                className="admin-category-modal-close"
+                onClick={() => setRejectModalSeller(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleRejectSellerSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ background: '#fff1f2', border: '1px solid #ffe4e6', borderRadius: 8, padding: 12, fontSize: 13, color: '#9f1239' }}>
+                You are about to reject the seller application for <strong>{rejectModalSeller.storeName || rejectModalSeller.name}</strong> ({rejectModalSeller.email}).
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600, color: '#334155' }}>
+                  Rejection Reason <span style={{ color: '#e11d48' }}>*</span>
+                </label>
+                <textarea
+                  rows="3"
+                  className="admin-search"
+                  style={{ width: '100%', borderRadius: 8, padding: 10, fontSize: 13, borderColor: '#cbd5e1' }}
+                  placeholder="Specify why this seller is being rejected (e.g. Invalid GSTIN / Incomplete store details)..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Quick Reason Suggestion Buttons */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {[
+                  'Invalid GSTIN or PAN',
+                  'Incomplete store details',
+                  'Prohibited product category',
+                  'Duplicate seller account'
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setRejectionReason(preset)}
+                    style={{
+                      background: '#f1f5f9',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 14,
+                      padding: '4px 10px',
+                      fontSize: 11,
+                      cursor: 'pointer',
+                      color: '#475569'
+                    }}
+                  >
+                    + {preset}
+                  </button>
+                ))}
+              </div>
+
+              <div className="admin-category-modal-actions" style={{ marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setRejectModalSeller(null)}
+                  disabled={sellerActionLoadingId === rejectModalSeller._id}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="admin-category-action delete"
+                  type="submit"
+                  disabled={sellerActionLoadingId === rejectModalSeller._id}
+                  style={{ padding: '8px 16px', fontSize: 13 }}
+                >
+                  {sellerActionLoadingId === rejectModalSeller._id ? 'Rejecting…' : 'Confirm Rejection'}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {/* Seller Details Modal */}
+      {selectedSellerDetail && (
+        <div className="admin-category-modal-backdrop" onMouseDown={() => setSelectedSellerDetail(null)}>
+          <section
+            className="admin-category-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-seller-detail-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            style={{ maxWidth: 520 }}
+          >
+            <div className="admin-category-modal-heading">
+              <div>
+                <p>SELLER PROFILE</p>
+                <h2 id="admin-seller-detail-modal-title">{selectedSellerDetail.storeName || 'Seller Information'}</h2>
+              </div>
+              <button
+                type="button"
+                className="admin-category-modal-close"
+                onClick={() => setSelectedSellerDetail(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="admin-category-details">
+              <p><strong>Seller Name</strong><span>{selectedSellerDetail.name || '—'}</span></p>
+              <p><strong>Email Address</strong><span>{selectedSellerDetail.email || '—'}</span></p>
+              <p><strong>Phone Number</strong><span>{selectedSellerDetail.phone || '—'}</span></p>
+              <p><strong>Store Name</strong><span>{selectedSellerDetail.storeName || '—'}</span></p>
+              <p><strong>Category</strong><span>{selectedSellerDetail.category || '—'}</span></p>
+              <p><strong>Business Type</strong><span>{selectedSellerDetail.businessType || '—'}</span></p>
+              <p><strong>Store Description</strong><span>{selectedSellerDetail.storeDesc || '—'}</span></p>
+              <p><strong>GSTIN</strong><span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{selectedSellerDetail.gstin || '—'}</span></p>
+              <p><strong>PAN Number</strong><span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{selectedSellerDetail.panNumber || '—'}</span></p>
+              <p>
+                <strong>Approval Status</strong>
+                <span>
+                  {selectedSellerDetail.isApproved
+                    ? 'Approved'
+                    : selectedSellerDetail.isRejected
+                      ? `Rejected (${selectedSellerDetail.rejectionReason || 'No reason specified'})`
+                      : 'Pending Approval'}
+                </span>
+              </p>
+              <p>
+                <strong>Account Status</strong>
+                <span>{selectedSellerDetail.accountStatus === 'blocked' || selectedSellerDetail.isActive === false ? 'Blocked' : 'Active'}</span>
+              </p>
+              <p>
+                <strong>Registered On</strong>
+                <span>{selectedSellerDetail.createdAt ? new Date(selectedSellerDetail.createdAt).toLocaleString('en-IN') : '—'}</span>
+              </p>
+            </div>
+
+            <div className="admin-category-modal-actions" style={{ justifyContent: 'space-between', marginTop: 16 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {!selectedSellerDetail.isApproved && (
+                  <button
+                    type="button"
+                    className="admin-category-action approve"
+                    onClick={() => {
+                      handleApproveSeller(selectedSellerDetail);
+                      setSelectedSellerDetail(null);
+                    }}
+                  >
+                    ✓ Approve Seller
+                  </button>
+                )}
+                {selectedSellerDetail.accountStatus === 'blocked' || selectedSellerDetail.isActive === false ? (
+                  <button
+                    type="button"
+                    className="admin-category-action unblock"
+                    onClick={() => {
+                      handleToggleSellerBlock(selectedSellerDetail);
+                      setSelectedSellerDetail(null);
+                    }}
+                  >
+                    🔓 Unblock Seller
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="admin-category-action block"
+                    onClick={() => {
+                      handleToggleSellerBlock(selectedSellerDetail);
+                      setSelectedSellerDetail(null);
+                    }}
+                  >
+                    🚫 Block Seller
+                  </button>
+                )}
+              </div>
+              <button type="button" onClick={() => setSelectedSellerDetail(null)}>Close</button>
+            </div>
           </section>
         </div>
       )}

@@ -178,7 +178,12 @@ const inr = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
 /* ---------- Left Sidebar Component ---------- */
 
-function SidebarNav({ onNavigate }) {
+function SidebarNav({ onNavigate, sellerSession }) {
+    const isBlocked = sellerSession?.status === 'blocked' || sellerSession?.isActive === false;
+    const isApproved = Boolean(sellerSession?.isApproved);
+    const isRejected = Boolean(sellerSession?.isRejected);
+    const isPending = sellerSession && !isApproved && !isRejected;
+
     return (
         <div className="flex h-full flex-col justify-between py-7 px-5 bg-white select-none">
             <div className="space-y-6">
@@ -213,12 +218,36 @@ function SidebarNav({ onNavigate }) {
                 ))}
             </div>
 
-            <div className="pt-6 border-t border-slate-100 px-3 text-xs text-slate-400 flex items-center justify-between">
-                <span className="font-medium text-slate-500">Meesho Seller Hub</span>
-                <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Active
-                </span>
+            <div className="pt-6 border-t border-slate-100 px-3 text-xs text-slate-400 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                    <span className="font-medium text-slate-500">Seller Status</span>
+                    {isBlocked ? (
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full text-[11px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+                            Blocked
+                        </span>
+                    ) : isRejected ? (
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full text-[11px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+                            Rejected
+                        </span>
+                    ) : isPending ? (
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full text-[11px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Pending Approval
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Approved
+                        </span>
+                    )}
+                </div>
+                {sellerSession?.storeName && (
+                    <span className="text-[11px] font-semibold text-slate-600 truncate">
+                        🏪 {sellerSession.storeName}
+                    </span>
+                )}
             </div>
         </div>
     );
@@ -226,20 +255,45 @@ function SidebarNav({ onNavigate }) {
 
 /* ---------- Main Component ---------- */
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
+
 export default function SupplierDashboard() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orderFilter, setOrderFilter] = useState('All');
+    const [sellerSession, setSellerSession] = useState(null);
     const location = useLocation();
 
     useEffect(() => {
         setDrawerOpen(false);
     }, [location.pathname]);
 
+    useEffect(() => {
+        const loadSession = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/seller/session`, {
+                    credentials: 'include'
+                });
+                const payload = await res.json();
+                if (res.ok && payload.success) {
+                    setSellerSession(payload.data);
+                }
+            } catch {
+                // Ignore network error on session check
+            }
+        };
+        loadSession();
+    }, []);
+
     const filteredOrders = useMemo(() => {
         if (orderFilter === 'All') return sampleOrders;
         return sampleOrders.filter((o) => o.status === orderFilter);
     }, [orderFilter]);
+
+    const isBlocked = sellerSession?.status === 'blocked' || sellerSession?.isActive === false;
+    const isApproved = Boolean(sellerSession?.isApproved);
+    const isRejected = Boolean(sellerSession?.isRejected);
+    const isPending = sellerSession && !isApproved && !isRejected;
 
     return (
         <div className="min-h-screen bg-[#f3f4f8] text-slate-900 font-sans antialiased flex flex-col lg:flex-row">
@@ -285,14 +339,14 @@ export default function SupplierDashboard() {
                         </button>
                     </div>
                     <div className="flex-1 overflow-y-auto">
-                        <SidebarNav onNavigate={() => setDrawerOpen(false)} />
+                        <SidebarNav onNavigate={() => setDrawerOpen(false)} sellerSession={sellerSession} />
                     </div>
                 </aside>
             </div>
 
-            {/* Desktop Left Sidebar: Matching User Screenshot */}
+            {/* Desktop Left Sidebar */}
             <aside className="hidden lg:block w-68 shrink-0 border-r border-slate-200/80 bg-white min-h-screen sticky top-0 h-screen overflow-y-auto shadow-2xs">
-                <SidebarNav />
+                <SidebarNav sellerSession={sellerSession} />
             </aside>
 
             {/* Main Content Area */}
@@ -300,8 +354,11 @@ export default function SupplierDashboard() {
                 {/* Header Subtitle */}
                 <div className="flex items-center justify-between">
                     <div>
+                        <h1 className="text-xl font-bold text-slate-800">
+                            {sellerSession?.storeName ? `${sellerSession.storeName} Dashboard` : 'Supplier Dashboard'}
+                        </h1>
                         <p className="text-xs font-semibold text-slate-400">
-                            Your Meesho analytics at a glance
+                            Your Meesho analytics and store performance at a glance
                         </p>
                     </div>
                     <div className="hidden sm:flex items-center gap-3">
@@ -319,6 +376,85 @@ export default function SupplierDashboard() {
                         </div>
                     </div>
                 </div>
+
+                {/* ---------- Seller Account Approval / Block Status Banners ---------- */}
+                {isPending && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-5 shadow-xs flex items-start gap-3.5">
+                        <span className="text-2xl shrink-0 mt-0.5">⏳</span>
+                        <div className="flex-1">
+                            <h2 className="text-sm font-bold text-amber-900">
+                                Seller Account Under Admin Review
+                            </h2>
+                            <p className="mt-1 text-xs text-amber-700 leading-relaxed">
+                                Welcome to Meesho Seller Hub! Your seller application is currently pending admin approval. You can review your dashboard, but adding products and fulfilling orders will be enabled once your account is approved.
+                            </p>
+                        </div>
+                        <span className="shrink-0 bg-amber-200/70 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                            Pending Approval
+                        </span>
+                    </div>
+                )}
+
+                {isRejected && (
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50/95 p-5 shadow-xs flex items-start gap-3.5">
+                        <span className="text-2xl shrink-0 mt-0.5">✕</span>
+                        <div className="flex-1">
+                            <h2 className="text-sm font-bold text-rose-900">
+                                Seller Application Rejected
+                            </h2>
+                            <p className="mt-1 text-xs text-rose-700 leading-relaxed">
+                                Your seller registration could not be approved at this time.
+                                {sellerSession?.rejectionReason && (
+                                    <span className="block mt-1 font-semibold text-rose-800">
+                                        Reason: {sellerSession.rejectionReason}
+                                    </span>
+                                )}
+                            </p>
+                            <p className="mt-2 text-xs text-rose-600">
+                                Please review your store details and business credentials or contact Meesho administrator support.
+                            </p>
+                        </div>
+                        <span className="shrink-0 bg-rose-200 text-rose-800 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                            Rejected
+                        </span>
+                    </div>
+                )}
+
+                {isBlocked && (
+                    <div className="rounded-2xl border border-red-300 bg-red-50 p-5 shadow-xs flex items-start gap-3.5">
+                        <span className="text-2xl shrink-0 mt-0.5">🚫</span>
+                        <div className="flex-1">
+                            <h2 className="text-sm font-bold text-red-900">
+                                Seller Account Suspended
+                            </h2>
+                            <p className="mt-1 text-xs text-red-700 leading-relaxed">
+                                This seller account has been blocked by the admin. Product catalog listings, payments, and fulfillment operations are currently suspended. Please contact support to resolve account suspension.
+                            </p>
+                        </div>
+                        <span className="shrink-0 bg-red-200 text-red-800 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                            Blocked
+                        </span>
+                    </div>
+                )}
+
+                {isApproved && !isBlocked && (
+                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 shadow-2xs flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold">
+                                ✓
+                            </span>
+                            <span className="text-xs font-semibold text-emerald-900">
+                                Verified & Approved Seller Account — Your store is live on Meesho marketplace!
+                            </span>
+                        </div>
+                        <Link
+                            to="/supplier/add-product"
+                            className="text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
+                        >
+                            + Add New Product →
+                        </Link>
+                    </div>
+                )}
 
                 {/* ---------- 6 KPI Cards (2x3 Grid) ---------- */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

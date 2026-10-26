@@ -99,7 +99,6 @@ export default function ProfileMenu({ variant = 'customer' }) {
                 aria-label="Open profile menu"
             >
                 <CgProfile aria-hidden="true" />
-                <span>{displayName}</span>
             </button>
             <div className="account-menu-dropdown">
                 {user ? (
@@ -112,6 +111,15 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         {String(user.role).toLowerCase() === 'customer' && user.phone && (
                             <p className="account-menu-help">Mobile number: {user.phone}</p>
                         )}
+                        {/* {variant === 'customer' && (
+                            <button
+                                className="account-menu-link"
+                                type="button"
+                                onClick={() => navigate('/wishlist')}
+                            >
+                                Wishlist
+                            </button>
+                        )} */}
                         {error && <p className="account-menu-error" role="alert">{error}</p>}
                         <button
                             className="account-menu-signout"
@@ -121,6 +129,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         >
                             {signingOut ? 'Signing out…' : 'Sign out'}
                         </button>
+                        
                     </>
                 ) : (
                     <>
@@ -133,6 +142,13 @@ export default function ProfileMenu({ variant = 'customer' }) {
                             onClick={() => navigate('/customer-signup')}
                         >
                             Login / Sign up
+                        </button>
+                        <button
+                            className="account-menu-link"
+                            type="button"
+                            onClick={() => navigate('/wishlist')}
+                        >
+                            Wishlist
                         </button>
                         <div className="profile-dropdown-items">My Orders</div>
                         <div className="profile-dropdown-items">Delete Account</div>
