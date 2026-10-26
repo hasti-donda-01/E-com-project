@@ -1,4 +1,3 @@
-import React from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import { Link, useNavigate } from 'react-router-dom'
 import newtag from './Images/new-tag.svg'
@@ -137,9 +136,6 @@ export default function Becomesupplier() {
     ];
 
       let navigate = useNavigate()
-        const GST = () => {
-            navigate('/GST')
-        }
         const sellOnline = () => {
             navigate('/signuppage')
         }
@@ -205,7 +201,7 @@ export default function Becomesupplier() {
                                     <div className='new-flicker'>
                                         <img src={newtag} alt="" />
                                         <p className='flickerpera'>Don’t have a GSTIN? You can still sell on Meesho.
-                                            <a href=""> Know More</a>
+                                            <a href="/GST"> Know More</a>
                                         </p>
                                     </div>
                                     <div className='h-[30px]'></div>

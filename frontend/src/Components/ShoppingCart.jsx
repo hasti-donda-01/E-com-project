@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiCheck, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import meeshoLogo from './Images/meeshologopink.svg';
+import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
@@ -23,11 +24,6 @@ const loadRazorpayCheckout = () => new Promise((resolve, reject) => {
   document.body.appendChild(script);
 });
 
-const requiresCustomerLogin = (response, payload) =>
-  (response.status === 400 && payload.message === 'Token Required') ||
-  (response.status === 403 && payload.message?.includes('required role: customer')) ||
-  (response.status === 404 && payload.message?.toLowerCase() === 'user not found');
-
 export default function ShoppingCart() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,14 +44,14 @@ export default function ShoppingCart() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
   const goToLogin = useCallback(() => {
-    sessionStorage.removeItem('customerAccessToken');
+    clearCustomerAccessToken();
     navigate('/customer-login', { state: { returnTo: '/cart' } });
   }, [navigate]);
 
   useEffect(() => {
     const controller = new AbortController();
     const fetchCart = async () => {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -68,14 +64,14 @@ export default function ShoppingCart() {
           signal: controller.signal
         });
         const payload = await response.json();
-        if (requiresCustomerLogin(response, payload)) {
+        if (isCustomerAuthFailure(response, payload)) {
           goToLogin();
           return;
         }
         if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
           throw new Error(payload.message || `Could not load your cart (${response.status}).`);
         }
-        setItems(payload.data.filter((item) => item.product));
+        setItems(payload.data);
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
           setError(loadError.message || 'Could not load your cart.');
@@ -89,6 +85,7 @@ export default function ShoppingCart() {
   }, [goToLogin]);
 
   const totals = useMemo(() => items.reduce((summary, item) => {
+    if (!item.product) return summary;
     const product = item.product;
     const quantity = Number(item.quantity) || 1;
     const originalPrice = Number(product.price) || 0;
@@ -98,13 +95,16 @@ export default function ShoppingCart() {
     return summary;
   }, { totalBill: 0, totalAmount: 0 }), [items]);
   const discount = Math.max(0, totals.totalBill - totals.totalAmount);
+  const hasUnavailableItems = items.some((item) =>
+    !item.product || Number(item.product.stock) < Number(item.quantity)
+  );
 
   const beginCheckout = async () => {
     setCheckoutLoading(true);
     setError('');
     setCheckoutMessage('');
     try {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -114,7 +114,7 @@ export default function ShoppingCart() {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       const payload = await response.json();
-      if (requiresCustomerLogin(response, payload)) {
+      if (isCustomerAuthFailure(response, payload)) {
         goToLogin();
         return;
       }
@@ -141,7 +141,7 @@ export default function ShoppingCart() {
     try {
       const form = new FormData(event.currentTarget);
       const addressDetails = Object.fromEntries(form.entries());
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -156,7 +156,7 @@ export default function ShoppingCart() {
         body: JSON.stringify(addressDetails)
       });
       const payload = await response.json();
-      if (requiresCustomerLogin(response, payload)) {
+      if (isCustomerAuthFailure(response, payload)) {
         goToLogin();
         return;
       }
@@ -182,7 +182,7 @@ export default function ShoppingCart() {
     setPlacingOrder(true);
     setError('');
     try {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -198,11 +198,15 @@ export default function ShoppingCart() {
           body: JSON.stringify({ address: selectedAddressId })
         });
         const createPayload = await createResponse.json();
-        if (requiresCustomerLogin(createResponse, createPayload)) {
+        if (isCustomerAuthFailure(createResponse, createPayload)) {
           goToLogin();
           return;
         }
-        if (!createResponse.ok || createPayload.success === false || !createPayload.data?.orderId) {
+        if (
+          !createResponse.ok || createPayload.success === false ||
+          !createPayload.data?.orderId || !createPayload.data?.keyId ||
+          !createPayload.data?.amount || !createPayload.data?.currency
+        ) {
           throw new Error(createPayload.message || `Could not start UPI payment (${createResponse.status}).`);
         }
 
@@ -239,12 +243,15 @@ export default function ShoppingCart() {
                   body: JSON.stringify(razorpayResponse)
                 });
                 const verifyPayload = await verifyResponse.json();
-                if (requiresCustomerLogin(verifyResponse, verifyPayload)) {
+                if (isCustomerAuthFailure(verifyResponse, verifyPayload)) {
                   goToLogin();
                   resolve(null);
                   return;
                 }
-                if (!verifyResponse.ok || verifyPayload.success === false) {
+                if (
+                  !verifyResponse.ok || verifyPayload.success === false ||
+                  !Array.isArray(verifyPayload.orders) || verifyPayload.orders.length === 0
+                ) {
                   reject(new Error(verifyPayload.message || `Could not verify payment (${verifyResponse.status}).`));
                   return;
                 }
@@ -267,6 +274,8 @@ export default function ShoppingCart() {
           setCompletedOrder({ ...paymentResult, paymentMethod: 'upi' });
           setItems([]);
           setCheckoutMessage('');
+        } else {
+          setCheckoutMessage('Payment was not completed. Your cart is unchanged.');
         }
         return;
       }
@@ -286,11 +295,14 @@ export default function ShoppingCart() {
         })
       });
       const payload = await response.json();
-      if (requiresCustomerLogin(response, payload)) {
+      if (isCustomerAuthFailure(response, payload)) {
         goToLogin();
         return;
       }
-      if (!response.ok || payload.success === false) {
+      if (
+        !response.ok || payload.success === false ||
+        !Array.isArray(payload.orders) || payload.orders.length === 0
+      ) {
         throw new Error(payload.message || `Could not place your order (${response.status}).`);
       }
       setCompletedOrder({ ...payload, paymentMethod: 'COD' });
@@ -308,7 +320,7 @@ export default function ShoppingCart() {
     setError('');
     setNotice('');
     try {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -319,7 +331,7 @@ export default function ShoppingCart() {
         headers: { Authorization: `Bearer ${customerToken}` }
       });
       const payload = await response.json();
-      if (requiresCustomerLogin(response, payload)) {
+      if (isCustomerAuthFailure(response, payload)) {
         goToLogin();
         return;
       }
@@ -341,7 +353,7 @@ export default function ShoppingCart() {
     setError('');
     setNotice('');
     try {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -356,7 +368,7 @@ export default function ShoppingCart() {
         body: JSON.stringify({ quantity })
       });
       const payload = await response.json();
-      if (requiresCustomerLogin(response, payload)) {
+      if (isCustomerAuthFailure(response, payload)) {
         goToLogin();
         return;
       }
@@ -377,7 +389,7 @@ export default function ShoppingCart() {
     setLoggingOut(true);
     setError('');
     try {
-      const customerToken = sessionStorage.getItem('customerAccessToken');
+      const customerToken = getCustomerAccessToken();
       if (!customerToken) {
         goToLogin();
         return;
@@ -391,7 +403,7 @@ export default function ShoppingCart() {
       if (!response.ok || payload.success === false) {
         throw new Error(payload.message || `Could not log out (${response.status}).`);
       }
-      sessionStorage.removeItem('customerAccessToken');
+      clearCustomerAccessToken();
       navigate('/', { replace: true });
     } catch (logoutError) {
       setError(logoutError.message || 'Could not log out.');
@@ -538,6 +550,25 @@ export default function ShoppingCart() {
             <div className="cart-items-grid">
               {items.map((item) => {
                 const product = item.product;
+                if (!product) {
+                  return (
+                    <article className="cart-item-card" key={item._id}>
+                      <div className="cart-item-details">
+                        <h2>Unavailable product</h2>
+                        <p>This item can no longer be purchased. Remove it to continue.</p>
+                        <button
+                          type="button"
+                          className="cart-remove-button"
+                          disabled={updatingId === item._id}
+                          onClick={() => removeItem(item)}
+                        >
+                          <FiTrash2 aria-hidden="true" />
+                          {updatingId === item._id ? 'Removing…' : 'Remove'}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                }
                 const currentPrice = Number(product.discountPrice) || Number(product.price) || 0;
                 return (
                   <article className="cart-item-card" key={item._id}>
@@ -547,6 +578,11 @@ export default function ShoppingCart() {
                     <div className="cart-item-details">
                       <h2>{product.name}</h2>
                       {product.brand && <p className="cart-item-brand">{product.brand}</p>}
+                      {Number(product.stock) < Number(item.quantity) && (
+                        <p className="cart-feedback cart-feedback-error" role="alert">
+                          Only {Math.max(0, Number(product.stock) || 0)} left in stock. Adjust quantity or remove this item.
+                        </p>
+                      )}
                       <strong>{inr(currentPrice)}</strong>
                       <div className="cart-item-actions">
                         <div className="cart-quantity-control" aria-label={`Quantity for ${product.name}`}>
@@ -594,7 +630,7 @@ export default function ShoppingCart() {
           <button
             type="button"
             className="cart-continue-button"
-            disabled={loading || items.length === 0 || checkoutLoading || placingOrder}
+            disabled={loading || items.length === 0 || hasUnavailableItems || checkoutLoading || placingOrder}
             onClick={checkoutMode ? placeOrder : beginCheckout}
           >
             <FiCheck aria-hidden="true" />

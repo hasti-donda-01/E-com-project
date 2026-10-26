@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiTrash2 } from 'react-icons/fi';
+import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
@@ -20,7 +21,7 @@ export default function Wishlist() {
   useEffect(() => {
     const controller = new AbortController();
     const loadWishlist = async () => {
-      const token = sessionStorage.getItem('customerAccessToken');
+      const token = getCustomerAccessToken();
       if (!token) {
         navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
         return;
@@ -33,8 +34,8 @@ export default function Wishlist() {
           signal: controller.signal
         });
         const payload = await response.json();
-        if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404) {
-          sessionStorage.removeItem('customerAccessToken');
+        if (isCustomerAuthFailure(response, payload)) {
+          clearCustomerAccessToken();
           navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
           return;
         }
@@ -56,7 +57,7 @@ export default function Wishlist() {
   }, [navigate]);
 
   const updateWishlist = async (item, action) => {
-    const token = sessionStorage.getItem('customerAccessToken');
+    const token = getCustomerAccessToken();
     if (!token) {
       navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
       return;
@@ -76,12 +77,10 @@ export default function Wishlist() {
         }
       );
       const payload = await response.json();
-      if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404) {
-        if (payload.message === 'Token Required' || response.status === 401 || response.status === 403) {
-          sessionStorage.removeItem('customerAccessToken');
-          navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
-          return;
-        }
+      if (isCustomerAuthFailure(response, payload)) {
+        clearCustomerAccessToken();
+        navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
+        return;
       }
       if (!response.ok || payload.success === false) {
         throw new Error(payload.message || `Could not update your wishlist (${response.status}).`);

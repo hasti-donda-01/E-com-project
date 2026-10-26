@@ -33,7 +33,8 @@ router.get('/accountstatus/:id', auth(["Admin"]), accountstatus);//block unblock
 router.post('/accountstatus/:id', auth(["Admin"]), accountstatus);
 router.patch('/accountstatus/:id', auth(["Admin"]), accountstatus);
 router.get('/getallorder', auth(["Admin"]), monitorallorder);
-router.get('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);
+router.patch('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);
+router.patch('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);
 router.get('/getcustomerdetail/:id', auth(["Admin"]), getCustomerDetails);//monitor customer activity
 router.post('/sellerapprove/:id', auth(["Admin"]), approveSeller);
 router.patch('/sellerapprove/:id', auth(["Admin"]), approveSeller);

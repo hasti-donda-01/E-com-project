@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
+import { storeCustomerAccessToken } from '../../utils/customerSession'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api'
 
@@ -28,7 +29,7 @@ export const verifyCustomer = createAsyncThunk("customer/verifyCustomer", async 
         if (!response.data?.token) {
             throw new Error('Customer login did not return an access token.')
         }
-        sessionStorage.setItem('customerAccessToken', response.data.token)
+        storeCustomerAccessToken(response.data.token)
         return response.data
     } catch (error) {
         return rejectWithValue(

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FiArrowLeft, FiCheckCircle, FiHeart, FiRefreshCw, FiShield, FiTruck } from 'react-icons/fi';
 import { IoMdStar } from 'react-icons/io';
+import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
@@ -85,7 +86,7 @@ export default function ProductDetails() {
   }, [id]);
 
   const addToCart = useCallback(async (buyNow = false) => {
-    const customerToken = sessionStorage.getItem('customerAccessToken');
+    const customerToken = getCustomerAccessToken();
     if (!customerToken) {
       navigate('/customer-login', {
         state: {
@@ -112,12 +113,8 @@ export default function ProductDetails() {
       });
       const payload = await response.json();
       if (!response.ok || payload.success === false) {
-        if (
-          (response.status === 400 && payload.message === 'Token Required') ||
-          (response.status === 403 && payload.message?.includes('required role: customer')) ||
-          (response.status === 404 && payload.message?.toLowerCase() === 'user not found')
-        ) {
-          sessionStorage.removeItem('customerAccessToken');
+        if (isCustomerAuthFailure(response, payload)) {
+          clearCustomerAccessToken();
           navigate('/customer-login', {
             state: {
               returnTo: location.pathname,
@@ -143,7 +140,7 @@ export default function ProductDetails() {
   }, [location.pathname, navigate, product]);
 
   const addToWishlist = useCallback(async () => {
-    const customerToken = sessionStorage.getItem('customerAccessToken');
+    const customerToken = getCustomerAccessToken();
     if (!customerToken) {
       navigate('/customer-login', {
         state: { returnTo: location.pathname, resumeAddToWishlist: true }
@@ -166,12 +163,8 @@ export default function ProductDetails() {
       });
       const payload = await response.json();
       if (!response.ok || payload.success === false) {
-        if (
-          (response.status === 400 && payload.message === 'Token Required') ||
-          (response.status === 403 && payload.message?.includes('required role: customer')) ||
-          (response.status === 404 && payload.message?.toLowerCase() === 'user not found')
-        ) {
-          sessionStorage.removeItem('customerAccessToken');
+        if (isCustomerAuthFailure(response, payload)) {
+          clearCustomerAccessToken();
           navigate('/customer-login', {
             state: { returnTo: location.pathname, resumeAddToWishlist: true }
           });

@@ -9,8 +9,9 @@ export default function VerifyOtp() {
     const location = useLocation()
     const navigate = useNavigate()
     const [phoneNumber, setPhoneNumber] = useState(location.state?.phoneNumber || '')
-    const [showOtp, setShowOtp] = useState(false)
+    const [showOtp, setShowOtp] = useState(Boolean(location.state?.phoneNumber))
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
+    const [otpError, setOtpError] = useState('')
     const [focusedIndex, setFocusedIndex] = useState(-1)
     const [seconds, setSeconds] = useState(60)
     const inputRefs = useRef([])
@@ -49,6 +50,7 @@ export default function VerifyOtp() {
         const next = [...otp]
         next[index] = digit
         setOtp(next)
+        setOtpError('')
         if (digit && index < 5) inputRefs.current[index + 1]?.focus()
     }
 
@@ -80,7 +82,11 @@ export default function VerifyOtp() {
 
     const verifyOtp = async () => {
         const code = otp.join('')
-        if (code.length !== 6) return
+        if (code.length !== 6) {
+            setOtpError('Enter the 6-digit OTP sent to your phone.')
+            return
+        }
+        setOtpError('')
         try {
             await dispatch(verifyCustomer({ phone: phoneNumber, otp: code })).unwrap()
             navigate(location.state?.returnTo || '/', {
@@ -142,24 +148,24 @@ export default function VerifyOtp() {
 
                     {!showOtp ? (
                         <>
-                            <h6 font-size="20px" font-weight="bold" color="greyBase" className="sc-dOfePm bzKJDM">Login or sign up to continue</h6><div className="sc-kFkjun cuomGy Authstyled__StyledCard-sc-2hunyy-2 icAkSj" color="white"><div className="CountryDropdown__StyledWrapper-sc-xzyn0c-0 eIhKkE"><span font-size="10px" font-weight="book" color="greyT2" className="sc-dOfePm czKNKx">Country</span><span font-size="16px" font-weight="demi" color="greyBase" className="sc-dOfePm fJsHQf">🇮🇳 +91</span><div className="sc-jXuTBK kUFBUY"></div></div>                <div className="Input__InputContainer-sc-1goybxj-0 gcwUCC"><input placeholder=" phone number" type="tel" maxLength="10" autoComplete="off" className="Input__InputField-sc-1goybxj-1 chAFGe" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value.replace(/\D/g, '').slice(0, 10))} /></div></div>
+                            <h6 color="greyBase" className="sc-dOfePm bzKJDM">Login or sign up to continue</h6><div className="sc-kFkjun cuomGy Authstyled__StyledCard-sc-2hunyy-2 icAkSj" color="white"><div className="CountryDropdown__StyledWrapper-sc-xzyn0c-0 eIhKkE"><span color="greyT2" className="sc-dOfePm czKNKx">Country</span><span color="greyBase" className="sc-dOfePm fJsHQf">🇮🇳 +91</span><div className="sc-jXuTBK kUFBUY"></div></div>                <div className="Input__InputContainer-sc-1goybxj-0 gcwUCC"><input placeholder=" phone number" type="tel" maxLength="10" autoComplete="off" className="Input__InputField-sc-1goybxj-1 chAFGe" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value.replace(/\D/g, '').slice(0, 10))} /></div></div>
 
-                            <button type="submit" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" font-size="15px" onClick={submitData} disabled={status === 'loading'}><div className="sc-jOTjWM knCwk"><span font-size="18px" font-weight="demi" color="#ffffff" className="sc-dOfePm lgUtFF">{status === 'loading' ? 'Saving...' : 'Continue'}</span></div></button>
+                            <button type="submit" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" onClick={submitData} disabled={status === 'loading'}><div className="sc-jOTjWM knCwk"><span color="#ffffff" className="sc-dOfePm lgUtFF">{status === 'loading' ? 'Saving...' : 'Continue'}</span></div></button>
                             {error && <p role="alert">{error}</p>}
                             {message && <p role="status">{message}</p>}
                         </>
                     ) : (
                         <>
-                            <h6 font-size="20px" font-weight="bold" color="greyBase" className="sc-dOfePm bzKJDM">Enter OTP sent to {phoneNumber}</h6>
+                            <h6 color="greyBase" className="sc-dOfePm bzKJDM">Enter OTP sent to {phoneNumber}</h6>
 
-                            <span
-                                font-size="12px" font-weight="demi" color="pinkBase"
+                                <button
+                                    type="button"
                                 className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI"
-                                style={{ display: 'block', marginTop: 16, fontSize: 15, fontWeight: 600, letterSpacing: 0.3, cursor: 'pointer' }}
+                                    style={{ display: 'block', marginTop: 16, fontSize: 15, fontWeight: 600, letterSpacing: 0.3, cursor: 'pointer', border: 0, background: 'none', padding: 0 }}
                                 onClick={() => setShowOtp(false)}
                             >
                                 CHANGE NUMBER
-                            </span>
+                                </button>
 
                             <div style={{ display: 'flex', gap: 16, marginTop: 52 }} onPaste={handleOtpPaste}>
                                 {otp.map((digit, i) => (
@@ -189,18 +195,19 @@ export default function VerifyOtp() {
                                 {seconds > 0 ? (
                                     <>Resend OTP in {seconds} s</>
                                 ) : (
-                                    <span style={{ color: '#9f2089', fontWeight: 600, cursor: 'pointer' }} onClick={resendOtp}>
+                                    <button type="button" style={{ color: '#9f2089', fontWeight: 600, cursor: 'pointer', border: 0, background: 'none', padding: 0 }} onClick={resendOtp}>
                                         Resend OTP
-                                    </span>
+                                    </button>
                                 )}
                             </p>
 
-                            <button type="button" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" font-size="15px" onClick={verifyOtp}><div className="sc-jOTjWM knCwk"><span font-size="18px" font-weight="demi" color="#ffffff" className="sc-dOfePm lgUtFF">Verify</span></div></button>
+                            <button type="button" className="sc-cRHGzb heoOeY Authstyled__StyledButton-sc-2hunyy-1 gJbiA-D" color="#ffffff" onClick={verifyOtp} disabled={status === 'loading'}><div className="sc-jOTjWM knCwk"><span color="#ffffff" className="sc-dOfePm lgUtFF">{status === 'loading' ? 'Verifying…' : 'Verify'}</span></div></button>
+                            {otpError && <p role="alert">{otpError}</p>}
                             {error && <p role="alert">{error}</p>}
                         </>
                     )}
 
-                </div><span font-size="12px" font-weight="demi" color="greyT2" className="sc-dOfePm fsmGU AuthWrapperstyled__StyledCaption-sc-1plclw5-4 bsTzl" width="1920">By continuing, you agree to Meesho’s&nbsp;<a href="https://www.meesho.com/legal/terms-conditions"><span font-size="12px" font-weight="demi" className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Terms &amp; Conditions &nbsp;</span></a>and &nbsp;<a href="https://www.meesho.com/legal/privacy"><span font-size="12px" font-weight="demi" className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Privacy Policy</span></a></span></div></div>
+                </div><span color="greyT2" className="sc-dOfePm fsmGU AuthWrapperstyled__StyledCaption-sc-1plclw5-4 bsTzl" width="1920">By continuing, you agree to Meesho’s&nbsp;<a href="https://www.meesho.com/legal/terms-conditions"><span className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Terms &amp; Conditions &nbsp;</span></a>and &nbsp;<a href="https://www.meesho.com/legal/privacy"><span className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI" color="pinkBase">Privacy Policy</span></a></span></div></div>
             </main>
         </div>
     )

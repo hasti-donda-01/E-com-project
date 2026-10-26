@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import commision from './Images/commision.jpg'
 
@@ -103,33 +103,17 @@ const PromoCard = ({ icon, title, text }) => (
     </div>
 )
 
-/* image or placeholder circle */
-const Art = ({ src, alt }) => (
-    <div style={{ position: 'relative', width: 280, height: 280, flexShrink: 0 }}>
-        <div style={{ position: 'absolute', inset: '70px 0 0 0', borderRadius: '50%', background: '#f4f5f7' }} />
-        {src ? (
-            <img src={src} alt={alt} style={{ position: 'absolute', left: '50%', bottom: 0, height: 270, transform: 'translateX(-50%)' }} />
-        ) : (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#aaa' }}>{alt}</div>
-        )}
-    </div>
-)
-
-const FactRow = ({ title, children, img, alt, flip }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: flip ? 'row-reverse' : 'row', gap: 30, marginBottom: 30 }}>
-        <div style={{ width: 500 }}>
-            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#111' }}>{title}</h3>
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: PINK, marginTop: 9, flexShrink: 0 }} />
-                <p style={{ margin: 0, fontSize: 14, lineHeight: '23px', color: '#333' }}>{children}</p>
-            </div>
-        </div>
-        <Art src={img} alt={alt} />
-    </div>
-)
-
 /* ================= FOOTER ================= */
-const FOOTER_LINKS = ['Sell Online', 'Pricing & Commission', 'How it works', 'Shipping & Returns', 'Grow Your Business', 'Learning Hub', 'Meesho Ads', 'Shop Online on Meesho']
+const FOOTER_LINKS = [
+    { label: 'Sell Online', href: '/Becomesupplier' },
+    { label: 'Pricing & Commission', href: '/PricingCommision' },
+    { label: 'How it works', href: '/HowitWorks' },
+    { label: 'Shipping & Returns', href: '/Return' },
+    { label: 'Grow Your Business', href: '/Grow' },
+    { label: 'Learning Hub' },
+    { label: 'Meesho Ads' },
+    { label: 'Shop Online on Meesho', href: '/' }
+]
 
 function Footer() {
     const colTitle = { margin: '0 0 22px', fontSize: 14, fontWeight: 600, color: '#111' }
@@ -144,8 +128,10 @@ function Footer() {
                     </div>
                     <div style={{ width: 330 }}>
                         <h4 style={colTitle}>Sell on Meesho</h4>
-                        {FOOTER_LINKS.map((l) => (
-                            <a key={l} href="#" style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#555', textDecoration: 'none' }}>{l}</a>
+                        {FOOTER_LINKS.map((link) => link.href ? (
+                            <a key={link.label} href={link.href} style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#555', textDecoration: 'none' }}>{link.label}</a>
+                        ) : (
+                            <span key={link.label} aria-disabled="true" style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#999' }}>{link.label}</span>
                         ))}
                     </div>
                     <div>
@@ -195,7 +181,7 @@ export default function PricingCommision() {
                         <p style={{ margin: '14px 0 0', fontSize: 12.5, lineHeight: '22px', color: '#2b2b2b' }}>
                             <span style={{ display: 'inline-block', background: PINK, color: '#fff', fontSize: 11, fontWeight: 600, padding: '0 10px', borderRadius: 3, marginRight: 10, lineHeight: '20px' }}>New!</span>
                             Don’t have a GSTIN or have a Composition GSTIN?<br />
-                            You can still sell on Meesho. Click <a href="/non-gst-sellers" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
+                            You can still sell on Meesho. Click <a href="/GST" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
                         </p>
 
                         <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 2, display: 'flex', width: 405, height: 42, marginTop: 20, padding: 0, background: '#fff', border: `1px solid ${focused ? PINK : '#d9dbe3'}` }}>

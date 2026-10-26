@@ -172,7 +172,7 @@ export const processFulfillment = async (req, res) => {
 
             // update payment to success on delivery
             await Payment.findOneAndUpdate(
-                { order: orderId },
+                { order: id },
                 { status: "success" }
             );
         }

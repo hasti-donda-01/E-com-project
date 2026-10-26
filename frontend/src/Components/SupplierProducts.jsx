@@ -50,7 +50,8 @@ export default function SupplierProducts({ embedded = false }) {
     }, [page]);
 
     useEffect(() => {
-        fetchProducts();
+        const timer = window.setTimeout(() => fetchProducts(), 0);
+        return () => window.clearTimeout(timer);
     }, [fetchProducts]);
 
     const deleteProduct = async (product) => {

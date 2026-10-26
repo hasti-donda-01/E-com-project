@@ -12,17 +12,9 @@ const menuItems = [
   { name: 'Categories', icon: '▤' },
   { name: 'Orders', icon: '▣' },
   { name: 'Sellers', icon: '♙' },
-  { name: 'Customers', icon: '♧' },
-  { name: 'Reports', icon: '▥' },
-  { name: 'Settings', icon: '⚙' },
 ];
 
-const orders = [
-  { id: 'ORD101', customer: 'Priya Sharma', product: 'Women Kurti', amount: 599, status: 'Delivered' },
-  { id: 'ORD102', customer: 'Riya Patel', product: 'Cotton Saree', amount: 899, status: 'Pending' },
-  { id: 'ORD103', customer: 'Neha Singh', product: 'Handbag', amount: 449, status: 'Shipped' },
-  { id: 'ORD104', customer: 'Aarav Shah', product: 'Casual Shirt', amount: 699, status: 'Cancelled' },
-];
+/* Dashboard stats and orders are loaded dynamically from the API */
 
 export default function AdminPanel() {
   const [activePage, setActivePage] = useState('Dashboard');
@@ -63,6 +55,14 @@ export default function AdminPanel() {
   const [adminPassword, setAdminPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  // Dashboard dynamic data
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [dashboardOrders, setDashboardOrders] = useState([]);
+  const [dashboardOrderCount, setDashboardOrderCount] = useState(0);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardOrdersError, setDashboardOrdersError] = useState('');
+  const [orderNotice, setOrderNotice] = useState('');
+  const [orderActionLoadingId, setOrderActionLoadingId] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -90,6 +90,68 @@ export default function AdminPanel() {
     checkAdminSession();
     return () => controller.abort();
   }, []);
+
+  // Load admin dashboard stats + recent orders whenever Dashboard tab is active
+  useEffect(() => {
+    if (!['Dashboard', 'Orders'].includes(activePage) || !adminUser) return undefined;
+    const controller = new AbortController();
+    const loadDashboard = async () => {
+      setDashboardLoading(true);
+      setDashboardOrdersError('');
+      try {
+        const [statsRes, ordersRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/admin/adminDashboard`, { credentials: 'include', signal: controller.signal }),
+          fetch(`${API_BASE_URL}/admin/getallorder?page=1&limit=50`, { credentials: 'include', signal: controller.signal })
+        ]);
+        if (statsRes.ok) {
+          const sp = await statsRes.json();
+          if (sp.success && sp.data) setDashboardStats(sp.data);
+        }
+        if (ordersRes.ok) {
+          const op = await ordersRes.json();
+          if (op.success === false || !Array.isArray(op.orders)) {
+            throw new Error(op.message || 'The orders API did not return an order list.');
+          }
+          const rawOrders = [...op.orders];
+          const totalPages = Math.max(1, Number(op.totalPages) || 1);
+          for (let page = 2; page <= totalPages; page += 1) {
+            const pageResponse = await fetch(
+              `${API_BASE_URL}/admin/getallorder?page=${page}&limit=50`,
+              { credentials: 'include', signal: controller.signal }
+            );
+            const pagePayload = await pageResponse.json();
+            if (!pageResponse.ok || pagePayload.success === false || !Array.isArray(pagePayload.orders)) {
+              throw new Error(pagePayload.message || `Could not load orders (${pageResponse.status}).`);
+            }
+            rawOrders.push(...pagePayload.orders);
+          }
+          setDashboardOrderCount(Number(op.totalOrders) || rawOrders.length);
+          // Map to simple display shape
+          setDashboardOrders(
+            (activePage === 'Dashboard' ? rawOrders.slice(0, 10) : rawOrders).map(o => ({
+              id: String(o._id).slice(-8).toUpperCase(),
+              _id: o._id,
+              customer: o.userId?.name || o.address?.name || 'Customer',
+              product: o.product?.name || 'Product',
+              amount: Number(o.totalAmount) || Number(o.product?.price) || 0,
+              orderStatus: o.orderStatus || 'placed',
+              status: {
+                delivered: 'Delivered', placed: 'Placed',
+                confirmed: 'Confirmed', shipped: 'Shipped',
+                cancelled: 'Cancelled', returned: 'Returned'
+              }[o.orderStatus?.toLowerCase()] || o.orderStatus || 'Pending'
+            }))
+          );
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') setDashboardOrdersError(err.message || 'Could not load dashboard data.');
+      } finally {
+        if (!controller.signal.aborted) setDashboardLoading(false);
+      }
+    };
+    loadDashboard();
+    return () => controller.abort();
+  }, [activePage, adminUser]);
 
   useEffect(() => {
     if (activePage !== 'Categories') return undefined;
@@ -242,11 +304,12 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, productLoadAttempt]);
 
-  const filteredOrders = orders.filter((order) =>
+  const filteredDashboardOrders = dashboardOrders.filter((order) =>
     `${order.id} ${order.customer} ${order.product} ${order.status}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+  const filteredOrders = filteredDashboardOrders;
   const filteredCategories = categories.filter((category) =>
     `${category.category_name || ''} ${category.description || ''} ${category.isActive === false ? 'inactive' : 'active'}`
       .toLowerCase()
@@ -521,6 +584,42 @@ export default function AdminPanel() {
     }
   };
 
+  const updateAdminOrderStatus = async (order, orderStatus) => {
+    if (orderStatus === 'cancelled' && !window.confirm(`Cancel order #${order.id}?`)) return;
+    setOrderActionLoadingId(order._id);
+    setOrderNotice('');
+    setDashboardOrdersError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/updateorderstatus/${order._id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderStatus })
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.success !== true || !payload.data?._id) {
+        throw new Error(payload.message || `Could not update order (${response.status}).`);
+      }
+      const nextStatus = payload.data.orderStatus;
+      setDashboardOrders((current) => current.map((item) => item._id === order._id
+        ? {
+          ...item,
+          orderStatus: nextStatus,
+          status: {
+            delivered: 'Delivered', placed: 'Placed', confirmed: 'Confirmed',
+            shipped: 'Shipped', cancelled: 'Cancelled', returned: 'Returned'
+          }[nextStatus?.toLowerCase()] || nextStatus
+        }
+        : item
+      ));
+      setOrderNotice(`Order #${order.id} updated to ${nextStatus}.`);
+    } catch (error) {
+      setDashboardOrdersError(error.message || 'Could not update order status.');
+    } finally {
+      setOrderActionLoadingId('');
+    }
+  };
+
   const saveCategory = async (event) => {
     event.preventDefault();
     if (categoryModalMode !== 'create' && !selectedCategory) return;
@@ -677,8 +776,8 @@ export default function AdminPanel() {
             >
               <span className="nav-icon">{item.icon}</span>
               <span>{item.name}</span>
-              {item.name === 'Orders' && (
-                <span className="menu-count">4</span>
+              {item.name === 'Orders' && dashboardOrderCount > 0 && (
+                <span className="menu-count">{dashboardOrderCount}</span>
               )}
             </button>
           ))}
@@ -717,7 +816,7 @@ export default function AdminPanel() {
           <>
             <section className="admin-welcome">
               <div>
-                <h2>Welcome back, Admin! 👋</h2>
+                <h2>Welcome back, {adminUser.name || 'Admin'}! 👋</h2>
                 <p>Here is what is happening with your store today.</p>
               </div>
 
@@ -730,29 +829,66 @@ export default function AdminPanel() {
               <div className="admin-stat-card">
                 <div className="stat-icon pink">₹</div>
                 <p>Total Revenue</p>
-                <h2>₹2,45,600</h2>
-                <small className="stat-positive">↑ 12.5% this month</small>
+                <h2>
+                  {dashboardLoading ? '—' : dashboardStats
+                    ? `₹${Number(dashboardStats.revenueAnalytics?.totalRevenue || 0).toLocaleString('en-IN')}`
+                    : '₹0'}
+                </h2>
+                <small>
+                  Net: ₹{Number(dashboardStats?.revenueAnalytics?.netRevenue || 0).toLocaleString('en-IN')}
+                </small>
               </div>
 
               <div className="admin-stat-card">
                 <div className="stat-icon purple">▣</div>
                 <p>Total Orders</p>
-                <h2>1,248</h2>
-                <small className="stat-positive">↑ 8.2% this month</small>
+                <h2>
+                  {dashboardLoading ? '—' : (dashboardStats?.orders?.totalOrders ?? 0).toLocaleString('en-IN')}
+                </h2>
+                <small className="stat-positive">
+                  {dashboardStats?.orders?.deliveredOrders ?? 0} delivered
+                </small>
               </div>
 
               <div className="admin-stat-card">
                 <div className="stat-icon orange">□</div>
                 <p>Total Products</p>
-                <h2>356</h2>
+                <h2>
+                  {dashboardLoading ? '—' : (dashboardStats?.platformStatistics?.totalProducts ?? 0).toLocaleString('en-IN')}
+                </h2>
                 <small>Listed products</small>
               </div>
 
               <div className="admin-stat-card">
                 <div className="stat-icon green">♙</div>
                 <p>Total Sellers</p>
-                <h2>84</h2>
-                <small>Registered sellers</small>
+                <h2>
+                  {dashboardLoading ? '—' : (dashboardStats?.usersAndSellers?.totalSellers ?? 0).toLocaleString('en-IN')}
+                </h2>
+                <small>
+                  {dashboardStats?.usersAndSellers?.approvedSellers ?? 0} approved,{' '}
+                  {dashboardStats?.usersAndSellers?.pendingSellers ?? 0} pending
+                </small>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="stat-icon pink">♧</div>
+                <p>Total Customers</p>
+                <h2>
+                  {dashboardLoading ? '—' : (dashboardStats?.usersAndSellers?.totalUsers ?? 0).toLocaleString('en-IN')}
+                </h2>
+                <small>
+                  {dashboardStats?.usersAndSellers?.activeUsers ?? 0} active
+                </small>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="stat-icon purple">✓</div>
+                <p>Order Completion</p>
+                <h2>
+                  {dashboardLoading ? '—' : dashboardStats?.orders?.orderCompletionRate || '0%'}
+                </h2>
+                <small>Delivery success rate</small>
               </div>
             </section>
 
@@ -771,10 +907,19 @@ export default function AdminPanel() {
                 </button>
               </div>
 
-              <OrderTable data={orders} />
+              {dashboardOrdersError ? (
+                <p className="admin-category-error" role="alert">{dashboardOrdersError}</p>
+              ) : dashboardLoading ? (
+                <p style={{ padding: '1rem', color: '#888' }}>Loading orders…</p>
+              ) : dashboardOrders.length === 0 ? (
+                <p style={{ padding: '1rem', color: '#888' }}>No recent orders found.</p>
+              ) : (
+                <OrderTable data={filteredDashboardOrders} />
+              )}
             </section>
           </>
         )}
+
 
         {activePage !== 'Dashboard' && (
           <section className="admin-content-card">
@@ -1202,7 +1347,6 @@ export default function AdminPanel() {
                           const isBlocked = seller.accountStatus === 'blocked' || seller.isActive === false;
                           const isApproved = Boolean(seller.isApproved);
                           const isRejected = Boolean(seller.isRejected);
-                          const isPending = !isApproved && !isRejected;
                           const isLoadingThis = sellerActionLoadingId === seller._id;
 
                           return (
@@ -1342,6 +1486,8 @@ export default function AdminPanel() {
               </>
             ) : activePage === 'Orders' ? (
               <>
+                {dashboardOrdersError && <p className="admin-category-error" role="alert">{dashboardOrdersError}</p>}
+                {orderNotice && <p className="admin-category-notice" role="status">{orderNotice}</p>}
                 <input
                   className="admin-search"
                   type="text"
@@ -1350,7 +1496,15 @@ export default function AdminPanel() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
 
-                <OrderTable data={filteredOrders} />
+                {dashboardLoading ? (
+                  <p className="admin-empty" role="status">Loading orders…</p>
+                ) : (
+                  <OrderTable
+                    data={filteredOrders}
+                    onStatusChange={updateAdminOrderStatus}
+                    loadingId={orderActionLoadingId}
+                  />
+                )}
               </>
             ) : (
               <div className="admin-placeholder">
@@ -1736,7 +1890,7 @@ export default function AdminPanel() {
   );
 }
 
-function OrderTable({ data }) {
+function OrderTable({ data, onStatusChange, loadingId }) {
   return (
     <div className="admin-table-wrapper">
       <table className="admin-table">
@@ -1747,12 +1901,37 @@ function OrderTable({ data }) {
             <th>PRODUCT</th>
             <th>AMOUNT</th>
             <th>STATUS</th>
+            {onStatusChange && <th>ACTION</th>}
           </tr>
         </thead>
 
         <tbody>
           {data.map((order) => (
-            <tr key={order.id}>
+            <OrderTableRow
+              key={`${order.id}-${order.orderStatus || order.status}`}
+              order={order}
+              onStatusChange={onStatusChange}
+              loading={loadingId === order._id}
+            />
+          ))}
+
+          {data.length === 0 && (
+            <tr>
+              <td colSpan={onStatusChange ? 6 : 5} className="admin-empty">
+                No orders found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OrderTableRow({ order, onStatusChange, loading }) {
+  const [nextStatus, setNextStatus] = useState(order.orderStatus || 'placed');
+  return (
+    <tr>
               <td className="order-id">{order.id}</td>
               <td>{order.customer}</td>
               <td>{order.product}</td>
@@ -1764,18 +1943,30 @@ function OrderTable({ data }) {
                   {order.status}
                 </span>
               </td>
-            </tr>
-          ))}
-
-          {data.length === 0 && (
-            <tr>
-              <td colSpan="5" className="admin-empty">
-                No orders found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+              {onStatusChange && (
+                <td>
+                  <div className="admin-category-actions">
+                    <select
+                      aria-label={`New status for order ${order.id}`}
+                      value={nextStatus}
+                      disabled={loading}
+                      onChange={(event) => setNextStatus(event.target.value)}
+                    >
+                      {['placed', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'].map((status) => (
+                        <option key={status} value={status}>{status}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="admin-category-action edit"
+                      disabled={loading || nextStatus === order.orderStatus}
+                      onClick={() => onStatusChange(order, nextStatus)}
+                    >
+                      {loading ? 'Saving…' : 'Update'}
+                    </button>
+                  </div>
+                </td>
+              )}
+    </tr>
   );
 }

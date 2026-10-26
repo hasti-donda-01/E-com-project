@@ -296,7 +296,16 @@ function Guide() {
 }
 
 /* ================= FOOTER ================= */
-const FOOTER_LINKS = ['Sell Online', 'Pricing & Commission', 'How it works', 'Shipping & Returns', 'Grow Your Business', 'Learning Hub', 'Meesho Ads', 'Shop Online on Meesho']
+const FOOTER_LINKS = [
+    { label: 'Sell Online', href: '/Becomesupplier' },
+    { label: 'Pricing & Commission', href: '/PricingCommision' },
+    { label: 'How it works', href: '/HowitWorks' },
+    { label: 'Shipping & Returns', href: '/Return' },
+    { label: 'Grow Your Business', href: '/Grow' },
+    { label: 'Learning Hub' },
+    { label: 'Meesho Ads' },
+    { label: 'Shop Online on Meesho', href: '/' }
+]
 
 function Footer() {
     const colTitle = { margin: '0 0 22px', fontSize: 14, fontWeight: 600, color: '#111' }
@@ -311,8 +320,10 @@ function Footer() {
                     </div>
                     <div style={{ width: 330 }}>
                         <h4 style={colTitle}>Sell on Meesho</h4>
-                        {FOOTER_LINKS.map((l) => (
-                            <a key={l} href="#" style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#555', textDecoration: 'none' }}>{l}</a>
+                        {FOOTER_LINKS.map((link) => link.href ? (
+                            <a key={link.label} href={link.href} style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#555', textDecoration: 'none' }}>{link.label}</a>
+                        ) : (
+                            <span key={link.label} aria-disabled="true" style={{ display: 'block', marginBottom: 14, fontSize: 13, color: '#999' }}>{link.label}</span>
                         ))}
                     </div>
                     <div>
@@ -363,7 +374,7 @@ export default function Return() {
                         <p style={{ margin: '16px 0 0', fontSize: 16, lineHeight: '25px', color: '#2b2b2b' }}>
                             <span style={{ display: 'inline-block', background: PINK, color: '#fff', fontSize: 13, fontWeight: 600, padding: '2px 11px', borderRadius: 3, marginRight: 10, lineHeight: '22px' }}>New!</span>
                             Don’t have a GSTIN or have a Composition GSTIN?<br />
-                            You can still sell on Meesho. Click <a href="/non-gst-sellers" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
+                            You can still sell on Meesho. Click <a href="/GST" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
                         </p>
                         <form onSubmit={handleSubmit} style={{ display: 'flex', width: 500, height: 58, marginTop: 22, padding: 0, background: '#fff', border: `1px solid ${focused ? PINK : '#d9dbe3'}` }}>
                             <div style={{ display: 'flex', alignItems: 'center', flex: 1, padding: '0 16px', minWidth: 0 }}>

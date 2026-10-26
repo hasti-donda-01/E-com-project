@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import meeshoLogo from './Images/meeshoLogo.svg';
 import SupplierProducts from './SupplierProducts';
 import ProfileMenu from './ProfileMenu';
@@ -13,7 +13,6 @@ import {
     FiBarChart2,
     FiShoppingBag,
     FiPackage,
-    FiSettings,
     FiTruck,
     FiRotateCcw,
     FiRefreshCw,
@@ -24,56 +23,7 @@ import {
 
 /* ---------- Config & Static Data ---------- */
 
-const kpiMetrics = [
-    {
-        id: 'orders',
-        title: 'Total Orders',
-        value: '3,790',
-        subtext: '3,691 unit quantity',
-        icon: <FiShoppingBag className="text-xl text-blue-500" />,
-        iconBg: 'bg-blue-50'
-    },
-    {
-        id: 'revenue',
-        title: 'Revenue',
-        value: '₹1,96,339',
-        subtext: 'From delivered orders',
-        icon: <span className="font-bold text-lg text-emerald-500">₹</span>,
-        iconBg: 'bg-emerald-50'
-    },
-    {
-        id: 'delivery',
-        title: 'Delivery Rate',
-        value: '88.3%',
-        subtext: '3,346 orders delivered',
-        icon: <FiTruck className="text-xl text-emerald-500" />,
-        iconBg: 'bg-emerald-50'
-    },
-    {
-        id: 'returns',
-        title: 'Return Rate',
-        value: '2.2%',
-        subtext: '84 customer returns',
-        icon: <FiRotateCcw className="text-xl text-rose-500" />,
-        iconBg: 'bg-rose-50'
-    },
-    {
-        id: 'rto',
-        title: 'RTO Rate',
-        value: '9.2%',
-        subtext: '347 RTO',
-        icon: <FiRefreshCw className="text-xl text-orange-500" />,
-        iconBg: 'bg-orange-50'
-    },
-    {
-        id: 'ads',
-        title: 'Ads Cost',
-        value: '₹22,030',
-        subtext: 'Advertisement spend',
-        icon: <FiBarChart2 className="text-xl text-purple-600" />,
-        iconBg: 'bg-purple-50'
-    }
-];
+/* KPI metrics are now computed dynamically from live order data */
 
 const sidebarSections = [
     {
@@ -100,79 +50,80 @@ const sidebarSections = [
             { name: 'Sort Labels', path: '/supplier/orders', icon: <FiPackage /> }
         ]
     },
-    {
-        title: 'SETTINGS',
-        items: [
-            { name: 'Settings', path: '/supplier/support', icon: <FiSettings /> }
-        ]
-    }
 ];
 
-const adsTrendBars = [
-    { amount: 800, height: 35 },
-    { amount: 1400, height: 60 },
-    { amount: 900, height: 40 },
-    { amount: 2300, height: 96, highlight: true },
-    { amount: 1650, height: 70 },
-    { amount: 1200, height: 50 },
-    { amount: 1900, height: 80 },
-    { amount: 1350, height: 58 },
-    { amount: 2200, height: 92 },
-    { amount: 1700, height: 72 }
-];
+/* ---------- Dynamic helpers ---------- */
 
-const sampleOrders = [
-    {
-        id: '#ORD-1001',
-        product: 'Women Pure Cotton Floral Printed Anarkali Kurti',
-        sku: 'MS-KURTI-01',
-        date: '24 Oct 2026',
-        amount: 499,
-        status: 'Delivered',
-        customer: 'Pooja Sharma',
-        city: 'Jaipur, RJ'
-    },
-    {
-        id: '#ORD-1002',
-        product: 'Banarasi Soft Silk Zari Border Saree with Blouse',
-        sku: 'MS-SAREE-44',
-        date: '24 Oct 2026',
-        amount: 899,
-        status: 'Delivered',
-        customer: 'Ananya Verma',
-        city: 'Lucknow, UP'
-    },
-    {
-        id: '#ORD-1003',
-        product: 'Men Regular Fit Casual Denim Indigo Shirt',
-        sku: 'MS-MENS-12',
-        date: '23 Oct 2026',
-        amount: 549,
-        status: 'RTO',
-        customer: 'Rahul Mehta',
-        city: 'Surat, GJ'
-    },
-    {
-        id: '#ORD-1004',
-        product: 'Women Quilted Structured Crossbody Handbag',
-        sku: 'MS-BAG-08',
-        date: '23 Oct 2026',
-        amount: 699,
-        status: 'Delivered',
-        customer: 'Divya Patel',
-        city: 'Ahmedabad, GJ'
-    },
-    {
-        id: '#ORD-1005',
-        product: 'Ethnic Oxidised Silver Traditional Jhumka Earrings',
-        sku: 'MS-JEWEL-19',
-        date: '22 Oct 2026',
-        amount: 199,
-        status: 'Returned',
-        customer: 'Sneha Reddy',
-        city: 'Hyderabad, TS'
-    }
-];
+// Compute KPI summary from raw orders array
+function computeStats(orders) {
+    const total = orders.length;
+    const delivered = orders.filter(o => (o.orderStatus || '').toLowerCase() === 'delivered').length;
+    const cancelled = orders.filter(o => (o.orderStatus || '').toLowerCase() === 'cancelled').length;
+    const returned = orders.filter(o => (o.orderStatus || '').toLowerCase() === 'returned').length;
+    const others = Math.max(0, total - delivered - cancelled - returned);
+
+    const revenue = orders
+        .filter(o => (o.orderStatus || '').toLowerCase() === 'delivered')
+        .reduce((sum, o) => {
+            const amt = Number(o.totalAmount) || Number(o.product?.price) || Number(o.product?.discountPrice) || 0;
+            return sum + amt;
+        }, 0);
+
+    const deliveryRate = total > 0 ? ((delivered / total) * 100).toFixed(1) : '0.0';
+    const returnRate = total > 0 ? ((returned / total) * 100).toFixed(1) : '0.0';
+    const rtoRate = total > 0 ? ((cancelled / total) * 100).toFixed(1) : '0.0';
+
+    return { total, delivered, cancelled, returned, others, revenue, deliveryRate, returnRate, rtoRate };
+}
+
+// Build bar chart from order revenue grouped by date (last 10 days)
+function buildBarData(orders) {
+    const dayMap = {};
+    [...orders]
+        .filter((order) => (order.orderStatus || '').toLowerCase() === 'delivered')
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .forEach(o => {
+        const day = new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        const amt = Number(o.totalAmount) || Number(o.product?.price) || Number(o.product?.discountPrice) || 0;
+        dayMap[day] = (dayMap[day] || 0) + amt;
+    });
+    const entries = Object.entries(dayMap).slice(-10);
+    if (entries.length === 0) return [];
+    const maxVal = Math.max(...entries.map(([, v]) => v), 1);
+    return entries.map(([label, amount], i) => ({
+        label,
+        amount,
+        height: Math.max(4, Math.round((amount / maxVal) * 96)),
+        highlight: i === entries.length - 1
+    }));
+}
+
+// Map a raw API order to the display shape used by the orders table
+function mapOrder(o) {
+    const statusRaw = (o.orderStatus || '').toLowerCase();
+    let status = 'Pending';
+    if (statusRaw === 'delivered') status = 'Delivered';
+    else if (statusRaw === 'cancelled') status = 'RTO';
+    else if (statusRaw === 'returned') status = 'Returned';
+    else if (statusRaw === 'shipped') status = 'Shipped';
+    else if (statusRaw === 'placed') status = 'Placed';
+    else if (statusRaw === 'confirmed') status = 'Confirmed';
+
+    const address = o.address;
+    const city = address ? `${address.city || ''}, ${address.state || ''}`.replace(/^, |, $/, '') : '';
+
+    return {
+        id: `#${String(o._id).slice(-8).toUpperCase()}`,
+        _id: o._id,
+        product: o.product?.name || 'Unknown Product',
+        sku: o.product?._id ? String(o.product._id).slice(-8).toUpperCase() : '—',
+        date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+        amount: Number(o.totalAmount) || Number(o.product?.price) || Number(o.product?.discountPrice) || 0,
+        status,
+        customer: o.userId?.name || 'Customer',
+        city,
+    };
+}
 
 const inr = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -200,13 +151,13 @@ function SidebarNav({ onNavigate, sellerSession }) {
                                         key={item.name}
                                         to={item.path}
                                         onClick={onNavigate}
-                                        className={`flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
-                                            isCurrent
+                                        className={({ isActive }) => `flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
+                                                isActive || isCurrent
                                                 ? 'bg-[#eef2ff] text-[#4f46e5] font-semibold shadow-2xs'
                                                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                                        }`}
+                                            }`}
                                     >
-                                        <span className={`text-lg shrink-0 ${isCurrent ? 'text-[#4f46e5]' : 'text-slate-400'}`}>
+                                            <span className={`text-lg shrink-0 ${isCurrent ? 'text-[#4f46e5]' : 'text-slate-400'}`}>
                                             {item.icon}
                                         </span>
                                         <span className="truncate">{item.name}</span>
@@ -262,12 +213,9 @@ export default function SupplierDashboard() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orderFilter, setOrderFilter] = useState('All');
     const [sellerSession, setSellerSession] = useState(null);
-    const location = useLocation();
-
-    useEffect(() => {
-        setDrawerOpen(false);
-    }, [location.pathname]);
-
+    const [orders, setOrders] = useState([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
+    const [ordersError, setOrdersError] = useState('');
     useEffect(() => {
         const loadSession = async () => {
             try {
@@ -285,10 +233,44 @@ export default function SupplierDashboard() {
         loadSession();
     }, []);
 
+    // Fetch seller's real orders
+    useEffect(() => {
+        const controller = new AbortController();
+        const loadOrders = async () => {
+            setOrdersLoading(true);
+            setOrdersError('');
+            try {
+                const res = await fetch(`${API_BASE_URL}/sellerp/getSellerOrder/me`, {
+                    credentials: 'include',
+                    signal: controller.signal
+                });
+                const payload = await res.json();
+                if (res.ok && payload.success && Array.isArray(payload.data)) {
+                    setOrders(payload.data);
+                } else {
+                    setOrdersError(payload.message || 'Could not load orders.');
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setOrdersError('Could not connect to server.');
+                }
+            } finally {
+                if (!controller.signal.aborted) setOrdersLoading(false);
+            }
+        };
+        loadOrders();
+        return () => controller.abort();
+    }, []);
+
+    // Compute stats from live orders
+    const stats = useMemo(() => computeStats(orders), [orders]);
+    const barData = useMemo(() => buildBarData(orders), [orders]);
+    const mappedOrders = useMemo(() => orders.map(mapOrder), [orders]);
+
     const filteredOrders = useMemo(() => {
-        if (orderFilter === 'All') return sampleOrders;
-        return sampleOrders.filter((o) => o.status === orderFilter);
-    }, [orderFilter]);
+        if (orderFilter === 'All') return mappedOrders;
+        return mappedOrders.filter((o) => o.status === orderFilter);
+    }, [orderFilter, mappedOrders]);
 
     const isBlocked = sellerSession?.status === 'blocked' || sellerSession?.isActive === false;
     const isApproved = Boolean(sellerSession?.isApproved);
@@ -377,6 +359,12 @@ export default function SupplierDashboard() {
                     </div>
                 </div>
 
+                {ordersError && (
+                    <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700" role="alert">
+                        {ordersError}
+                    </p>
+                )}
+
                 {/* ---------- Seller Account Approval / Block Status Banners ---------- */}
                 {isPending && (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-5 shadow-xs flex items-start gap-3.5">
@@ -457,8 +445,56 @@ export default function SupplierDashboard() {
                 )}
 
                 {/* ---------- 6 KPI Cards (2x3 Grid) ---------- */}
+                {ordersLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="rounded-[22px] border border-slate-100 bg-white p-6 shadow-2xs animate-pulse">
+                                <div className="h-4 w-28 bg-slate-100 rounded mb-4" />
+                                <div className="h-8 w-20 bg-slate-200 rounded mb-2" />
+                                <div className="h-3 w-24 bg-slate-100 rounded" />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {kpiMetrics.map((kpi) => (
+                    {[
+                        {
+                            id: 'orders', title: 'Total Orders',
+                            value: stats.total.toLocaleString('en-IN'),
+                            subtext: `${stats.delivered} delivered orders`,
+                            icon: <FiShoppingBag className="text-xl text-blue-500" />, iconBg: 'bg-blue-50'
+                        },
+                        {
+                            id: 'revenue', title: 'Revenue',
+                            value: inr(stats.revenue),
+                            subtext: 'From delivered orders',
+                            icon: <span className="font-bold text-lg text-emerald-500">₹</span>, iconBg: 'bg-emerald-50'
+                        },
+                        {
+                            id: 'delivery', title: 'Delivery Rate',
+                            value: `${stats.deliveryRate}%`,
+                            subtext: `${stats.delivered} orders delivered`,
+                            icon: <FiTruck className="text-xl text-emerald-500" />, iconBg: 'bg-emerald-50'
+                        },
+                        {
+                            id: 'returns', title: 'Return Rate',
+                            value: `${stats.returnRate}%`,
+                            subtext: `${stats.returned} customer returns`,
+                            icon: <FiRotateCcw className="text-xl text-rose-500" />, iconBg: 'bg-rose-50'
+                        },
+                        {
+                            id: 'rto', title: 'RTO Rate',
+                            value: `${stats.rtoRate}%`,
+                            subtext: `${stats.cancelled} RTO / Cancelled`,
+                            icon: <FiRefreshCw className="text-xl text-orange-500" />, iconBg: 'bg-orange-50'
+                        },
+                        {
+                            id: 'pending', title: 'Pending Orders',
+                            value: stats.others.toLocaleString('en-IN'),
+                            subtext: 'Placed / confirmed / shipped',
+                            icon: <FiBarChart2 className="text-xl text-purple-600" />, iconBg: 'bg-purple-50'
+                        }
+                    ].map((kpi) => (
                         <div
                             key={kpi.id}
                             className="rounded-[22px] border border-slate-100 bg-white p-6 shadow-2xs hover:shadow-xs transition-all"
@@ -482,6 +518,7 @@ export default function SupplierDashboard() {
                         </div>
                     ))}
                 </div>
+                )}
 
                 {/* ---------- Bottom Two Analytics Cards ---------- */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -500,54 +537,38 @@ export default function SupplierDashboard() {
                                 <div className="relative flex items-center justify-center">
                                     <svg className="w-44 h-44 transform -rotate-90" viewBox="0 0 100 100">
                                         <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="36"
-                                            fill="transparent"
-                                            stroke="#f1f5f9"
-                                            strokeWidth="14"
+                                            cx="50" cy="50" r="36"
+                                            fill="transparent" stroke="#f1f5f9" strokeWidth="14"
                                         />
-                                        {/* Delivered: 88.3% (Green) */}
+                                        {/* Delivered (Green) */}
                                         <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="36"
-                                            fill="transparent"
-                                            stroke="#10b981"
-                                            strokeWidth="14"
-                                            strokeDasharray="200 226"
+                                            cx="50" cy="50" r="36"
+                                            fill="transparent" stroke="#10b981" strokeWidth="14"
+                                            strokeDasharray={`${(stats.total > 0 ? (stats.delivered / stats.total) * 226 : 0).toFixed(1)} 226`}
                                             strokeDashoffset="0"
                                             strokeLinecap="round"
                                         />
-                                        {/* RTO: 9.2% (Orange) */}
+                                        {/* RTO / Cancelled (Orange) */}
                                         <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="36"
-                                            fill="transparent"
-                                            stroke="#f97316"
-                                            strokeWidth="14"
-                                            strokeDasharray="21 226"
-                                            strokeDashoffset="-202"
+                                            cx="50" cy="50" r="36"
+                                            fill="transparent" stroke="#f97316" strokeWidth="14"
+                                            strokeDasharray={`${(stats.total > 0 ? (stats.cancelled / stats.total) * 226 : 0).toFixed(1)} 226`}
+                                            strokeDashoffset={`-${(stats.total > 0 ? (stats.delivered / stats.total) * 226 : 0).toFixed(1)}`}
                                             strokeLinecap="round"
                                         />
-                                        {/* Returns: 2.2% (Rose) */}
+                                        {/* Returns (Rose) */}
                                         <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="36"
-                                            fill="transparent"
-                                            stroke="#f43f5e"
-                                            strokeWidth="14"
-                                            strokeDasharray="5 226"
-                                            strokeDashoffset="-223"
+                                            cx="50" cy="50" r="36"
+                                            fill="transparent" stroke="#f43f5e" strokeWidth="14"
+                                            strokeDasharray={`${(stats.total > 0 ? (stats.returned / stats.total) * 226 : 0).toFixed(1)} 226`}
+                                            strokeDashoffset={`-${(stats.total > 0 ? ((stats.delivered + stats.cancelled) / stats.total) * 226 : 0).toFixed(1)}`}
                                             strokeLinecap="round"
                                         />
                                     </svg>
 
                                     {/* Donut Center */}
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span className="text-2xl font-black text-slate-900">3,790</span>
+                                        <span className="text-2xl font-black text-slate-900">{stats.total.toLocaleString('en-IN')}</span>
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total</span>
                                     </div>
                                 </div>
@@ -557,22 +578,22 @@ export default function SupplierDashboard() {
                                     <div className="flex items-center gap-2.5">
                                         <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
                                         <span className="text-slate-600 font-medium">Delivered:</span>
-                                        <span className="text-slate-900 font-bold">3,346 (88.3%)</span>
+                                        <span className="text-slate-900 font-bold">{stats.delivered} ({stats.deliveryRate}%)</span>
                                     </div>
                                     <div className="flex items-center gap-2.5">
                                         <span className="h-3 w-3 rounded-full bg-[#f97316]"></span>
-                                        <span className="text-slate-600 font-medium">RTO:</span>
-                                        <span className="text-slate-900 font-bold">347 (9.2%)</span>
+                                        <span className="text-slate-600 font-medium">RTO / Cancelled:</span>
+                                        <span className="text-slate-900 font-bold">{stats.cancelled} ({stats.rtoRate}%)</span>
                                     </div>
                                     <div className="flex items-center gap-2.5">
                                         <span className="h-3 w-3 rounded-full bg-[#f43f5e]"></span>
                                         <span className="text-slate-600 font-medium">Returns:</span>
-                                        <span className="text-slate-900 font-bold">84 (2.2%)</span>
+                                        <span className="text-slate-900 font-bold">{stats.returned} ({stats.returnRate}%)</span>
                                     </div>
                                     <div className="flex items-center gap-2.5">
                                         <span className="h-3 w-3 rounded-full bg-slate-300"></span>
-                                        <span className="text-slate-600 font-medium">Others:</span>
-                                        <span className="text-slate-900 font-bold">13 (0.3%)</span>
+                                        <span className="text-slate-600 font-medium">Pending:</span>
+                                        <span className="text-slate-900 font-bold">{stats.others} orders</span>
                                     </div>
                                 </div>
                             </div>
@@ -586,16 +607,16 @@ export default function SupplierDashboard() {
                         </div>
                     </div>
 
-                    {/* 2. Advertisement Cost Trend (Bar Chart) */}
+                    {/* 2. Order Revenue Trend (Bar Chart) */}
                     <div className="rounded-[22px] border border-slate-100 bg-white p-6 shadow-2xs flex flex-col justify-between">
                         <div>
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-base font-bold text-slate-900">
-                                        Advertisement Cost Trend
+                                        Order Revenue Trend
                                     </h3>
                                     <p className="text-xs text-slate-400 mt-1">
-                                        Daily ads spending over time
+                                        Daily order revenue from your store
                                     </p>
                                 </div>
                             </div>
@@ -603,13 +624,19 @@ export default function SupplierDashboard() {
                             {/* Chart Container */}
                             <div className="mt-8 flex items-end gap-3 h-48">
                                 {/* Dedicated Y-Axis */}
-                                <div className="flex flex-col justify-between h-40 text-[10px] text-slate-400 text-right pr-2 shrink-0">
-                                    <span>₹2400</span>
-                                    <span>₹1800</span>
-                                    <span>₹1200</span>
-                                    <span>₹600</span>
-                                    <span>₹0</span>
-                                </div>
+                                {(() => {
+                                    const maxAmt = barData.length > 0 ? Math.max(...barData.map(b => b.amount)) : 2400;
+                                    const step = Math.ceil(maxAmt / 4 / 100) * 100 || 100;
+                                    return (
+                                        <div className="flex flex-col justify-between h-40 text-[10px] text-slate-400 text-right pr-2 shrink-0">
+                                            <span>{inr(step * 4)}</span>
+                                            <span>{inr(step * 3)}</span>
+                                            <span>{inr(step * 2)}</span>
+                                            <span>{inr(step)}</span>
+                                            <span>₹0</span>
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Bars Area with Grid */}
                                 <div className="relative flex-1 h-40 flex items-end justify-between gap-2 border-b border-slate-200/80">
@@ -621,13 +648,18 @@ export default function SupplierDashboard() {
                                         <div></div>
                                     </div>
 
-                                    {adsTrendBars.map((bar, idx) => (
+                                    {barData.length === 0 ? (
+                                        <div className="flex-1 flex items-center justify-center text-xs text-slate-400">
+                                            No order data yet
+                                        </div>
+                                    ) : (
+                                    barData.map((bar, idx) => (
                                         <div
                                             key={idx}
                                             className="group relative flex-1 flex flex-col items-center h-full justify-end z-10"
                                         >
                                             <div className="pointer-events-none absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-md">
-                                                {inr(bar.amount)}
+                                                {bar.label}: {inr(bar.amount)}
                                             </div>
 
                                             <div
@@ -639,13 +671,14 @@ export default function SupplierDashboard() {
                                                 }`}
                                             ></div>
                                         </div>
-                                    ))}
+                                    ))
+                                    )}
                                 </div>
                             </div>
                         </div>
 
                         <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                            <span>Total Spend: ₹22,030</span>
+                            <span>Total Revenue: {inr(stats.revenue)}</span>
                             <Link to="/Grow" className="text-[#4f46e5] font-bold hover:underline">
                                 Campaign Reports →
                             </Link>
@@ -783,13 +816,9 @@ export default function SupplierDashboard() {
                                         <span className="text-gray-600">Total Amount:</span>
                                         <span className="font-bold text-gray-900">{inr(selectedOrder.amount)}</span>
                                     </div>
-                                    <div className="flex justify-between text-emerald-600 font-semibold">
-                                        <span>0% Commission:</span>
-                                        <span>₹0.00</span>
-                                    </div>
-                                    <div className="flex justify-between pt-1 border-t border-indigo-200/50 font-bold text-gray-900">
-                                        <span>Payout to Bank:</span>
-                                        <span className="text-[#4f46e5]">{inr(selectedOrder.amount)}</span>
+                                    <div className="flex justify-between border-t border-indigo-200/50 pt-1 text-gray-600">
+                                        <span>Order status:</span>
+                                        <span className="font-semibold text-gray-900">{selectedOrder.status}</span>
                                     </div>
                                 </div>
                             </div>

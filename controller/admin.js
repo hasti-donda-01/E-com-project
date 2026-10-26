@@ -346,10 +346,18 @@ export const monitorallorder = async (req, res) => {
 
 export const updateorderstatus = async (req, res) => {
     try {
-        console.log(req.body, "order")
-        console.log(req.params.id, "order")
-        const order = await Order.findOneAndUpdate({ _id: req.params.id }, { $set: { orderStatus: req.body.orderStatus } });
-        console.log(order, "order")
+        const validStatuses = ["placed", "confirmed", "shipped", "delivered", "cancelled"];
+        if (!validStatuses.includes(req.body.orderStatus)) {
+            return res.status(400).json({
+                message: "Invalid order status.",
+                success: false
+            });
+        }
+        const order = await Order.findByIdAndUpdate(
+            req.params.id,
+            { $set: { orderStatus: req.body.orderStatus } },
+            { new: true, runValidators: true }
+        );
         if (!order) {
             return res.status(404).json({
                 message: "orderId not found",
@@ -360,8 +368,7 @@ export const updateorderstatus = async (req, res) => {
             message: "order status updated successfully",
             success: true,
             data: order
-        })
-
+        });
 
     } catch (error) {
         return res.status(500).json({

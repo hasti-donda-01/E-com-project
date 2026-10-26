@@ -1,5 +1,5 @@
 import { MdVerified } from "react-icons/md";
-import { PiGreaterThanDuotone, PiGreaterThanThin } from "react-icons/pi";
+import { PiGreaterThanDuotone } from "react-icons/pi";
 import personalcare from './Images/personalcare.jpg';
 import electronics from './Images/electronics.jpg';
 import books from './Images/books.jpg';

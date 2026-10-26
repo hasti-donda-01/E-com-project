@@ -52,10 +52,10 @@ export default function ProductGrid() {
             <section className="gold">
                 <img src={gold} alt="" />
                 <div className="gold-button">
-                    <a href="">Shop Now</a>
+                    <a href="#products-catalog">Shop Now</a>
                 </div>
                 <div className="gold-imgs">
-                    <a href="">
+                    <a href="#products-catalog" aria-label="Browse products">
                         <div className="gold-item">
                        { golditems.map((x, i) => {
                             return <img src={x.image} alt={x.name} key={i} />;

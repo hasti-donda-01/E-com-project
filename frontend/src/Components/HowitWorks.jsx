@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import meeshoLogo from './Images/meeshoLogo.svg'
+import { useState, useEffect } from 'react'
 import DesktopPicsell from './Images/DesktopPicsell.jpg'
-import { useNavigate } from 'react-router-dom'
 import SupplierNavbar from './SupplierNavbar'
 import SupplierFooter from './SupplierFooter'
 
 const PINK = '#f43397'
-const MAROON = '#570d48'
-const INDIGO = '#3d1fc4'
 const FONT = "'Poppins', sans-serif"
 const CONTAINER = { maxWidth: 1524, margin: '0 auto', padding: '0 24px', boxSizing: 'border-box' }
 
@@ -303,10 +299,10 @@ export default function HowitWorks() {
                         <span style={{ display: 'inline-block', background: PINK, color: '#fff', fontSize: 16, fontWeight: 600, padding: '1px 17px', borderRadius: 4, marginRight: 12, lineHeight: '30px' }}>New!</span>
                         Don’t have a GSTIN or have a Composition GSTIN?
                         <br />
-                        You can still sell on Meesho. Click <a href="/non-gst-sellers" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
+                        You can still sell on Meesho. Click <a href="/GST" style={{ color: PINK, fontWeight: 600, textDecoration: 'none' }}>here</a> to know more.
                     </p>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', width: 541, height: 48, marginTop: 0, background: '#fff', border: `1px solid ${focused ? PINK : '#d9dbe3'}`, padding: 0, marginTop: 40 }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', width: 541, height: 48, background: '#fff', border: `1px solid ${focused ? PINK : '#d9dbe3'}`, padding: 0, marginTop: 40 }}>
                         <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, }}>
                             <span style={{ fontSize: 14, color: '#2b2b2b' }}>+91</span>
                             <input

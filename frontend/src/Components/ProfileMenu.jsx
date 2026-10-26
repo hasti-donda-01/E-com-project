@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CgProfile } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
+import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
 
 const API_BASE_URL = (
     import.meta.env.VITE_API_URL ||
@@ -19,7 +20,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
 
         const loadSession = async () => {
             try {
-                const customerToken = sessionStorage.getItem('customerAccessToken');
+                const customerToken = getCustomerAccessToken();
                 const response = await fetch(`${API_BASE_URL}/seller/session`, {
                     credentials: 'include',
                     headers: customerToken
@@ -33,11 +34,8 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         throw new Error('The account session response was invalid.');
                     }
                     setUser(payload.data);
-                } else if (
-                    response.status === 404 &&
-                    sessionStorage.getItem('customerAccessToken')
-                ) {
-                    sessionStorage.removeItem('customerAccessToken');
+                } else if (isCustomerAuthFailure(response, await response.json().catch(() => ({})))) {
+                    clearCustomerAccessToken();
                 } else if (![400, 401, 403].includes(response.status)) {
                     throw new Error(`Could not check account session (${response.status}).`);
                 }
@@ -59,7 +57,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
         setError('');
         setSigningOut(true);
         try {
-            const customerToken = sessionStorage.getItem('customerAccessToken');
+            const customerToken = getCustomerAccessToken();
             const response = await fetch(`${API_BASE_URL}/seller/logout`, {
                 method: 'POST',
                 credentials: 'include',
@@ -73,7 +71,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
             }
             const isAdmin = String(user?.role).toLowerCase() === 'admin';
             if (String(user?.role).toLowerCase() === 'customer') {
-                sessionStorage.removeItem('customerAccessToken');
+                clearCustomerAccessToken();
             }
             setUser(null);
             navigate(isAdmin ? '/admin' : '/', { replace: true });
@@ -85,10 +83,6 @@ export default function ProfileMenu({ variant = 'customer' }) {
     };
 
     if (!user && !loading && variant !== 'customer') return null;
-
-    const displayName = variant === 'customer'
-        ? 'Profile'
-        : user?.name || (loading ? 'Checking account…' : 'Profile');
 
     return (
         <div className={`account-menu account-menu-${variant}`}>
@@ -111,15 +105,6 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         {String(user.role).toLowerCase() === 'customer' && user.phone && (
                             <p className="account-menu-help">Mobile number: {user.phone}</p>
                         )}
-                        {/* {variant === 'customer' && (
-                            <button
-                                className="account-menu-link"
-                                type="button"
-                                onClick={() => navigate('/wishlist')}
-                            >
-                                Wishlist
-                            </button>
-                        )} */}
                         {error && <p className="account-menu-error" role="alert">{error}</p>}
                         <button
                             className="account-menu-signout"
@@ -150,8 +135,6 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         >
                             Wishlist
                         </button>
-                        <div className="profile-dropdown-items">My Orders</div>
-                        <div className="profile-dropdown-items">Delete Account</div>
                     </>
                 )}
             </div>

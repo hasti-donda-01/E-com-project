@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import footerlogo from './Images/footerlogo.svg'
 export default function SupplierFooter() {

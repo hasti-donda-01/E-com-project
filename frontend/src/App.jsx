@@ -1,7 +1,3 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 import Navbar from './Components/Navbar'
 import ProductGrid from './Components/ProductGrid'
@@ -26,6 +22,7 @@ import ProductCard from './Components/ProductCard'
 import ProductDetails from './Components/ProductDetails'
 import ShoppingCart from './Components/ShoppingCart'
 import SupplierDashboard from './Components/SupplierDashboard'
+import SupplierOrders from './Components/SupplierOrders'
 import AddProduct from './Components/AddProduct'
 import SupplierProducts from './Components/SupplierProducts'
 import AdminPanel from './Components/AdminPanel'
@@ -49,6 +46,8 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/Becomesupplier" element={<Becomesupplier />} />
         <Route path='/SupplierLogin' element={<SupplierLogin />} />
+        <Route path='/signuppage' element={<StartSelling />} />
+        <Route path='/supplier-signup' element={<StartSelling />} />
         <Route path='/StartSelling' element={<StartSelling />} />
         <Route path='/Inverster' element={<Inverster />} />
         <Route path='/investor-relations' element={<Inverster />} />
@@ -58,10 +57,13 @@ function App() {
         <Route path='/investor-relations/resources' element={<InvestorResources />} />
         <Route path='/HowitWorks' element={<HowitWorks />} />
         <Route path='/PricingCommision' element={<PricingCommision />} />
+        <Route path='/pricing-commission' element={<PricingCommision />} />
         <Route path='/Return' element={<Return />} />
+        <Route path='/shipping-returns' element={<Return />} />
         <Route path='/Grow' element={<Grow />} />
         <Route path='/GST' element={<GST />} />
         <Route path='/SupplierDashboard' element={<SupplierDashboard />} />
+        <Route path='/supplier/orders' element={<SupplierOrders />} />
         <Route path='/AddProduct' element={<AddProduct />} />
         <Route path='/supplier/add-product' element={<AddProduct />} />
         <Route path='/supplier/products' element={<SupplierProducts />} />

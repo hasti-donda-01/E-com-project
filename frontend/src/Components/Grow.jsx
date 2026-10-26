@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import Desktoppic2 from './Images/Desktoppic2.jpg'
 import SupplierFooter from './SupplierFooter'

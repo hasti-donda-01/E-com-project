@@ -1,7 +1,4 @@
-import React, { useState } from 'react'
-import meeshoLogo from './Images/meeshoLogo.svg'
-import SupplierLogin from './SupplierLogin'
-import SupplierFooter from './SupplierFooter'
+import { useState } from 'react'
 import SupplierNavbar from './SupplierNavbar'
 
 /* 👇 import your real images and assign them here */
@@ -13,20 +10,8 @@ const IMG = {
 }
 
 const PINK = '#f43397'
-const INDIGO = '#3d1fc4'
 const FONT = "'Poppins', sans-serif"
-const WRAP = { width: '100%', maxWidth: 1300, margin: '0 auto', paddingLeft: 24, paddingRight: 24, boxSizing: 'border-box' }
 const NARROW = { width: '100%', maxWidth: 1000, margin: '0 auto', paddingLeft: 24, paddingRight: 24, boxSizing: 'border-box' }
-
-/* ================= NAVBAR ================= */
-const NAV_LINKS = [
-    { label: 'Sell Online', href: '#' },
-    { label: 'How it works', href: '#' },
-    { label: 'Pricing & Commission', href: '#' },
-    { label: 'Shipping & Returns', href: '#' },
-    { label: 'Grow Business', href: '#' },
-    { label: 'Don’t have GST?', href: '#', active: true },
-]
 
 
 /* ================= HELPERS ================= */
@@ -153,7 +138,7 @@ export default function GST() {
                     </div>
 
                     <div style={{ width: 460, border: '1px solid #e6e1ee', borderRadius: 4, padding: '20px 24px', boxSizing: 'border-box' }}>
-                        {BENEFITS.map((b, i) => (
+                        {BENEFITS.map((b) => (
                             <div key={b.title} style={{ display: 'flex', gap: 12, paddingBottom: 16, marginBottom: 16, borderBottom: '1px solid #ececec' }}>
                                 <IconBox>{b.icon}</IconBox>
                                 <div>
@@ -217,12 +202,12 @@ export default function GST() {
                             Learn how to sell and grow<br />your business on Meesho
                         </div>
                     </div>
-                    <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', border: '1px solid #333', borderRadius: 3, background: '#fff', color: '#333', fontSize: 12, textDecoration: 'none' }}>
+                    <span aria-disabled="true" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', border: '1px solid #aaa', borderRadius: 3, background: '#f5f5f5', color: '#777', fontSize: 12, cursor: 'not-allowed' }}>
                         <span style={{ width: 18, height: 18, borderRadius: '50%', background: PINK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <svg width="7" height="8" viewBox="0 0 6 7"><path d="M0 0l6 3.5L0 7z" fill="#fff" /></svg>
                         </span>
                         Visit Learning Hub
-                    </a>
+                    </span>
                 </div>
             </section>
 
