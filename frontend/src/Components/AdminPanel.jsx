@@ -46,6 +46,11 @@ export default function AdminPanel() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
   const [productLoadAttempt, setProductLoadAttempt] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productModalMode, setProductModalMode] = useState('');
+  const [productActionLoading, setProductActionLoading] = useState(false);
+  const [productActionError, setProductActionError] = useState('');
+  const [productNotice, setProductNotice] = useState('');
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState('');
@@ -251,6 +256,83 @@ export default function AdminPanel() {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+
+  const openProductModal = (product, mode) => {
+    setSelectedProduct(product);
+    setProductModalMode(mode);
+    setProductActionError('');
+  };
+
+  const closeProductModal = () => {
+    if (productActionLoading) return;
+    setSelectedProduct(null);
+    setProductModalMode('');
+    setProductActionError('');
+  };
+
+  const saveAdminProduct = async (event) => {
+    event.preventDefault();
+    if (!selectedProduct || productModalMode !== 'edit') return;
+
+    const form = new FormData(event.currentTarget);
+    const productDetails = {
+      name: String(form.get('name') || '').trim(),
+      brand: String(form.get('brand') || '').trim(),
+      price: Number(form.get('price')),
+      stock: Number(form.get('stock'))
+    };
+    if (!productDetails.name || !productDetails.brand || !(productDetails.price > 0) ||
+        !Number.isInteger(productDetails.stock) || productDetails.stock < 0) {
+      setProductActionError('Enter a name, brand, positive price, and whole-number stock of 0 or more.');
+      return;
+    }
+
+    setProductActionLoading(true);
+    setProductActionError('');
+    setProductNotice('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/updateProduct/${selectedProduct._id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productDetails)
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || `Could not update product (${response.status}).`);
+      }
+      setProducts((current) => current.map((product) =>
+        product._id === selectedProduct._id ? { ...product, ...payload.data } : product
+      ));
+      setProductNotice(payload.message || 'Product updated successfully.');
+      setSelectedProduct(null);
+      setProductModalMode('');
+    } catch (error) {
+      setProductActionError(error.message || 'Could not update product.');
+    } finally {
+      setProductActionLoading(false);
+    }
+  };
+
+  const deleteAdminProduct = async (product) => {
+    if (!window.confirm(`Delete "${product.name || 'this product'}"? This action cannot be undone.`)) return;
+    setProductsError('');
+    setProductNotice('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/deleteProduct/${product._id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || `Could not delete product (${response.status}).`);
+      }
+      setProducts((current) => current.filter((item) => item._id !== product._id));
+      setProductNotice(payload.warning || payload.message || 'Product deleted successfully.');
+    } catch (error) {
+      setProductsError(error.message || 'Could not delete product.');
+    }
+  };
 
   const openCategoryModal = (category, mode) => {
     setSelectedCategory(category);
@@ -602,6 +684,10 @@ export default function AdminPanel() {
                   </button>
                 </div>
 
+                {productNotice && (
+                  <p className="admin-category-notice" role="status">{productNotice}</p>
+                )}
+
                 {productsError && (
                   <div className="admin-category-error" role="alert">
                     <span>{productsError}</span>
@@ -625,16 +711,17 @@ export default function AdminPanel() {
                         <th>PRICE</th>
                         <th>STOCK</th>
                         <th>CREATED</th>
+                        <th>ACTION</th>
                       </tr>
                     </thead>
                     <tbody>
                       {productsLoading && products.length === 0 ? (
-                        <tr><td colSpan="6" className="admin-empty">Loading products…</td></tr>
+                        <tr><td colSpan="7" className="admin-empty">Loading products…</td></tr>
                       ) : productsError && products.length === 0 ? (
-                        <tr><td colSpan="6" className="admin-empty">Products could not be loaded.</td></tr>
+                        <tr><td colSpan="7" className="admin-empty">Products could not be loaded.</td></tr>
                       ) : filteredProducts.length === 0 ? (
                         <tr>
-                          <td colSpan="6" className="admin-empty">
+                          <td colSpan="7" className="admin-empty">
                             {products.length === 0 ? 'No products found.' : 'No products match your search.'}
                           </td>
                         </tr>
@@ -661,6 +748,31 @@ export default function AdminPanel() {
                               {product.createdAt
                                 ? new Date(product.createdAt).toLocaleDateString('en-IN')
                                 : '—'}
+                            </td>
+                            <td>
+                              <div className="admin-category-actions">
+                                <button
+                                  className="admin-category-action view"
+                                  type="button"
+                                  onClick={() => openProductModal(product, 'view')}
+                                >
+                                  View
+                                </button>
+                                <button
+                                  className="admin-category-action edit"
+                                  type="button"
+                                  onClick={() => openProductModal(product, 'edit')}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  className="admin-category-action delete"
+                                  type="button"
+                                  onClick={() => deleteAdminProduct(product)}
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -938,6 +1050,74 @@ export default function AdminPanel() {
           </section>
         )}
       </main>
+
+      {productModalMode && selectedProduct && (
+        <div className="admin-category-modal-backdrop" onMouseDown={closeProductModal}>
+          <section
+            className="admin-category-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-product-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="admin-category-modal-heading">
+              <div>
+                <p>PRODUCT MANAGEMENT</p>
+                <h2 id="admin-product-modal-title">
+                  {productModalMode === 'edit' ? 'Edit product' : selectedProduct.name || 'Product details'}
+                </h2>
+              </div>
+              <button type="button" aria-label="Close" onClick={closeProductModal}>×</button>
+            </div>
+
+            {productModalMode === 'view' ? (
+              <>
+                <div className="admin-category-details">
+                  {selectedProduct.image && (
+                    <img src={selectedProduct.image} alt={selectedProduct.name || 'Product'} />
+                  )}
+                  <p><strong>Name</strong><span>{selectedProduct.name || '—'}</span></p>
+                  <p><strong>Brand</strong><span>{selectedProduct.brand || '—'}</span></p>
+                  <p><strong>Category</strong><span>{selectedProduct.category_name || selectedProduct.categoryId?.category_name || 'Uncategorized'}</span></p>
+                  <p><strong>Price</strong><span>{Number.isFinite(Number(selectedProduct.price)) ? `₹${Number(selectedProduct.price).toLocaleString('en-IN')}` : '—'}</span></p>
+                  <p><strong>Stock</strong><span>{Number.isFinite(Number(selectedProduct.stock)) ? selectedProduct.stock : '—'}</span></p>
+                  <p><strong>Rating</strong><span>{selectedProduct.rating ?? '—'}</span></p>
+                  <p><strong>Created</strong><span>{selectedProduct.createdAt ? new Date(selectedProduct.createdAt).toLocaleString('en-IN') : '—'}</span></p>
+                </div>
+                <div className="admin-category-modal-actions">
+                  <button type="button" onClick={closeProductModal}>Close</button>
+                </div>
+              </>
+            ) : (
+              <form className="admin-category-edit-form" onSubmit={saveAdminProduct}>
+                <label>
+                  Product name
+                  <input name="name" required maxLength="120" defaultValue={selectedProduct.name || ''} />
+                </label>
+                <label>
+                  Brand
+                  <input name="brand" required maxLength="80" defaultValue={selectedProduct.brand || ''} />
+                </label>
+                <label>
+                  Price
+                  <input name="price" type="number" min="0.01" step="0.01" required defaultValue={selectedProduct.price ?? ''} />
+                </label>
+                <label>
+                  Available stock
+                  <input name="stock" type="number" min="0" step="1" required defaultValue={selectedProduct.stock ?? ''} />
+                </label>
+                {productActionError && <p className="admin-category-error" role="alert">{productActionError}</p>}
+                <div className="admin-category-modal-actions">
+                  <button type="button" onClick={closeProductModal} disabled={productActionLoading}>Cancel</button>
+                  <button className="admin-primary-btn" type="submit" disabled={productActionLoading}>
+                    {productActionLoading ? 'Saving…' : 'Save changes'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        </div>
+      )}
 
       {categoryModalMode && (
         <div className="admin-category-modal-backdrop" onMouseDown={closeCategoryModal}>

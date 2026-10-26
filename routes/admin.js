@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { auth } from '../middleware/auth.js';
-import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getAllSellerPayments, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateorderstatus, verifySeller } from '../controller/admin.js';
+import { accountstatus, approveSeller, deleteProduct, getallproducts, getallseller, getAllSellerPayments, getalluser, getCustomerDetails, getSellerReport, monitorallorder, rejectSeller, updateAdminProduct, updateorderstatus, verifySeller } from '../controller/admin.js';
 import { adminDashboard } from '../controller/dashboards.js';
 import { adminLogin, getAdminSession, logoutAdmin } from '../auth/seller.js';
 // const storage = multer.diskStorage({
@@ -28,6 +28,7 @@ router.get('/getallsellers', auth(["Admin"]), getallseller);
 router.get('/getalluser', auth(["Admin"]), getalluser);
 router.get('/getallproducts', auth(["Admin"]), getallproducts);
 router.delete('/deleteProduct/:id', auth(["Admin"]), deleteProduct)
+router.patch('/updateProduct/:id', auth(["Admin"]), updateAdminProduct);
 router.get('/accountstatus/:id', auth(["Admin"]), accountstatus);//block unblock user
 router.get('/getallorder', auth(["Admin"]), monitorallorder);
 router.get('/updateorderstatus/:id', auth(["Admin"]), updateorderstatus);

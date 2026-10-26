@@ -116,9 +116,29 @@ export default function ProductCard() {
   }, []);
 
   const routeCategoryId = searchParams.get('category');
+  const routeSearch = searchParams.get('search')?.trim() || '';
   const activeCategoryIds = routeCategoryId ? [routeCategoryId] : selectedCategories;
   const getCategoryId = (product) =>
     String(product.categoryId?._id || product.categoryId || '');
+  const matchesSearch = (product, query) => {
+    const attributeText = attributeFilterGroups
+      .flatMap(([key]) => getAttributeValues(product, key))
+      .join(' ');
+    const categoryId = getCategoryId(product);
+    const categoryName = categories.find(
+      (category) => String(category._id) === categoryId
+    )?.category_name;
+    const searchableText = [
+      product.name,
+      product.brand,
+      product.description,
+      product.category_name,
+      product.categoryId?.category_name,
+      categoryName,
+      attributeText
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchableText.includes(query.toLowerCase());
+  };
   const availableCategories = categories
     .filter((category) => products.some((product) => getCategoryId(product) === String(category._id)))
     .filter((category) =>
@@ -134,6 +154,7 @@ export default function ProductCard() {
   };
 
   const filteredProducts = products
+    .filter((product) => !routeSearch || matchesSearch(product, routeSearch))
     .filter((product) =>
       activeCategoryIds.length === 0 || activeCategoryIds.includes(getCategoryId(product))
     )
@@ -168,7 +189,13 @@ export default function ProductCard() {
         ? currentSelection.filter((id) => id !== categoryId)
         : [...currentSelection, categoryId]
     );
-    if (routeCategoryId) setSearchParams({}, { replace: true });
+    if (routeCategoryId) {
+      setSearchParams((currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+        nextParams.delete('category');
+        return nextParams;
+      }, { replace: true });
+    }
   };
 
   const toggleAttributeFilter = (key, value) => {
@@ -188,10 +215,11 @@ export default function ProductCard() {
     setMaxPrice('');
     setMinimumRating('');
     setMinimumDiscount('');
-    if (routeCategoryId) setSearchParams({}, { replace: true });
+    if (routeCategoryId || routeSearch) setSearchParams({}, { replace: true });
   };
 
-  const hasActiveFilters = activeCategoryIds.length > 0 ||
+  const hasActiveFilters = Boolean(routeSearch) ||
+    activeCategoryIds.length > 0 ||
     Object.values(attributeFilters).some((values) => values.length > 0) ||
     Boolean(minPrice || maxPrice || minimumRating || minimumDiscount);
 
@@ -223,7 +251,9 @@ export default function ProductCard() {
 
   return (
     <section className="products-page" id="products-catalog" aria-label="Products">
-      <h1 className="products-page-title">Products For You</h1>
+      <h1 className="products-page-title">
+        {routeSearch ? `Products: ${routeSearch}` : 'Products For You'}
+      </h1>
       <div className="productlisting">
         <aside className="productlistleft" aria-label="Product filters">
           <label className="product-sort">

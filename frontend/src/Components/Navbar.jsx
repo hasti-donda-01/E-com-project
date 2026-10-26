@@ -486,9 +486,18 @@ export default function Navbar() {
                 >
                     {activeCategoryMenu && categoryMenus[activeCategoryMenu]?.map((category) => (
                             <section className="category-mega-column" key={category.title}>
-                                <h2>{category.title}</h2>
+                                <h2>
+                                    <a href={`/?search=${encodeURIComponent(category.title)}#products-catalog`}>
+                                        {category.title}
+                                    </a>
+                                </h2>
                                 {category.items.map((item) => (
-                                    <a href="#products-catalog" key={item}>
+                                    <a
+                                        href={`/?search=${encodeURIComponent(
+                                            /^view all$/i.test(item) ? category.title : item
+                                        )}#products-catalog`}
+                                        key={item}
+                                    >
                                         {item}
                                     </a>
                                 ))}

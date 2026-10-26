@@ -3,8 +3,8 @@ import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { Seller } from "../models/seller.js"
 import { User } from "../models/user.js";
-import fs from 'fs'
 import { Payment } from "../models/payment.js";
+import { cloudinary } from "../config/cloudinary.js";
 
 export const getallseller = async (req, res) => {
     try {
@@ -137,26 +137,83 @@ export const getallproducts = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     try {
-        const product = await Product.findOneAndDelete({ _id: req.params.id });
+        const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
             return res.status(404).json({
                 message: "product not found",
                 success: false
             })
         }
-        fs.unlinkSync(`./public/product/${product.imagename}`);
+        let warning;
+        if (product.imagename && product.image?.includes("res.cloudinary.com")) {
+            try {
+                await cloudinary.uploader.destroy(product.imagename);
+            } catch (error) {
+                console.error("Product image cleanup failed:", error);
+                warning = "The product was deleted, but its image could not be removed.";
+            }
+        }
 
         return res.status(200).json({
             message: "Product deleted successfully",
-            success: true
+            success: true,
+            warning
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(error.name === "CastError" ? 400 : 500).json({
             message: error.message,
             success: false
         })
     }
 }
+
+export const updateAdminProduct = async (req, res) => {
+    try {
+        const { name, brand, price, stock } = req.body;
+        const numericPrice = Number(price);
+        const numericStock = Number(stock);
+
+        if (
+            typeof name !== "string" || !name.trim() ||
+            typeof brand !== "string" || !brand.trim() ||
+            !Number.isFinite(numericPrice) || numericPrice <= 0 ||
+            !Number.isInteger(numericStock) || numericStock < 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a product name, brand, positive price, and valid stock."
+            });
+        }
+
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found."
+            });
+        }
+
+        product.name = name.trim();
+        product.brand = brand.trim();
+        product.price = numericPrice;
+        product.stock = numericStock;
+        if (Number.isFinite(product.discountPercent)) {
+            product.discountPrice = numericPrice * (1 - product.discountPercent / 100);
+        }
+        await product.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully.",
+            data: product
+        });
+    } catch (error) {
+        return res.status(error.name === "CastError" ? 400 : 500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 
 //block - unblock user

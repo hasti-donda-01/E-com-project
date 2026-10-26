@@ -16,7 +16,25 @@ let brands = [
     { href: '/', image: bags, name: 'Bags' },
     { href: '/', image: footwearbrand, name: 'Footwear' },
     { href: '/', image: books, name: 'Books' },
-]
+];
+
+const featuredBrands = [
+    { name: 'WILD\nSTONE', className: 'wildstone' },
+    { name: 'plum', className: 'plum' },
+    { name: 'NIVEA', className: 'nivea' },
+    { name: 'Himalaya', className: 'himalaya' },
+    { name: 'mi', className: 'mi' },
+    { name: 'Bata', className: 'bata' },
+    { name: 'WOW', className: 'wow' },
+    { name: 'WILD\nSTONE', className: 'wildstone' },
+    { name: 'plum', className: 'plum' },
+    { name: 'NIVEA', className: 'nivea' },
+    { name: 'Himalaya', className: 'himalaya' },
+    { name: 'mi', className: 'mi' },
+    { name: 'Bata', className: 'bata' },
+    { name: 'WOW', className: 'wow' },
+];
+
 export default function Brand() {
     return (
         <section className="brand-container">
@@ -39,6 +57,20 @@ export default function Brand() {
                         </a>
                     })
                 }
+            </div>
+
+            <div className="brand-logos-shell" aria-label="Featured brand logos">
+                <div className="brand-marquee">
+                    <div className="brand-marquee-track">
+                        {featuredBrands.map((brand, index) => (
+                            <div key={`${brand.className}-${index}`} className={`brand-logo-item ${brand.className}`}>
+                                {brand.name.split('\n').map((line, lineIndex) => (
+                                    <span key={`${brand.className}-${lineIndex}`}>{line}</span>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </section>
     )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiEdit2, FiPackage, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiEye, FiPackage, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
 
@@ -22,6 +22,7 @@ export default function SupplierProducts({ embedded = false }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
+    const [viewingProduct, setViewingProduct] = useState(null);
     const [editingProduct, setEditingProduct] = useState(null);
     const [saving, setSaving] = useState(false);
     const [editError, setEditError] = useState('');
@@ -159,7 +160,7 @@ export default function SupplierProducts({ embedded = false }) {
                     ) : (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[680px] text-left text-sm">
+                                <table className="w-full min-w-[760px] text-left text-sm">
                                     <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                         <tr>
                                             <th className="px-5 py-3">Product</th>
@@ -189,6 +190,13 @@ export default function SupplierProducts({ embedded = false }) {
                                                 <td className="px-5 py-4 text-slate-600">{product.stock}</td>
                                                 <td className="px-5 py-4">
                                                     <div className="flex justify-end gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setViewingProduct(product)}
+                                                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                                        >
+                                                            <FiEye /> View
+                                                        </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -237,6 +245,67 @@ export default function SupplierProducts({ embedded = false }) {
                     )}
                 </section>
             </div>
+
+            {viewingProduct && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) setViewingProduct(null);
+                    }}
+                >
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="view-product-title"
+                        className="my-auto w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+                    >
+                        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4 sm:px-7">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[#9f2089]">Product details</p>
+                                <h2 id="view-product-title" className="mt-1 text-xl font-bold text-slate-900">
+                                    {viewingProduct.name || 'Product'}
+                                </h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setViewingProduct(null)}
+                                aria-label="Close product details"
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                            >
+                                <FiX className="text-lg" />
+                            </button>
+                        </div>
+                        <div className="space-y-4 px-5 py-5 sm:px-7">
+                            {viewingProduct.image && (
+                                <img src={viewingProduct.image} alt={viewingProduct.name || 'Product'} className="mx-auto h-48 w-full rounded-xl bg-slate-50 object-contain" />
+                            )}
+                            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                                <dt className="text-slate-500">Brand</dt>
+                                <dd className="text-right font-medium text-slate-800">{viewingProduct.brand || '—'}</dd>
+                                <dt className="text-slate-500">Price</dt>
+                                <dd className="text-right font-medium text-slate-800">{inr(viewingProduct.price)}</dd>
+                                <dt className="text-slate-500">Available stock</dt>
+                                <dd className="text-right font-medium text-slate-800">{viewingProduct.stock ?? '—'}</dd>
+                                <dt className="text-slate-500">Rating</dt>
+                                <dd className="text-right font-medium text-slate-800">{viewingProduct.rating ?? '—'}</dd>
+                                <dt className="text-slate-500">Category</dt>
+                                <dd className="text-right font-medium text-slate-800">
+                                    {viewingProduct.category_name || viewingProduct.categoryId?.category_name || '—'}
+                                </dd>
+                            </dl>
+                        </div>
+                        <div className="flex justify-end border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-7">
+                            <button
+                                type="button"
+                                onClick={() => setViewingProduct(null)}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
 
             {editingProduct && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm">

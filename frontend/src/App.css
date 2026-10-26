@@ -317,12 +317,12 @@ body {
 
 .category-mega-column h2 {
   margin: 0 0 16px;
-  color: #9f2089;
   font-size: 13px;
   font-weight: 600;
 }
 
-.category-mega-column a {
+.category-mega-column h2 a,
+.category-mega-column > a {
   display: block;
   margin-top: 10px;
   color: #66667a;
@@ -331,8 +331,15 @@ body {
   text-decoration: none;
 }
 
-.category-mega-column a:hover,
-.category-mega-column a:focus-visible {
+.category-mega-column h2 a {
+  margin-top: 0;
+  color: #9f2089;
+}
+
+.category-mega-column h2 a:hover,
+.category-mega-column h2 a:focus-visible,
+.category-mega-column > a:hover,
+.category-mega-column > a:focus-visible {
   color: #9f2089;
 }
 
@@ -1312,6 +1319,97 @@ img {
   flex: 0 0 auto;
   width: 175px;
   overflow: hidden;
+}
+
+.brand-logos-shell {
+  width: 100%;
+  margin-top: 24px;
+  background: #e8dff9;
+  overflow: hidden;
+  padding: 0;
+}
+
+.brand-marquee {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.brand-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 18px;
+  padding: 10px 0;
+  animation: marquee-brand-scroll 24s linear infinite;
+}
+
+.brand-logo-item {
+  flex: 0 0 auto;
+  width: 210px;
+  height: 138px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 0.9;
+  white-space: pre-line;
+}
+
+.brand-logo-item span {
+  display: block;
+}
+
+.brand-logo-item.wildstone {
+  font-size: 2rem;
+  color: #101010;
+}
+
+.brand-logo-item.plum {
+  font-size: 3.4rem;
+  color: #a13ab8;
+  font-family: Georgia, serif;
+  letter-spacing: -0.08em;
+}
+
+.brand-logo-item.nivea {
+  font-size: 2.5rem;
+  color: #0d0f6f;
+}
+
+.brand-logo-item.himalaya {
+  font-size: 2rem;
+  color: #0f8a56;
+}
+
+.brand-logo-item.mi {
+  font-size: 3.3rem;
+  color: #ff5a12;
+}
+
+.brand-logo-item.bata {
+  font-size: 3rem;
+  color: #d11022;
+  font-family: Georgia, serif;
+}
+
+.brand-logo-item.wow {
+  font-size: 2.9rem;
+  color: #131313;
+}
+
+@keyframes marquee-brand-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* Gold */
@@ -4785,7 +4883,11 @@ body {
 }
 
 .admin-product-table {
-  min-width: 760px;
+  min-width: 1080px;
+}
+
+.admin-product-table .admin-category-actions {
+  flex-wrap: nowrap;
 }
 
 .admin-product-name {
