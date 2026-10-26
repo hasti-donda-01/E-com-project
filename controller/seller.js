@@ -33,13 +33,21 @@ export const getSellerPayments = async (req, res) => {
 
 export const getSellerOrder = async (req, res) => {
     try {
-        const sellerId = req.user._id;
+        const sellerId = req.user._id || req.user.id;
 
         const products = await Product.find({ user: sellerId });
         const productIds = products.map(p => p._id);
 
-        const orders = await Order.find({ product: { $in: productIds } })
-            .populate("product", "totalAmount orderStatus paymentStatus");
+        const orders = await Order.find({
+            $or: [
+                { sellerId: sellerId },
+                { product: { $in: productIds } }
+            ]
+        })
+            .populate("product", "name price image brand discountPrice stock")
+            .populate("userId", "name email phone")
+            .populate("address")
+            .sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
