@@ -926,3 +926,14 @@ export const revenue = async (req, res) => {
         return res.status(500).json({ message: error.message, success: false });
     }
 };
+
+// Fetch orders for authenticated customer
+export const getCustomerOrders = async (req, res) => {
+    try {
+        const customerId = req.user.id;
+        const orders = await Order.find({ userId: customerId }).sort({ createdAt: -1 });
+        return res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};

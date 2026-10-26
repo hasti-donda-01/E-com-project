@@ -9,6 +9,7 @@ import address from './address.js';
 import subcategory from './subcategory.js';
 import wish from './wishlist.js';
 import order from './order.js'
+import customer from './customer.js'
 import sellerp from './sellerp.js';
 import despute from './dispute.js'
 
@@ -19,7 +20,7 @@ router.use('/seller', seller);
 router.use('/admin', admin)
 router.use('/cart', cart);
 router.use('/user', user);
-router.use('/address', address)
+router.use('/customer', customer);
 router.use('/subcat', subcategory)
 router.use('/wish', wish);
 router.use('/order', order)

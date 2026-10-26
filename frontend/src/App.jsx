@@ -42,6 +42,7 @@ function App() {
         <Route path="/cart" element={<><ShoppingCart /><CustomerFooter /></>} />
         <Route path="/wishlist" element={<><Navbar /><Wishlist /><CustomerFooter /></>} />
         <Route path="/customer-signup" element={<CutomerSignUp />} />
+        <Route path="/customer/orders" element={<CustomerOrders />} />
         <Route path="/customer-login" element={<CutomerSignUp />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/Becomesupplier" element={<Becomesupplier />} />
