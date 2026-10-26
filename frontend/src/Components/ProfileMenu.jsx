@@ -114,6 +114,13 @@ export default function ProfileMenu({ variant = 'customer' }) {
                         >
                             {signingOut ? 'Signing out…' : 'Sign out'}
                         </button>
+                        <button
+                            className="account-menu-link"
+                            type="button"
+                            onClick={() => navigate('/customer/orders')}
+                        >
+                            My Orders
+                        </button>
                         
                     </>
                 ) : (

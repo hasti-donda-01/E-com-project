@@ -28,7 +28,7 @@ import SupplierProducts from './Components/SupplierProducts'
 import AdminPanel from './Components/AdminPanel'
 import Wishlist from './Components/Wishlist'
 import CustomerFooter from './Components/CustomerFooter'
-
+import CustomerOrders from './Components/CustomerOrders';
 function App() {
 
 
