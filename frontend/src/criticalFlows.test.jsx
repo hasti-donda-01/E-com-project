@@ -179,6 +179,15 @@ describe('seller and admin order flows', () => {
     expect(JSON.parse(globalThis.fetch.mock.calls[1][1].body)).toEqual({ status: 'confirmed' });
   });
 
+  it('does not present an API failure as an empty seller account', async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('API offline'));
+    render(<MemoryRouter><SupplierOrders /></MemoryRouter>);
+
+    expect((await screen.findByRole('alert')).textContent).toContain('API offline');
+    expect(screen.queryByText('No orders yet')).toBeNull();
+    expect(screen.getByText(/unavailable until the server connection/)).toBeTruthy();
+  });
+
   it('loads and updates an admin order using the authenticated API', async () => {
     const user = userEvent.setup();
     const order = {

@@ -136,6 +136,8 @@ export default function SupplierOrders() {
         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           {loading ? (
             <p className="p-8 text-sm text-slate-500" role="status">Loading orders…</p>
+          ) : error ? (
+            <p className="p-8 text-sm text-slate-500">Orders are unavailable until the server connection is restored.</p>
           ) : orders.length === 0 ? (
             <div className="p-8 text-center">
               <h2 className="font-semibold">No orders yet</h2>
