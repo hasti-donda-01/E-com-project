@@ -1,16 +1,21 @@
+// Customer sign-up / login screen with phone number
 import { useState } from 'react'
 import meeshologo from './Images/meeshoLogo.svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { addCustomer } from '../redux/action/customerApi'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-export default function CutomerSignUp() {
 
+export default function CutomerSignUp() {
+    // Phone number input state
     const [phoneNumber, setPhoneNumber] = useState('')
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Redux auth state
     const { status, error, message } = useSelector((state) => state.customer)
+
+    // Request OTP and navigate to OTP verification screen
     const submitData = async () => {
         try {
             await dispatch(addCustomer({ phone: phoneNumber })).unwrap()
@@ -24,7 +29,7 @@ export default function CutomerSignUp() {
                 }
             })
         } catch {
-            // The rejected request message is displayed from Redux state.
+            // Error message is displayed from Redux state
         }
     }
     return (

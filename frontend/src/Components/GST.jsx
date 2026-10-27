@@ -1,9 +1,8 @@
+// Selling on Meesho without GST guide (covers Enrolment ID, UIN, and FAQs)
 import { useState } from 'react'
 import SupplierNavbar from './SupplierNavbar'
 
-/* 👇 import your real images and assign them here */
-// import gstHero from './Images/gstHero.png'
-// import learningHubLogo from './Images/learningHub.svg'
+// Optional image placeholders
 const IMG = {
     hero: null,      // gstHero
     hub: null,       // learningHubLogo
@@ -13,8 +12,7 @@ const PINK = '#f43397'
 const FONT = "'Poppins', sans-serif"
 const NARROW = { width: '100%', maxWidth: 1000, margin: '0 auto', paddingLeft: 24, paddingRight: 24, boxSizing: 'border-box' }
 
-
-/* ================= HELPERS ================= */
+// Reusable styling and button components
 const Pink = ({ children }) => <span style={{ color: PINK, fontWeight: 600 }}>{children}</span>
 
 const Heading = ({ children, style }) => (
@@ -30,7 +28,7 @@ const RegisterBtn = ({ suffix }) => (
     </div>
 )
 
-/* simple icons (swap with your own SVGs if you like) */
+// Icon helpers
 const IconBox = ({ children }) => (
     <span style={{ width: 28, height: 28, borderRadius: 6, background: '#fde3f0', color: PINK, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{children}</span>
 )
@@ -38,7 +36,7 @@ const Tick = () => (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3L12 3" stroke={PINK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 )
 
-/* ================= DATA ================= */
+// Selling benefits and onboarding steps data
 const BENEFITS = [
     { icon: '%', title: '0% Commission Fee', text: 'Suppliers selling on Meesho keep 100% of their profit by not paying any commission.' },
     { icon: '₹', title: '0 Penalty Charges', text: 'Sell online without the fear of order cancellation charges with 0 Penalty for late dispatch or order cancellations.' },
@@ -54,7 +52,7 @@ const STEPS = [
     { title: 'Receive Payments', text: 'Payment is securely deposited directly to your bank account on Meesho following a 7-day payment cycle from order delivery, including cash on delivery orders.' },
 ]
 
-/* ⚠️ Replace these answers with your official copy */
+// Frequently asked questions about GST exemption
 const FAQS = [
     { q: 'I have a Composition GSTIN. Can I sell on Meesho?', a: 'Yes. Sellers with a Composition GSTIN can register on Meesho and sell to customers within their own state.' },
     { q: 'I don’t have a GSTIN but I want to sell on Meesho. How do I register?', a: 'Get an Enrolment ID or UIN, then sign up on Meesho as a seller using your active bank account and that ID.' },

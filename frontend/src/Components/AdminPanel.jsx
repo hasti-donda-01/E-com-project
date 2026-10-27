@@ -1,4 +1,5 @@
 
+// Admin dashboard for managing products, categories, orders, sellers, and stats
 import { useEffect, useState } from 'react';
 
 const API_BASE_URL = (
@@ -6,6 +7,7 @@ const API_BASE_URL = (
   'https://e-com-project-b3ci.onrender.com/api'
 ).replace(/\/$/, '');
 
+// Sidebar navigation items
 const menuItems = [
   { name: 'Dashboard', icon: '▦' },
   { name: 'Products', icon: '□' },
@@ -14,9 +16,8 @@ const menuItems = [
   { name: 'Sellers', icon: '♙' },
 ];
 
-/* Dashboard stats and orders are loaded dynamically from the API */
-
 export default function AdminPanel() {
+  // Active navigation tab and search query
   const [activePage, setActivePage] = useState('Dashboard');
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState([]);
@@ -64,6 +65,7 @@ export default function AdminPanel() {
   const [orderNotice, setOrderNotice] = useState('');
   const [orderActionLoadingId, setOrderActionLoadingId] = useState('');
 
+  // Check active admin session on mount
   useEffect(() => {
     const controller = new AbortController();
     const checkAdminSession = async () => {
@@ -91,7 +93,7 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, []);
 
-  // Load admin dashboard stats + recent orders whenever Dashboard tab is active
+  // Fetch dashboard numbers and recent orders when Dashboard is open
   useEffect(() => {
     if (!['Dashboard', 'Orders'].includes(activePage) || !adminUser) return undefined;
     const controller = new AbortController();
@@ -126,7 +128,7 @@ export default function AdminPanel() {
             rawOrders.push(...pagePayload.orders);
           }
           setDashboardOrderCount(Number(op.totalOrders) || rawOrders.length);
-          // Map to simple display shape
+          // Format orders for table display
           setDashboardOrders(
             (activePage === 'Dashboard' ? rawOrders.slice(0, 10) : rawOrders).map(o => ({
               id: String(o._id).slice(-8).toUpperCase(),
@@ -153,6 +155,7 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, adminUser]);
 
+  // Load all categories when Categories tab is active
   useEffect(() => {
     if (activePage !== 'Categories') return undefined;
 
@@ -192,6 +195,7 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, categoryLoadAttempt]);
 
+  // Load registered sellers list when Sellers tab is active
   useEffect(() => {
     if (activePage !== 'Sellers') return undefined;
 
@@ -248,6 +252,7 @@ export default function AdminPanel() {
     return () => controller.abort();
   }, [activePage, sellerLoadAttempt]);
 
+  // Load all products across the platform when Products tab is active
   useEffect(() => {
     if (activePage !== 'Products') return undefined;
 

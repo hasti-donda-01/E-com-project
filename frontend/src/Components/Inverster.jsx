@@ -1,3 +1,4 @@
+// Investor Relations overview page - covers company mission, ecosystem stakeholders, and financials
 import { useState } from 'react';
 import { FiArrowRight, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
 import InvestorFooter from './InvestorFooter';
@@ -7,6 +8,7 @@ import stakeholderMohit from './Images/mohit.jpg';
 import stakeholderSuman from './Images/suman.jpg';
 import appPreview from './Images/mallimg.jpg';
 
+// Key stakeholder groups in Meesho ecosystem
 const stakeholders = [
     { name: 'Users', detail: 'Everyday entrepreneurs', image: stakeholderAmit },
     { name: 'Sellers', detail: 'Small businesses', image: stakeholderMohit },
@@ -14,6 +16,7 @@ const stakeholders = [
     { name: 'Content Creators', detail: 'Creator community', image: stakeholderAmit }
 ];
 
+// Experience highlights by audience (Consumer vs Seller)
 const experiences = {
     Consumer: {
         description: 'Discover quality products across fashion, home, beauty and more at affordable prices.',
@@ -28,6 +31,7 @@ const experiences = {
 };
 
 export default function Inverster() {
+    // Selected experience tab (Consumer / Seller)
     const [activeExperience, setActiveExperience] = useState('Consumer');
     const experience = experiences[activeExperience];
 

@@ -1,3 +1,4 @@
+// Customer order history page - shows past orders, delivery status, and items
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiRefreshCw } from 'react-icons/fi';
@@ -9,6 +10,7 @@ const API_BASE_URL = (
 ).replace(/\/$/, '');
 
 export default function CustomerOrders() {
+    // Orders data and product cache state
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState({});
     const [loading, setLoading] = useState(true);
@@ -18,6 +20,7 @@ export default function CustomerOrders() {
     const [refreshVersion, setRefreshVersion] = useState(0);
     const navigate = useNavigate();
 
+    // Fetch customer's orders from server
     useEffect(() => {
         const controller = new AbortController();
         const loadOrders = async () => {

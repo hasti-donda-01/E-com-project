@@ -1,3 +1,4 @@
+// Featured brands carousel and promotional banners on homepage
 import { MdVerified } from "react-icons/md";
 import { PiGreaterThanDuotone } from "react-icons/pi";
 import personalcare from './Images/personalcare.jpg';
@@ -12,6 +13,7 @@ import budget from './productimages/budget.jpg'
 import daily from './productimages/daily.jpg'
 import picks from './productimages/picks.jpg'
 
+// Brand category shortcuts
 let brands = [
     { href: '/', image: personalcare, name: 'Personal Care' },
     { href: '/', image: electronics, name: 'Electronics' },
@@ -22,6 +24,7 @@ let brands = [
     { href: '/', image: books, name: 'Books' },
 ];
 
+// Logos shown in marquee ticker
 const featuredBrands = [
     { name: 'WILD\nSTONE', className: 'wildstone' },
     { name: 'plum', className: 'plum' },
@@ -39,6 +42,7 @@ const featuredBrands = [
     { name: 'WOW', className: 'wow' },
 ];
 
+// Promotional cards for trending & budget buys
 const promoCards = [
     {
         title: 'Trending Now',

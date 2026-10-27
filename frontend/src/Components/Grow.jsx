@@ -1,9 +1,10 @@
+// Grow Business page for suppliers - covers ads, recommendations, and shipping programs
 import { useState, useEffect } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import Desktoppic2 from './Images/Desktoppic2.jpg'
 import SupplierFooter from './SupplierFooter'
 
-/* 👇 import your real images and assign them here */
+// Placeholder image references
 const IMG = {
     adsVideo: null,
     recoPerson: null,
@@ -18,7 +19,7 @@ const INDIGO = '#3d1fc4'
 const FONT = "'Poppins', sans-serif"
 const WRAP = { width: '100%', maxWidth: 1300, margin: '0 auto', paddingLeft: 24, paddingRight: 24, boxSizing: 'border-box' }
 
-/* ================= NAVBAR ================= */
+// Header navigation for seller landing pages
 const NAV_LINKS = [
     { label: 'Sell Online', href: '#' },
     { label: 'How it works', href: '#' },
@@ -52,7 +53,7 @@ function Navbar() {
     )
 }
 
-/* ================= HELPERS ================= */
+// UI helper components
 const SectionTitle = ({ children }) => (
     <h2
         style={{
@@ -82,7 +83,7 @@ const Dot = () => <span style={{ width: 7, height: 7, borderRadius: '50%', backg
 
 const Pink = ({ children }) => <span style={{ color: PINK, fontWeight: 600 }}>{children}</span>
 
-/* video thumbnail + label card */
+// Video thumbnail card
 const VideoCard = ({ img, label, bg = '#e6eef0' }) => (
     <div style={{ display: 'flex', alignItems: 'center', marginTop: 24 }}>
         <div style={{ position: 'relative', width: 130, height: 78, background: bg, overflow: 'hidden' }}>
@@ -97,7 +98,7 @@ const VideoCard = ({ img, label, bg = '#e6eef0' }) => (
     </div>
 )
 
-/* 3-step horizontal stepper in a grey box */
+// Three-step horizontal process bar
 const Steps3 = ({ steps }) => (
     <div style={{ marginTop: 20, background: '#f4f4f6', borderRadius: 6, padding: '28px 24px 30px', display: 'flex', gap: 24 }}>
         {steps.map((s, i) => (
@@ -111,7 +112,7 @@ const Steps3 = ({ steps }) => (
     </div>
 )
 
-/* feature with pink icon, title, text */
+// Feature card with icon
 const Feature = ({ icon, title, text }) => (
     <div style={{ display: 'flex', gap: 12 }}>
         <span style={{ width: 26, height: 26, borderRadius: 6, background: '#fde3f0', color: PINK, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</span>
@@ -133,7 +134,7 @@ const Art = ({ src, alt, size = 200 }) => (
     </div>
 )
 
-/* ================= DATA ================= */
+// Sidebar navigation items and section content
 const SIDEBAR = [
     { id: 'ads', label: 'Advertise Your Products', sub: [{ id: 'campaign', label: 'How Campaign Works' }] },
     { id: 'reco', label: 'Product Recommendation', sub: [{ id: 'recs', label: 'Recommendations' }, { id: 'increase', label: 'Increase Sales' }] },
@@ -189,7 +190,7 @@ const NDD_STEPS = [
     <>Raise Ticket</>,
 ]
 
-/* ================= GUIDE ================= */
+// Guide component with active section tracking
 function Guide() {
     const [current, setCurrent] = useState('ads')
 

@@ -1,3 +1,4 @@
+// User profile menu dropdown (shows login button or user account details)
 import { useEffect, useState } from 'react';
 import { CgProfile } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
@@ -9,12 +10,14 @@ const API_BASE_URL = (
 ).replace(/\/$/, '');
 
 export default function ProfileMenu({ variant = 'customer' }) {
+    // User profile state
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [signingOut, setSigningOut] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // Check if user is already logged in
     useEffect(() => {
         const controller = new AbortController();
 
@@ -52,6 +55,7 @@ export default function ProfileMenu({ variant = 'customer' }) {
         return () => controller.abort();
     }, []);
 
+    // Logout handler
     const handleSignOut = async () => {
         if (signingOut) return;
         setError('');

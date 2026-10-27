@@ -1,3 +1,4 @@
+// How it Works guide for suppliers - explains registration, catalog upload, and fulfillment
 import { useState, useEffect } from 'react'
 import DesktopPicsell from './Images/DesktopPicsell.jpg'
 import SupplierNavbar from './SupplierNavbar'
@@ -7,10 +8,7 @@ const PINK = '#f43397'
 const FONT = "'Poppins', sans-serif"
 const CONTAINER = { maxWidth: 1524, margin: '0 auto', padding: '0 24px', boxSizing: 'border-box' }
 
-/* ================= NAVBAR ================= */
-
-
-/* ================= ICONS (register cards) ================= */
+// Registration requirement icons
 const PhoneAtIcon = () => (
     <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
         <path d="M12 10c-2 2-3 5-2 9 3 12 13 26 27 31 4 2 8 1 10-1l3-4c1-1 1-3 0-4l-8-6c-1-1-3-1-4 0l-3 3c-6-3-11-8-14-14l3-3c1-1 1-3 0-4l-6-8c-1-1-4-1-6 1z" fill={PINK} />
@@ -39,13 +37,14 @@ const BankIcon = () => (
     </svg>
 )
 
+// Cards displaying what documents are needed to register
 const REGISTER_CARDS = [
     { icon: <PhoneAtIcon />, text: 'Mobile Number & Email ID' },
     { icon: <DocIcon />, text: 'GSTIN Number (for GST sellers) or Enrolment ID / UIN (for non-GST sellers)' },
     { icon: <BankIcon />, text: 'Active Bank Account with the same GST' },
 ]
 
-/* ================= SMALL HELPERS ================= */
+// Section title and text formatting helpers
 const SectionTitle = ({ children }) => (
     <h2
         style={{

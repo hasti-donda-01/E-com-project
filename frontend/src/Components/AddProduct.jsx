@@ -1,15 +1,16 @@
+// Add product page for suppliers (handles image upload, category selection, and pricing)
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiUploadCloud, FiX, FiCheckCircle, FiAlertCircle, FiStar } from 'react-icons/fi';
 
-/* ---------- Config ---------- */
-
+// API configuration
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
 const API_URL = `${API_BASE_URL}/product/create`; // POST multipart/form-data
 const CATEGORIES_URL = `${API_BASE_URL}/category/get`;
 const MAX_IMAGE_MB = 5;
 const supportedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+// Default empty form values
 const initialForm = {
     name: '',
     brand: '',
@@ -21,6 +22,7 @@ const initialForm = {
     attributes: {}
 };
 
+// Filter attributes available for products
 const productFilterAttributes = [
     ['gender', 'Gender'],
     ['color', 'Color'],
@@ -47,6 +49,7 @@ const productFilterAttributes = [
     ['type', 'Type']
 ];
 
+// Helper to format currency
 const inr = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
 const inputClass = (hasError) =>
@@ -56,8 +59,7 @@ const inputClass = (hasError) =>
             : 'border-slate-200 focus:border-[#4f46e5] focus:ring-indigo-100'
     }`;
 
-/* ---------- Small building blocks ---------- */
-
+// Reusable card container
 function Card({ title, hint, children }) {
     return (
         <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-2xs">
@@ -68,6 +70,7 @@ function Card({ title, hint, children }) {
     );
 }
 
+// Reusable form field with error display
 function Field({ label, htmlFor, error, hint, children }) {
     return (
         <div>
@@ -85,8 +88,6 @@ function Field({ label, htmlFor, error, hint, children }) {
         </div>
     );
 }
-
-/* ---------- Page ---------- */
 
 export default function AddProduct() {
     const [form, setForm] = useState(initialForm);
@@ -190,7 +191,7 @@ export default function AddProduct() {
         setErrors((er) => ({ ...er, [key]: undefined }));
     };
 
-    /* ----- Image ----- */
+    // Image file selection & validation
     const pickImage = (file) => {
         if (!file) return;
         if (!supportedImageTypes.has(file.type)) {
@@ -206,12 +207,13 @@ export default function AddProduct() {
         setErrors((er) => ({ ...er, image: undefined }));
     };
 
+    // Remove selected image
     const removeImage = () => {
         if (image) URL.revokeObjectURL(image.url);
         setImage(null);
     };
 
-    /* ----- Live price summary ----- */
+    // Calculate final price after discount
     const summary = useMemo(() => {
         const price = parseFloat(form.price) || 0;
         const discount = Math.min(Math.max(parseFloat(form.discount) || 0, 0), 100);
@@ -219,7 +221,7 @@ export default function AddProduct() {
         return { price, discount, final, rating: parseFloat(form.rating) || 0 };
     }, [form.price, form.discount, form.rating]);
 
-    /* ----- Validation & submit ----- */
+    // Form validation before submit
     const validate = () => {
         const e = {};
         const price = parseFloat(form.price);

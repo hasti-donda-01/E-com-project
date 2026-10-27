@@ -1,3 +1,4 @@
+// Become a Supplier landing page showcasing benefits, onboarding steps, and seller stories
 import meeshoLogo from './Images/meeshoLogo.svg'
 import { Link, useNavigate } from 'react-router-dom'
 import newtag from './Images/new-tag.svg'
@@ -12,8 +13,9 @@ import suman from './Images/suman.jpg'
 import mohit from './Images/mohit.jpg'
 import meeshologopink from './Images/meeshologopink.svg'
 import footerlogo from './Images/footerlogo.svg'
+
 export default function Becomesupplier() {
-   
+    // 5-step seller onboarding guide
     const steps = [
         {
             title: "Create Account",
@@ -25,6 +27,7 @@ export default function Becomesupplier() {
         { title: "Affordable Shipping", desc: "Enjoy affordable shipping to customers across India" },
         { title: "Receive Payments", desc: "Payments are deposited directly to your bank account following a 7-day payment cycle from order delivery." },
     ]
+    // Real seller success stories
     const stories = [
         {
             img: amit,
@@ -46,6 +49,7 @@ export default function Becomesupplier() {
         },
     ]
 
+    // Key advantages of selling on Meesho
     let supplierblocks = [
         { icon: lazy, blocktitle: "0% Commission Fee", blockdesc: "Suppliers selling on Meesho keep 100% of their profit by not paying any commission" },
         { icon: penalty, blocktitle: "0 Penalty Charges", blockdesc: "Sell online without the fear of order cancellation charges with 0 Penalty for late dispatch or order cancellations." },

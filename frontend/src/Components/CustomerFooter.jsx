@@ -1,7 +1,9 @@
+// Main footer for customer-facing store pages
 import { FiFacebook, FiInstagram, FiLinkedin, FiMail, FiPhone, FiYoutube } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import footerLogo from './Images/footerlogo.svg';
 
+// Popular product categories
 const categoryLinks = [
     'Women Fashion',
     'Men Fashion',
@@ -15,6 +17,7 @@ const categoryLinks = [
     'More Categories'
 ];
 
+// Customer care and policy links
 const serviceLinks = [
     'Help Centre',
     'Track Order',
@@ -27,6 +30,7 @@ const serviceLinks = [
     'Contact Us'
 ];
 
+// Seller onboarding and portal links
 const supplierLinks = [
     { label: 'Supplier Login', to: '/SupplierLogin' },
     { label: 'Become a Supplier', to: '/Becomesupplier' },
@@ -34,6 +38,7 @@ const supplierLinks = [
     { label: 'Partner With Us', to: '/Becomesupplier' }
 ];
 
+// About Meesho company links
 const aboutLinks = [
     'About Us',
     'Careers',
@@ -43,6 +48,7 @@ const aboutLinks = [
     'Sustainability'
 ];
 
+// Helper to render unordered list of links
 function FooterLinkList({ links }) {
     return (
         <ul className="customer-footer-links">
@@ -55,6 +61,7 @@ function FooterLinkList({ links }) {
     );
 }
 
+// Main customer footer component
 export default function CustomerFooter() {
     return (
         <footer className="customer-footer">
