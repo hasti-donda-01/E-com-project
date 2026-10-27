@@ -1,17 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+// Shopping cart and checkout flow (quantity updates, delivery address, Razorpay & COD payment)
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ReactReduxContext } from 'react-redux';
 import { FiCheck, FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import meeshoLogo from './Images/meeshologopink.svg';
 import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
+import { setCartItems } from '../redux/slice/cartSlice';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
   'https://e-com-project-b3ci.onrender.com/api'
 ).replace(/\/$/, '');
 
+// Format price to INR
 const inr = (value) =>
   `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
+// Dynamically inject Razorpay SDK script
 const loadRazorpayCheckout = () => new Promise((resolve, reject) => {
   if (window.Razorpay) {
     resolve();
@@ -27,6 +32,9 @@ const loadRazorpayCheckout = () => new Promise((resolve, reject) => {
 export default function ShoppingCart() {
   const navigate = useNavigate();
   const location = useLocation();
+  const reduxContext = useContext(ReactReduxContext);
+  const dispatch = reduxContext?.store?.dispatch;
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
@@ -48,6 +56,7 @@ export default function ShoppingCart() {
     navigate('/customer-login', { state: { returnTo: '/cart' } });
   }, [navigate]);
 
+  // Fetch user's cart items from API
   useEffect(() => {
     const controller = new AbortController();
     const fetchCart = async () => {
@@ -72,6 +81,9 @@ export default function ShoppingCart() {
           throw new Error(payload.message || `Could not load your cart (${response.status}).`);
         }
         setItems(payload.data);
+        if (dispatch) {
+          dispatch(setCartItems(payload.data));
+        }
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
           setError(loadError.message || 'Could not load your cart.');
@@ -326,7 +338,11 @@ export default function ShoppingCart() {
       if (!response.ok || payload.success === false) {
         throw new Error(payload.message || `Could not remove this item (${response.status}).`);
       }
-      setItems((currentItems) => currentItems.filter((cartItem) => cartItem._id !== item._id));
+      setItems((currentItems) => {
+        const next = currentItems.filter((cartItem) => cartItem._id !== item._id);
+        if (dispatch) dispatch(setCartItems(next));
+        return next;
+      });
       setNotice('Item removed from your cart.');
     } catch (removeError) {
       setError(removeError.message || 'Could not remove this item.');
@@ -363,9 +379,13 @@ export default function ShoppingCart() {
       if (!response.ok || payload.success === false) {
         throw new Error(payload.message || `Could not update quantity (${response.status}).`);
       }
-      setItems((currentItems) => currentItems.map((cartItem) =>
-        cartItem._id === item._id ? { ...cartItem, quantity } : cartItem
-      ));
+      setItems((currentItems) => {
+        const next = currentItems.map((cartItem) =>
+          cartItem._id === item._id ? { ...cartItem, quantity } : cartItem
+        );
+        if (dispatch) dispatch(setCartItems(next));
+        return next;
+      });
     } catch (quantityError) {
       setError(quantityError.message || 'Could not update quantity.');
     } finally {

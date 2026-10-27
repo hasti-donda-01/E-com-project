@@ -4,16 +4,26 @@ import meeshologo from './Images/meeshoLogo.svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { addCustomer } from '../redux/action/customerApi'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { CiSearch } from 'react-icons/ci'
 
 export default function CutomerSignUp() {
     // Phone number input state
     const [phoneNumber, setPhoneNumber] = useState('')
+    // Search query state
+    const [searchTerm, setSearchTerm] = useState('')
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const location = useLocation();
 
     // Redux auth state
     const { status, error, message } = useSelector((state) => state.customer)
+
+    // Handle catalog search
+    const handleSearch = (event) => {
+        event.preventDefault();
+        const query = searchTerm.trim();
+        navigate(query ? `/?search=${encodeURIComponent(query)}#products-catalog` : '/');
+    };
 
     // Request OTP and navigate to OTP verification screen
     const submitData = async () => {
@@ -44,11 +54,34 @@ export default function CutomerSignUp() {
                         </div>
 
                         <div className='customerheader4'>
-                            <div placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader5'>
+                            <form className='customerheader5' role="search" onSubmit={handleSearch}>
                                 <div className='customerheader6'>
-                                    <input type="text" placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader7' />
+                                    <button
+                                        type="submit"
+                                        aria-label="Search products"
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: 0,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            color: '#666'
+                                        }}
+                                    >
+                                        <CiSearch size={20} aria-hidden="true" />
+                                    </button>
                                 </div>
-                            </div>
+                                <input
+                                    type="text"
+                                    placeholder="Try Saree, Kurti or Search by Product Code"
+                                    className='customerheader7'
+                                    style={{ outline: 'none' }}
+                                    value={searchTerm}
+                                    onChange={(event) => setSearchTerm(event.target.value)}
+                                    aria-label="Search products"
+                                />
+                            </form>
 
                             <div className='customerheader8'>
                                 <Link to="/Becomesupplier" className='customerheader9' style={{ textDecoration: 'none' }}>

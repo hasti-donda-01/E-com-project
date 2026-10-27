@@ -1,61 +1,44 @@
+// Customer wishlist page - displays saved products with move-to-cart and remove actions
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { FiShoppingCart, FiTrash2 } from 'react-icons/fi';
-import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
+import { clearCustomerAccessToken, getCustomerAccessToken } from '../utils/customerSession';
+import { fetchWishlist, moveToCart, removeFromWishlist } from '../redux/action/wishlistApi';
+import { clearWishlistNotice } from '../redux/slice/wishlistSlice';
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ||
-  'https://e-com-project-b3ci.onrender.com/api'
-).replace(/\/$/, '');
-
+// Format price in INR
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 export default function Wishlist() {
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  // Wishlist state from Redux
+  const { items, status, error: reduxError, notice: reduxNotice } = useSelector((state) => state.wishlist);
+  const loading = status === 'loading';
+
   const [busyId, setBusyId] = useState('');
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [localError, setLocalError] = useState('');
+  const [localNotice, setLocalNotice] = useState('');
 
+  const error = localError || reduxError || '';
+  const notice = localNotice || reduxNotice || '';
+
+  // Fetch saved wishlist items on mount
   useEffect(() => {
-    const controller = new AbortController();
-    const loadWishlist = async () => {
-      const token = getCustomerAccessToken();
-      if (!token) {
-        navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/wish/get`, {
-          credentials: 'include',
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal
-        });
-        const payload = await response.json();
-        if (isCustomerAuthFailure(response, payload)) {
-          clearCustomerAccessToken();
-          navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
-          return;
-        }
-        if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
-          throw new Error(payload.message || `Could not load your wishlist (${response.status}).`);
-        }
-        setItems(payload.data.filter((item) => item.product));
-      } catch (loadError) {
-        if (loadError.name !== 'AbortError') {
-          setError(loadError.message || 'Could not load your wishlist.');
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
+    const token = getCustomerAccessToken();
+    if (!token) {
+      navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
+      return;
+    }
+    dispatch(fetchWishlist());
+    return () => {
+      dispatch(clearWishlistNotice());
     };
+  }, [dispatch, navigate]);
 
-    loadWishlist();
-    return () => controller.abort();
-  }, [navigate]);
-
+  // Move item to cart or delete from wishlist
   const updateWishlist = async (item, action) => {
     const token = getCustomerAccessToken();
     if (!token) {
@@ -63,32 +46,39 @@ export default function Wishlist() {
       return;
     }
     setBusyId(item._id);
-    setError('');
-    setNotice('');
+    setLocalError('');
+    setLocalNotice('');
+
     try {
-      const response = await fetch(
-        action === 'move'
-          ? `${API_BASE_URL}/wish/movetocart/${item._id}`
-          : `${API_BASE_URL}/wish/remove/${item._id}`,
-        {
-          method: action === 'move' ? 'POST' : 'DELETE',
-          credentials: 'include',
-          headers: { Authorization: `Bearer ${token}` }
+      if (action === 'move') {
+        const resultAction = await dispatch(moveToCart(item._id));
+        if (moveToCart.rejected.match(resultAction)) {
+          const errMsg = String(resultAction.payload || 'Could not move product to cart.');
+          if (/token required|jwt expired|jwt malformed|invalid token|invalid signature|required role: customer|user not found|401/i.test(errMsg)) {
+            clearCustomerAccessToken();
+            navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
+            return;
+          }
+          setLocalError(errMsg);
+        } else {
+          setLocalNotice('Product moved to your cart.');
         }
-      );
-      const payload = await response.json();
-      if (isCustomerAuthFailure(response, payload)) {
-        clearCustomerAccessToken();
-        navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
-        return;
+      } else {
+        const resultAction = await dispatch(removeFromWishlist(item._id));
+        if (removeFromWishlist.rejected.match(resultAction)) {
+          const errMsg = String(resultAction.payload || 'Could not remove product from wishlist.');
+          if (/token required|jwt expired|jwt malformed|invalid token|invalid signature|required role: customer|user not found|401/i.test(errMsg)) {
+            clearCustomerAccessToken();
+            navigate('/customer-login', { state: { returnTo: '/wishlist' }, replace: true });
+            return;
+          }
+          setLocalError(errMsg);
+        } else {
+          setLocalNotice('Product removed from your wishlist.');
+        }
       }
-      if (!response.ok || payload.success === false) {
-        throw new Error(payload.message || `Could not update your wishlist (${response.status}).`);
-      }
-      setItems((currentItems) => currentItems.filter((currentItem) => currentItem._id !== item._id));
-      setNotice(action === 'move' ? 'Product moved to your cart.' : 'Product removed from your wishlist.');
     } catch (updateError) {
-      setError(updateError.message || 'Could not update your wishlist.');
+      setLocalError(updateError.message || 'Could not update your wishlist.');
     } finally {
       setBusyId('');
     }

@@ -1,7 +1,9 @@
+// Financial reports, earnings releases, and shareholder documents
 import { FiDownload, FiFileText } from 'react-icons/fi';
 import InvestorFooter from './InvestorFooter';
 import InvestorHeader from './InvestorHeader';
 
+// Quarterly financial table columns and row types
 const financialColumns = ['Q1', 'Q2', 'Q3', 'Q4'];
 
 const financialRows = [
@@ -14,6 +16,7 @@ const financialRows = [
     'Earnings call transcript'
 ];
 
+// Downloadable reports and statutory filings
 const documentSections = [
     {
         title: 'Annual Report',

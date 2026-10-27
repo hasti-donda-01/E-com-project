@@ -1,6 +1,8 @@
+// Footer for investor relations portal pages
 import { Link } from 'react-router-dom';
 import mlogo from './Images/mlogo.svg';
 
+// Quick links for investor relations
 const footerLinks = [
     { label: 'Home', to: '/investor-relations' },
     { label: 'Financials', to: '/investor-relations/financials' },
@@ -9,6 +11,7 @@ const footerLinks = [
     { label: 'Resources', to: '/investor-relations/resources' }
 ];
 
+// Footer layout component
 export default function InvestorFooter() {
     return (
         <footer className="investor-footer">

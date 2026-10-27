@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+// Product detail page with image view, price, specifications, add to cart, and related items
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { FiArrowLeft, FiCheckCircle, FiHeart, FiRefreshCw, FiShield, FiTruck } from 'react-icons/fi';
 import { IoMdStar } from 'react-icons/io';
-import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
+import { clearCustomerAccessToken, getCustomerAccessToken } from '../utils/customerSession';
+import { fetchProductById, fetchProducts } from '../redux/action/productApi';
+import { clearCurrentProduct } from '../redux/slice/productSlice';
+import { addToCart as addToCartThunk } from '../redux/action/cartApi';
+import { addToWishlist as addToWishlistThunk } from '../redux/action/wishlistApi';
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ||
-  'https://e-com-project-b3ci.onrender.com/api'
-).replace(/\/$/, '');
-
+// Format number to INR
 const inr = (value) =>
   `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
@@ -19,12 +21,22 @@ export default function ProductDetails() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const resumedCartAction = useRef(false);
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [relatedError, setRelatedError] = useState('');
+
+  // Redux state for product details and catalog
+  const {
+    currentProduct: product,
+    productDetailStatus,
+    productDetailError,
+    products: catalogProducts
+  } = useSelector((state) => state.product);
+
+  const loading = productDetailStatus === 'loading';
+  const error = productDetailError || '';
+  const relatedError = '';
+
+  // Local notification and busy states
   const [cartMessage, setCartMessage] = useState('');
   const [cartError, setCartError] = useState('');
   const [addingToCart, setAddingToCart] = useState(false);
@@ -32,59 +44,30 @@ export default function ProductDetails() {
   const [wishlistError, setWishlistError] = useState('');
   const [addingToWishlist, setAddingToWishlist] = useState(false);
 
+  // Fetch product details and catalog for related products
   useEffect(() => {
-    const controller = new AbortController();
-
-    const loadProduct = async () => {
-      setLoading(true);
-      setError('');
-      setProduct(null);
-      setRelatedProducts([]);
-      setRelatedError('');
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/product/getp/${encodeURIComponent(id)}`, {
-          signal: controller.signal
-        });
-        const payload = await response.json();
-        if (!response.ok || payload.success === false || !payload.data) {
-          throw new Error(payload.message || `Could not load this product (${response.status}).`);
-        }
-        setProduct(payload.data);
-
-        try {
-          const relatedResponse = await fetch(`${API_BASE_URL}/product/get?page=1`, {
-            signal: controller.signal
-          });
-          const relatedPayload = await relatedResponse.json();
-          if (!relatedResponse.ok || relatedPayload.success === false || !Array.isArray(relatedPayload.data)) {
-            throw new Error(relatedPayload.message || `Could not load related products (${relatedResponse.status}).`);
-          }
-          const categoryId = getCategoryId(payload.data);
-          setRelatedProducts(
-            relatedPayload.data
-              .filter((item) => item._id !== payload.data._id)
-              .filter((item) => !categoryId || getCategoryId(item) === categoryId)
-              .slice(0, 4)
-          );
-        } catch (relatedLoadError) {
-          if (relatedLoadError.name !== 'AbortError') {
-            setRelatedError(relatedLoadError.message || 'Could not load related products.');
-          }
-        }
-      } catch (loadError) {
-        if (loadError.name !== 'AbortError') {
-          setError(loadError.message || 'Could not load this product.');
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
+    if (id) {
+      dispatch(fetchProductById(id));
+      if (!catalogProducts || catalogProducts.length === 0) {
+        dispatch(fetchProducts(1));
       }
+    }
+    return () => {
+      dispatch(clearCurrentProduct());
     };
+  }, [dispatch, id]);
 
-    loadProduct();
-    return () => controller.abort();
-  }, [id]);
+  // Derive related products from category
+  const categoryId = getCategoryId(product);
+  const relatedProducts = useMemo(() => {
+    if (!product || !catalogProducts || catalogProducts.length === 0) return [];
+    return catalogProducts
+      .filter((item) => item._id !== product._id)
+      .filter((item) => !categoryId || getCategoryId(item) === categoryId)
+      .slice(0, 4);
+  }, [product, catalogProducts, categoryId]);
 
+  // Add item to cart through Redux thunk
   const addToCart = useCallback(async (buyNow = false) => {
     const customerToken = getCustomerAccessToken();
     if (!customerToken) {
@@ -102,18 +85,18 @@ export default function ProductDetails() {
     setCartError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/cart/addtocart`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${customerToken}`
-        },
-        body: JSON.stringify({ product: product._id, quantity: 1 })
-      });
-      const payload = await response.json();
-      if (!response.ok || payload.success === false) {
-        if (isCustomerAuthFailure(response, payload)) {
+      const resultAction = await dispatch(addToCartThunk({ productId: product._id, quantity: 1 }));
+      if (addToCartThunk.fulfilled.match(resultAction)) {
+        navigate('/cart', {
+          state: {
+            cartNotice: buyNow
+              ? 'Product added. Review your order to continue.'
+              : resultAction.payload?.message || 'Added to your cart.'
+          }
+        });
+      } else {
+        const errorMsg = String(resultAction.payload || 'Could not add this product to your cart.');
+        if (/token required|jwt expired|jwt malformed|invalid token|invalid signature|required role: customer|user not found|401/i.test(errorMsg)) {
           clearCustomerAccessToken();
           navigate('/customer-login', {
             state: {
@@ -123,22 +106,16 @@ export default function ProductDetails() {
           });
           return;
         }
-        throw new Error(payload.message || `Could not add this product to your cart (${response.status}).`);
+        throw new Error(errorMsg);
       }
-      navigate('/cart', {
-        state: {
-          cartNotice: buyNow
-            ? 'Product added. Review your order to continue.'
-            : payload.message || 'Added to your cart.'
-        }
-      });
     } catch (addError) {
       setCartError(addError.message || 'Could not add this product to your cart.');
     } finally {
       setAddingToCart(false);
     }
-  }, [location.pathname, navigate, product]);
+  }, [dispatch, location.pathname, navigate, product]);
 
+  // Save product to wishlist through Redux thunk
   const addToWishlist = useCallback(async () => {
     const customerToken = getCustomerAccessToken();
     if (!customerToken) {
@@ -152,33 +129,26 @@ export default function ProductDetails() {
     setWishlistMessage('');
     setWishlistError('');
     try {
-      const response = await fetch(`${API_BASE_URL}/wish/addtowish`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${customerToken}`
-        },
-        body: JSON.stringify({ product: product._id })
-      });
-      const payload = await response.json();
-      if (!response.ok || payload.success === false) {
-        if (isCustomerAuthFailure(response, payload)) {
+      const resultAction = await dispatch(addToWishlistThunk(product._id));
+      if (addToWishlistThunk.fulfilled.match(resultAction)) {
+        setWishlistMessage(resultAction.payload?.message || 'Added to your wishlist.');
+      } else {
+        const errorMsg = String(resultAction.payload || 'Could not save this product.');
+        if (/token required|jwt expired|jwt malformed|invalid token|invalid signature|required role: customer|user not found|401/i.test(errorMsg)) {
           clearCustomerAccessToken();
           navigate('/customer-login', {
             state: { returnTo: location.pathname, resumeAddToWishlist: true }
           });
           return;
         }
-        throw new Error(payload.message || `Could not save this product (${response.status}).`);
+        throw new Error(errorMsg);
       }
-      setWishlistMessage(payload.message || 'Added to your wishlist.');
     } catch (wishlistAddError) {
       setWishlistError(wishlistAddError.message || 'Could not add this product to your wishlist.');
     } finally {
       setAddingToWishlist(false);
     }
-  }, [location.pathname, navigate, product]);
+  }, [dispatch, location.pathname, navigate, product]);
 
   useEffect(() => {
     if (

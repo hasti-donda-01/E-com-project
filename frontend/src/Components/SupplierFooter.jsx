@@ -1,5 +1,7 @@
+// Footer component for supplier portal and seller informational pages
 import { Link } from 'react-router-dom'
 import footerlogo from './Images/footerlogo.svg'
+
 export default function SupplierFooter() {
     const footerLinks = ['Sell Online', 'Pricing & Commission', 'How it works', 'Shipping & Returns', 'Grow Your Business', 'Learning Hub', 'Meesho Ads', 'Shop Online on Meesho']
 

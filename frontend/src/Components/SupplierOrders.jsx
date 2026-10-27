@@ -1,3 +1,4 @@
+// Supplier orders management - view customer orders and update delivery status
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
@@ -7,9 +8,11 @@ const API_BASE_URL = (
   'https://e-com-project-b3ci.onrender.com/api'
 ).replace(/\/$/, '');
 
+// Format currency in INR
 const formatAmount = (amount) =>
   `₹${Number(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
+// Determine the next order lifecycle status
 const nextAction = (status = '') => {
   switch (status.toLowerCase()) {
     case 'placed': return { label: 'Confirm order', status: 'confirmed' };

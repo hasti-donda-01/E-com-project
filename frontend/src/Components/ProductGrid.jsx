@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+// Hero banner section with festive collection and quick category links
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories } from '../redux/action/productApi';
 import gold from './Images/gold.jpg';
 import lehangas from './Images/lehangas.jpg';
 import jewellery from './Images/jewellery.jpg';
@@ -6,41 +9,25 @@ import mensweargold from './Images/mensweargold.jpg';
 import saress from './Images/saress.jpg';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = (
-    import.meta.env.VITE_API_URL ||
-    'https://e-com-project-b3ci.onrender.com/api'
-).replace(/\/$/, '');
-
 export default function ProductGrid() {
     const navigate = useNavigate();
-    const [categories, setCategories] = useState([]);
-    const [loadingCategories, setLoadingCategories] = useState(true);
-    const [categoryError, setCategoryError] = useState('');
+    const dispatch = useDispatch();
 
+    // Redux categories state
+    const { categories, categoriesStatus, categoriesError } = useSelector((state) => state.product);
+
+    // Fetch categories using Redux action
     useEffect(() => {
-        const controller = new AbortController();
-        const loadCategories = async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/category/get`, {
-                    signal: controller.signal
-                });
-                const payload = await response.json();
-                if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
-                    throw new Error(payload.message || `Could not load categories (${response.status}).`);
-                }
-                setCategories(payload.data.filter((category) => category.isActive !== false));
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    setCategoryError(error.message || 'Could not load categories.');
-                }
-            } finally {
-                if (!controller.signal.aborted) setLoadingCategories(false);
-            }
-        };
-        loadCategories();
-        return () => controller.abort();
-    }, []);
+        if (!categories || categories.length === 0) {
+            dispatch(fetchCategories());
+        }
+    }, [dispatch, categories]);
 
+    const loadingCategories = categoriesStatus === 'loading';
+    const categoryError = categoriesError || '';
+
+
+    // Festive wear categories shown on banner
     let golditems = [
         {image: lehangas, name: 'Lehangas'},
         {image: mensweargold, name: 'Menswear'},

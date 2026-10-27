@@ -1,14 +1,19 @@
+// Product catalog listing with filter sidebar (category, price range, rating, attributes)
 import { useEffect, useState } from 'react';
 import { IoMdStar } from 'react-icons/io';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllProducts, fetchCategories } from '../redux/action/productApi';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
   'https://e-com-project-b3ci.onrender.com/api'
 ).replace(/\/$/, '');
 
+// Format number to INR
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
+// Filter attribute categories
 const attributeFilterGroups = [
   ['gender', 'Gender'],
   ['color', 'Color'],
@@ -49,9 +54,13 @@ const normalizeFilterValue = (value) => String(value).trim().toLowerCase();
 
 export default function ProductCard() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+
+  // Redux state for products and categories from backend
+  const { products, categories, status, error: reduxError } = useSelector((state) => state.product);
+
+  // Local filter states
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [categorySearch, setCategorySearch] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -61,59 +70,16 @@ export default function ProductCard() {
   const [minimumRating, setMinimumRating] = useState('');
   const [minimumDiscount, setMinimumDiscount] = useState('');
   const [sort, setSort] = useState('relevance');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
+  const loading = status === 'loading';
+  const error = reduxError || '';
+
+  // Dispatch Redux actions to fetch products and categories from backend
   useEffect(() => {
-    const controller = new AbortController();
+    dispatch(fetchAllProducts());
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
-    const loadProducts = async () => {
-      try {
-        const firstResponse = await fetch(`${API_BASE_URL}/product/get?page=1`, {
-          signal: controller.signal
-        });
-        const firstPayload = await firstResponse.json();
-        if (!firstResponse.ok || firstPayload.success === false) {
-          throw new Error(firstPayload.message || `Could not load products (${firstResponse.status}).`);
-        }
-        if (!Array.isArray(firstPayload.data)) {
-          throw new Error('The products API response did not include a product list.');
-        }
-
-        const allProducts = [...firstPayload.data];
-        const totalPages = Math.max(1, Number(firstPayload.totalPages) || 1);
-        for (let page = 2; page <= totalPages; page += 1) {
-          const response = await fetch(`${API_BASE_URL}/product/get?page=${page}`, {
-            signal: controller.signal
-          });
-          const payload = await response.json();
-          if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
-            throw new Error(payload.message || `Could not load products (${response.status}).`);
-          }
-          allProducts.push(...payload.data);
-        }
-        setProducts(allProducts);
-
-        const categoryResponse = await fetch(`${API_BASE_URL}/category/get`, {
-          signal: controller.signal
-        });
-        const categoryPayload = await categoryResponse.json();
-        if (!categoryResponse.ok || categoryPayload.success === false || !Array.isArray(categoryPayload.data)) {
-          throw new Error(categoryPayload.message || `Could not load categories (${categoryResponse.status}).`);
-        }
-        setCategories(categoryPayload.data.filter((category) => category.isActive !== false));
-      } catch (loadError) {
-        if (loadError.name !== 'AbortError') {
-          setError(loadError.message || 'Could not load products.');
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
-
-    loadProducts();
-    return () => controller.abort();
-  }, []);
 
   const routeCategoryId = searchParams.get('category');
   const routeSearch = searchParams.get('search')?.trim() || '';

@@ -1,3 +1,4 @@
+// Investor contacts and registrar information page (compliance officer, office address, and RTA)
 import InvestorFooter from './InvestorFooter';
 import InvestorHeader from './InvestorHeader';
 

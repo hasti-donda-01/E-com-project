@@ -1,3 +1,4 @@
+// Entry point: mounts React application into DOM with Redux store provider
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'

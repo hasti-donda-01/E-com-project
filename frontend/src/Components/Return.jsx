@@ -1,12 +1,9 @@
+// Shipping and returns policy page for sellers (covers delivery steps, return charges, and cancellation)
 import React, { useState, useEffect } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import Desktoppic2 from './Images/Desktoppic2.jpg'
 
-/* 👇 import your real images and assign them here */
-// import shippingHero from './Images/shippingHero.png'
-// import returnImg from './Images/returnPolicy.png'
-// import cancelImg from './Images/cancellation.png'
-// import videoThumb from './Images/videoThumb.jpg'
+// Image placeholders
 const IMG = {
     hero: null,       // shippingHero
     returns: null,    // returnImg
@@ -19,7 +16,7 @@ const INDIGO = '#3d1fc4'
 const FONT = "'Poppins', sans-serif"
 const WRAP = { width: '100%', maxWidth: 1300, margin: '0 auto', paddingLeft: 24, paddingRight: 24, boxSizing: 'border-box' }
 
-/* ================= NAVBAR ================= */
+// Header navigation for seller pages
 const NAV_LINKS = [
     { label: 'Sell Online', href: '#' },
     { label: 'How it works', href: '#' },
@@ -53,7 +50,7 @@ function Navbar() {
     )
 }
 
-/* ================= ICONS ================= */
+// Shipping icons
 const TruckIcon = () => (
     <svg width="56" height="46" viewBox="0 0 46 38" fill="none">
         <path d="M2 8h22v18H2z" fill={PINK} />

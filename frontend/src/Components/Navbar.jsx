@@ -1,4 +1,5 @@
 
+// Main customer navigation bar - search, cart, wishlist, profile menu, and category mega dropdowns
 import { useState } from 'react';
 import { BsCart2 } from 'react-icons/bs';
 import { FiHeart } from 'react-icons/fi';
@@ -8,9 +9,11 @@ import headerimg from './Images/headerimg.jpg'
 import { GiReturnArrow } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { GiPriceTag } from 'react-icons/gi';
 import ProfileMenu from './ProfileMenu';
 
+// Mega-menu category groupings
 const ethnicWearCategories = [
     {
         title: 'Sarees',
@@ -351,6 +354,7 @@ const categoryMenus = {
 };
 
 export default function Navbar() {
+    // Dropdown hover & search input state
     const [activeCategoryMenu, setActiveCategoryMenu] = useState('');
     const [searchParams] = useSearchParams();
     const routeSearch = searchParams.get('search') || '';
@@ -358,6 +362,11 @@ export default function Navbar() {
     const searchTerm = searchDraft.route === routeSearch ? searchDraft.value : routeSearch;
     const navigate = useNavigate();
 
+    // Redux cart and wishlist item counts
+    const cartCount = useSelector((state) => state.cart?.items?.length || 0);
+    const wishlistCount = useSelector((state) => state.wishlist?.items?.length || 0);
+
+    // Submit search query and filter products
     const handleSearch = (event) => {
         event.preventDefault();
         const query = searchTerm.trim();
@@ -430,17 +439,38 @@ export default function Navbar() {
 
 
                         <button type="button" className="cart-nav-button wishlist-nav-button" onClick={() => navigate('/wishlist')}>
-                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
+                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY" style={{ position: 'relative' }}>
                                 <FiHeart aria-hidden="true" />
+                                {wishlistCount > 0 && (
+                                    <span style={{
+                                        position: 'absolute', top: -6, right: -8,
+                                        background: '#9f2089', color: '#fff', fontSize: 10,
+                                        fontWeight: 700, borderRadius: 10, minWidth: 16,
+                                        height: 16, display: 'flex', alignItems: 'center',
+                                        justifyContent: 'center', padding: '0 4px'
+                                    }}>
+                                        {wishlistCount}
+                                    </span>
+                                )}
                                 <span className="sc-dOfePm kBqyGz hover header-right">Wishlist</span>
                             </div>
                         </button>
 
                         {/* Cart */}
                         <button type="button" className="cart-nav-button" onClick={() => navigate('/cart')}>
-                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY">
+                            <div className="sc-kFkjun cEGPDc TabWrapper-sc-1edf3ww-0 jtaRdY" style={{ position: 'relative' }}>
                                 <BsCart2 height={25} width={25} color='#222' />
-
+                                {cartCount > 0 && (
+                                    <span style={{
+                                        position: 'absolute', top: -6, right: -8,
+                                        background: '#9f2089', color: '#fff', fontSize: 10,
+                                        fontWeight: 700, borderRadius: 10, minWidth: 16,
+                                        height: 16, display: 'flex', alignItems: 'center',
+                                        justifyContent: 'center', padding: '0 4px'
+                                    }}>
+                                        {cartCount}
+                                    </span>
+                                )}
                                 <span className="sc-dOfePm kBqyGz hover header-right">
                                     Cart
                                 </span>

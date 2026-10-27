@@ -1,4 +1,5 @@
 
+// Supplier registration flow - multi-step form collecting contact, store info, and verifying OTP
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import meeshoLogo from './Images/meeshoLogo.svg'
@@ -10,6 +11,7 @@ import { MdCheckCircle } from "react-icons/md"
 import store from './Images/store.svg'
 
 export default function StartSelling() {
+    // Form input state
     const [formData, setFormData] = useState({
         name: '',
         email: '',

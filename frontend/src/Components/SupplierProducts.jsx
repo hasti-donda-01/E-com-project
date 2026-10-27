@@ -1,80 +1,68 @@
-import { useCallback, useEffect, useState } from 'react';
+// Supplier product inventory management (view, edit price/stock, and delete products)
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { FiArrowLeft, FiEdit2, FiEye, FiPackage, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
+import { deleteSellerProduct, fetchSellerProducts, updateSellerProduct } from '../redux/action/sellerProductApi';
+import { clearNotice, setPage } from '../redux/slice/sellerProductSlice';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
-
-const getErrorMessage = async (response) => {
-    try {
-        const payload = await response.json();
-        return payload.message || `Request failed (${response.status})`;
-    } catch {
-        return `Request failed (${response.status})`;
-    }
-};
-
+// Format currency
 const inr = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
 export default function SupplierProducts({ embedded = false }) {
-    const [products, setProducts] = useState([]);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [notice, setNotice] = useState('');
+    const dispatch = useDispatch();
+
+    // Redux supplier product state
+    const {
+        products,
+        page,
+        totalPages,
+        status,
+        error: reduxError,
+        notice: reduxNotice,
+        saving,
+        editError: reduxEditError,
+    } = useSelector((state) => state.sellerProduct);
+
+    const loading = status === 'loading';
+    const [localError, setLocalError] = useState('');
+    const [localNotice, setLocalNotice] = useState('');
+    const [localEditError, setLocalEditError] = useState('');
     const [viewingProduct, setViewingProduct] = useState(null);
     const [editingProduct, setEditingProduct] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [editError, setEditError] = useState('');
 
-    const fetchProducts = useCallback(async () => {
-        setLoading(true);
-        setError('');
-        try {
-            const response = await fetch(`${API_BASE_URL}/sellerp/getmyproducts?page=${page}`, {
-                credentials: 'include'
-            });
-            if (!response.ok) throw new Error(await getErrorMessage(response));
+    const error = localError || reduxError || '';
+    const notice = localNotice || reduxNotice || '';
+    const editError = localEditError || reduxEditError || '';
 
-            const payload = await response.json();
-            if (payload.success === false) throw new Error(payload.message || 'Could not load products.');
-            const pageData = Array.isArray(payload.data) ? payload.data : [];
-            setProducts(Array.isArray(pageData[0]) ? pageData[0] : []);
-            const totalPagesText = String(pageData[1] || '');
-            setTotalPages(Math.max(1, Number(totalPagesText.match(/\d+/)?.[0] || 1)));
-        } catch (err) {
-            setError(err.message || 'Could not load products.');
-        } finally {
-            setLoading(false);
-        }
-    }, [page]);
-
+    // Fetch supplier products on page change
     useEffect(() => {
-        const timer = window.setTimeout(() => fetchProducts(), 0);
-        return () => window.clearTimeout(timer);
-    }, [fetchProducts]);
+        dispatch(fetchSellerProducts(page));
+    }, [dispatch, page]);
 
+    // Handle delete product
     const deleteProduct = async (product) => {
         if (!window.confirm(`Delete "${product.name}"? This action cannot be undone.`)) return;
-        setNotice('');
-        setError('');
+        setLocalNotice('');
+        setLocalError('');
+        dispatch(clearNotice());
         try {
-            const response = await fetch(`${API_BASE_URL}/product/delete/${product._id}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-            const payload = await response.json();
-            if (!response.ok || !payload.success) {
-                throw new Error(payload.message || `Request failed (${response.status})`);
+            const resultAction = await dispatch(deleteSellerProduct(product._id));
+            if (deleteSellerProduct.rejected.match(resultAction)) {
+                setLocalError(resultAction.payload || 'Could not delete the product.');
+            } else {
+                if (products.length === 1 && page > 1) {
+                    dispatch(setPage(page - 1));
+                } else {
+                    dispatch(fetchSellerProducts(page));
+                }
             }
-            setNotice(payload.warning || 'Product deleted successfully.');
-            if (products.length === 1 && page > 1) setPage((currentPage) => currentPage - 1);
-            else await fetchProducts();
         } catch (err) {
-            setError(err.message || 'Could not delete the product.');
+            setLocalError(err.message || 'Could not delete the product.');
         }
     };
 
+    // Handle edit product
     const saveProduct = async (event) => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
@@ -86,31 +74,23 @@ export default function SupplierProducts({ embedded = false }) {
         };
         if (!productDetails.name || !productDetails.brand || !(productDetails.price > 0) ||
             !Number.isInteger(productDetails.stock) || productDetails.stock < 0) {
-            setEditError('Enter a name, brand, positive price, and whole-number stock of 0 or more.');
+            setLocalEditError('Enter a name, brand, positive price, and whole-number stock of 0 or more.');
             return;
         }
 
-        setSaving(true);
-        setEditError('');
-        setNotice('');
+        setLocalEditError('');
+        setLocalNotice('');
+        dispatch(clearNotice());
         try {
-            const response = await fetch(`${API_BASE_URL}/product/update/${editingProduct._id}`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productDetails)
-            });
-            const payload = await response.json();
-            if (!response.ok || !payload.success) {
-                throw new Error(payload.message || `Request failed (${response.status})`);
+            const resultAction = await dispatch(updateSellerProduct({ productId: editingProduct._id, data: productDetails }));
+            if (updateSellerProduct.rejected.match(resultAction)) {
+                setLocalEditError(resultAction.payload || 'Could not update the product.');
+            } else {
+                setEditingProduct(null);
+                dispatch(fetchSellerProducts(page));
             }
-            setEditingProduct(null);
-            setNotice(payload.warning || 'Product updated successfully.');
-            await fetchProducts();
         } catch (err) {
-            setEditError(err.message || 'Could not update the product.');
-        } finally {
-            setSaving(false);
+            setLocalEditError(err.message || 'Could not update the product.');
         }
     };
 
@@ -227,7 +207,7 @@ export default function SupplierProducts({ embedded = false }) {
                                 <button
                                     type="button"
                                     disabled={page <= 1}
-                                    onClick={() => setPage((currentPage) => currentPage - 1)}
+                                    onClick={() => dispatch(setPage(page - 1))}
                                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     Previous
@@ -236,7 +216,7 @@ export default function SupplierProducts({ embedded = false }) {
                                 <button
                                     type="button"
                                     disabled={page >= totalPages}
-                                    onClick={() => setPage((currentPage) => currentPage + 1)}
+                                    onClick={() => dispatch(setPage(page + 1))}
                                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     Next

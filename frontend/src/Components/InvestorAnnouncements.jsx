@@ -1,7 +1,9 @@
+// Investor relations announcements and press releases page
 import { useMemo, useState } from 'react';
 import InvestorFooter from './InvestorFooter';
 import InvestorHeader from './InvestorHeader';
 
+// Corporate filings and regulatory intimations
 const corporateAnnouncements = [
     {
         date: '23 October, 2026',
@@ -21,6 +23,7 @@ const corporateAnnouncements = [
     }
 ];
 
+// Press releases and company news
 const pressReleases = [
     {
         date: '14 October, 2026',
@@ -76,6 +79,7 @@ const pressReleases = [
     }
 ];
 
+// Filterable list helper for announcements
 function AnnouncementList({ items, query }) {
     const filteredItems = items.filter((item) =>
         `${item.date} ${item.title}`.toLowerCase().includes(query.trim().toLowerCase())
@@ -97,6 +101,7 @@ function AnnouncementList({ items, query }) {
     );
 }
 
+// Announcements and press release directory
 export default function InvestorAnnouncements() {
     const [query, setQuery] = useState('');
     const [year, setYear] = useState('2026');

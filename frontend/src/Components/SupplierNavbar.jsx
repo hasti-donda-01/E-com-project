@@ -1,3 +1,4 @@
+// Header navigation bar for supplier landing and informational pages
 import { Link, useNavigate } from 'react-router-dom';
 import meeshoLogo from './Images/meeshoLogo.svg'
 import ProfileMenu from './ProfileMenu';

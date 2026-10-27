@@ -1,14 +1,24 @@
+// Customer OTP verification screen with 6-digit pin boxes and resend countdown
 import { useState, useRef, useEffect } from 'react'
 import meeshologo from './Images/meeshoLogo.svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { addCustomer, verifyCustomer } from '../redux/action/customerApi'
+import { CiSearch } from 'react-icons/ci'
 
 export default function VerifyOtp() {
 
     const location = useLocation()
     const navigate = useNavigate()
     const [phoneNumber, setPhoneNumber] = useState(location.state?.phoneNumber || '')
+    const [searchTerm, setSearchTerm] = useState('')
+
+    // Handle catalog search
+    const handleSearch = (event) => {
+        event.preventDefault()
+        const query = searchTerm.trim()
+        navigate(query ? `/?search=${encodeURIComponent(query)}#products-catalog` : '/')
+    }
     const [showOtp, setShowOtp] = useState(Boolean(location.state?.phoneNumber))
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
     const [otpError, setOtpError] = useState('')
@@ -70,16 +80,18 @@ export default function VerifyOtp() {
         inputRefs.current[Math.min(pasted.length, 5)]?.focus()
     }
 
+    // Resend verification code
     const resendOtp = async () => {
         if (seconds > 0) return
         try {
             await dispatch(addCustomer({ phone: phoneNumber })).unwrap()
             setSeconds(60)
         } catch {
-            // The rejected request message is displayed from Redux state.
+            // Error is shown from Redux state
         }
     }
 
+    // Verify OTP and redirect to previous page
     const verifyOtp = async () => {
         const code = otp.join('')
         if (code.length !== 6) {
@@ -116,11 +128,34 @@ export default function VerifyOtp() {
                         </div>
 
                         <div className='customerheader4'>
-                            <div placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader5'>
+                            <form className='customerheader5' role="search" onSubmit={handleSearch}>
                                 <div className='customerheader6'>
-                                    <input type="text" placeholder="Try Saree, Kurti or Search by Product Code" className='customerheader7' />
+                                    <button
+                                        type="submit"
+                                        aria-label="Search products"
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: 0,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            color: '#666'
+                                        }}
+                                    >
+                                        <CiSearch size={20} aria-hidden="true" />
+                                    </button>
                                 </div>
-                            </div>
+                                <input
+                                    type="text"
+                                    placeholder="Try Saree, Kurti or Search by Product Code"
+                                    className='customerheader7'
+                                    style={{ outline: 'none' }}
+                                    value={searchTerm}
+                                    onChange={(event) => setSearchTerm(event.target.value)}
+                                    aria-label="Search products"
+                                />
+                            </form>
 
                             <div className='customerheader8' style={{ color: "white" }}>
                                 <div className='customerheader9'>

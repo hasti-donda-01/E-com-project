@@ -1,99 +1,59 @@
 // Customer order history page - shows past orders, delivery status, and items
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { FiRefreshCw } from 'react-icons/fi';
-import { getCustomerAccessToken, clearCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
-
-const API_BASE_URL = (
-    import.meta.env.VITE_API_URL ||
-    'https://e-com-project-b3ci.onrender.com/api'
-).replace(/\/$/, '');
+import { getCustomerAccessToken } from '../utils/customerSession';
+import { fetchCustomerOrders } from '../redux/action/orderApi';
+import { clearOrders } from '../redux/slice/orderSlice';
 
 export default function CustomerOrders() {
-    // Orders data and product cache state
-    const [orders, setOrders] = useState([]);
-    const [products, setProducts] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [error, setError] = useState('');
-    const [needsLogin, setNeedsLogin] = useState(false);
-    const [refreshVersion, setRefreshVersion] = useState(0);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    // Fetch customer's orders from server
-    useEffect(() => {
-        const controller = new AbortController();
-        const loadOrders = async () => {
-            setLoading(true);
-            setError('');
-            setNeedsLogin(false);
-            try {
-                const token = getCustomerAccessToken();
-                const response = await fetch(`${API_BASE_URL}/customer/orders`, {
-                    credentials: 'include',
-                    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                    signal: controller.signal,
-                });
-                const payload = await response.json();
-                if (
-                    response.status === 400 &&
-                    /token required|jwt expired|jwt malformed|invalid token/i.test(payload.message || '')
-                ) {
-                    setNeedsLogin(true);
-                }
-                if (!response.ok || payload.success === false || !Array.isArray(payload.data)) {
-                    throw new Error(payload.message || `Could not load orders (${response.status}).`);
-                }
-                setOrders(payload.data);
+    // Redux orders state from backend
+    const { orders, status, error: reduxError } = useSelector((state) => state.order);
+    const loading = status === 'loading';
+    const [refreshing, setRefreshing] = useState(false);
+    const [needsLogin, setNeedsLogin] = useState(false);
+    const error = reduxError || '';
 
-                // Fetch product details for each order that doesn't have populated product
-                const productIds = [...new Set(
-                    payload.data.map(o => {
-                        // product could be a populated object or just an ID string
-                        if (o.product && typeof o.product === 'object' && o.product.image) return null;
-                        return typeof o.product === 'string' ? o.product : o.product?._id || null;
-                    }).filter(Boolean)
-                )];
-
-                if (productIds.length > 0) {
-                    const productMap = {};
-                    await Promise.all(
-                        productIds.map(async (pid) => {
-                            try {
-                                const pRes = await fetch(`${API_BASE_URL}/product/getp/${pid}`, {
-                                    signal: controller.signal,
-                                });
-                                const pData = await pRes.json();
-                                if (pRes.ok && pData.success !== false && pData.data) {
-                                    productMap[pid] = pData.data;
-                                }
-                            } catch { /* ignore individual failures */ }
-                        })
-                    );
-                    setProducts(productMap);
-                }
-            } catch (loadError) {
-                if (loadError.name !== 'AbortError') {
-                    setError(loadError.message || 'Could not load orders.');
-                }
-            } finally {
-                if (!controller.signal.aborted) {
-                    setLoading(false);
-                    setRefreshing(false);
-                }
-            }
-        };
-        loadOrders();
-        return () => controller.abort();
-    }, [refreshVersion]);
-
-    // Helper: get product info from order (supports both populated and ID-only)
-    const getProduct = (order) => {
-        if (order.product && typeof order.product === 'object' && order.product.image) {
-            return order.product; // already populated from backend
+    // Load orders using Redux thunk
+    const loadOrders = async () => {
+        const token = getCustomerAccessToken();
+        if (!token) {
+            setNeedsLogin(true);
+            return;
         }
-        const pid = typeof order.product === 'string' ? order.product : order.product?._id;
-        return products[pid] || {};
+        setNeedsLogin(false);
+        const result = await dispatch(fetchCustomerOrders());
+        if (fetchCustomerOrders.rejected.match(result)) {
+            const errMsg = String(result.payload || '');
+            if (/token required|jwt expired|jwt malformed|invalid token|unauthorized/i.test(errMsg)) {
+                setNeedsLogin(true);
+            }
+        }
+    };
+
+    useEffect(() => {
+        loadOrders();
+        return () => {
+            dispatch(clearOrders());
+        };
+    }, [dispatch]);
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await loadOrders();
+        setRefreshing(false);
+    };
+
+    // Helper: get product info from order (populated or attached)
+    const getProduct = (order) => {
+        if (order.product && typeof order.product === 'object') {
+            return order.product;
+        }
+        return {};
     };
 
     if (loading) {
@@ -123,11 +83,8 @@ export default function CustomerOrders() {
                             borderRadius: 8, border: '1px solid #cbd5e1', background: '#fff',
                             padding: '6px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer'
                         }}
-                        disabled={loading}
-                        onClick={() => {
-                            setRefreshing(true);
-                            setRefreshVersion(v => v + 1);
-                        }}
+                        disabled={loading || refreshing}
+                        onClick={handleRefresh}
                     >
                         <FiRefreshCw aria-hidden="true" /> {refreshing ? 'Refreshing…' : 'Refresh'}
                     </button>

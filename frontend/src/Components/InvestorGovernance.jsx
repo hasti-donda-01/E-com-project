@@ -1,3 +1,4 @@
+// Corporate governance page - details Board of Directors, committees, and regulatory policies
 import { useRef, useState } from 'react';
 import { FiFileText } from 'react-icons/fi';
 import InvestorFooter from './InvestorFooter';
@@ -7,10 +8,10 @@ import mukul from './Images/mukul.jpg';
 import hari from './Images/hari.jpg';
 import kimuska from './Images/kimuska.jpg'
 import mohit2 from './Images/mohit2.jpg'
-
 import sanjeev from './Images/sanjeev.jpg'
 import vidit from './Images/vidit.jpg'
 
+// Board of Directors grouped by role
 const boardMembers = [
     [
         { name: 'Vidit Aatrey', role: 'Chairman, Managing Director and CEO', image: vidit },
@@ -27,6 +28,7 @@ const boardMembers = [
     ]
 ];
 
+// Board committees and member assignments
 const committees = [
     {
         title: 'Audit Committee',
@@ -69,6 +71,7 @@ const committees = [
     }
 ];
 
+// Company policies, disclosures, and charter documents
 const documentSections = [
     {
         title: 'Disclosures under Regulation 46 of SEBI (LODR) Regulations, 2015',

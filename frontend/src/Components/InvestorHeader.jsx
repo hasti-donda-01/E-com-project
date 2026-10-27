@@ -1,7 +1,9 @@
+// Header navigation bar for the Investor Relations portal
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import mlogo from './Images/mlogo.svg';
 
+// Navigation links for investor pages
 const navItems = [
     { label: 'Home', href: '/investor-relations' },
     { label: 'Financials', href: '/investor-relations/financials' },
@@ -10,6 +12,7 @@ const navItems = [
     { label: 'Resources', href: '/investor-relations/resources' }
 ];
 
+// Header bar with active page indicator
 export default function InvestorHeader() {
     const [hovered, setHovered] = useState('');
     const location = useLocation();

@@ -677,32 +677,45 @@ body {
   max-width: 100%;
   display: flex;
   align-items: center;
-  border: 1px solid rgb(139, 139, 163);
+  gap: 10px;
+  border: 1px solid #8b8ba3;
   border-radius: 4px;
-  padding: 11px;
+  padding: 10px 14px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.customerheader5:focus-within {
+  border-color: #9f2089;
 }
 
 .customerheader6 {
-  height: 100%;
   display: flex;
-  padding: 0px 8px 0px 0px;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  color: #666;
 }
 
 .customerheader7 {
-  border-radius: 0px 12px 12px 0px;
-  letter-spacing: 0.0025em;
-  box-sizing: border-box;
-  flex: 1 1 0%;
-  padding: 0px;
-  border-width: medium;
-  border-style: none;
-  border-color: currentcolor;
-  border-image: none;
-  height: 90%;
-  width: 100%;
-  caret-color: rgb(159, 32, 137);
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  flex: 1 1 auto;
+  font-size: 15px;
+  line-height: 20px;
+  color: #353543;
+  caret-color: #9f2089;
+}
+
+.customerheader7::placeholder {
+  color: #8b8ba3;
+  opacity: 1;
 }
 
 .customerheader8 {

@@ -2,58 +2,24 @@
 import { useEffect, useState } from 'react';
 import { CgProfile } from 'react-icons/cg';
 import { useNavigate } from 'react-router-dom';
-import { clearCustomerAccessToken, getCustomerAccessToken, isCustomerAuthFailure } from '../utils/customerSession';
-
-const API_BASE_URL = (
-    import.meta.env.VITE_API_URL ||
-    'https://e-com-project-b3ci.onrender.com/api'
-).replace(/\/$/, '');
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCustomerAccessToken, getCustomerAccessToken } from '../utils/customerSession';
+import { fetchCustomerSession, logoutCustomer } from '../redux/action/customerApi';
 
 export default function ProfileMenu({ variant = 'customer' }) {
-    // User profile state
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // User session state from Redux
+    const { user, sessionStatus } = useSelector((state) => state.customer);
+    const loading = sessionStatus === 'loading';
     const [signingOut, setSigningOut] = useState(false);
     const [error, setError] = useState('');
-    const navigate = useNavigate();
 
     // Check if user is already logged in
     useEffect(() => {
-        const controller = new AbortController();
-
-        const loadSession = async () => {
-            try {
-                const customerToken = getCustomerAccessToken();
-                const response = await fetch(`${API_BASE_URL}/seller/session`, {
-                    credentials: 'include',
-                    headers: customerToken
-                        ? { Authorization: `Bearer ${customerToken}` }
-                        : undefined,
-                    signal: controller.signal
-                });
-                if (response.ok) {
-                    const payload = await response.json();
-                    if (!payload.success || !payload.data) {
-                        throw new Error('The account session response was invalid.');
-                    }
-                    setUser(payload.data);
-                } else if (isCustomerAuthFailure(response, await response.json().catch(() => ({})))) {
-                    clearCustomerAccessToken();
-                } else if (![400, 401, 403].includes(response.status)) {
-                    throw new Error(`Could not check account session (${response.status}).`);
-                }
-            } catch (sessionError) {
-                if (sessionError.name !== 'AbortError') {
-                    setError('Account status is temporarily unavailable.');
-                }
-            } finally {
-                if (!controller.signal.aborted) setLoading(false);
-            }
-        };
-
-        loadSession();
-        return () => controller.abort();
-    }, []);
+        dispatch(fetchCustomerSession());
+    }, [dispatch]);
 
     // Logout handler
     const handleSignOut = async () => {
@@ -61,23 +27,11 @@ export default function ProfileMenu({ variant = 'customer' }) {
         setError('');
         setSigningOut(true);
         try {
-            const customerToken = getCustomerAccessToken();
-            const response = await fetch(`${API_BASE_URL}/seller/logout`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: customerToken
-                    ? { Authorization: `Bearer ${customerToken}` }
-                    : undefined
-            });
-            const payload = await response.json();
-            if (!response.ok || payload.success === false) {
-                throw new Error(payload.message || `Sign out failed (${response.status}).`);
-            }
             const isAdmin = String(user?.role).toLowerCase() === 'admin';
-            if (String(user?.role).toLowerCase() === 'customer') {
-                clearCustomerAccessToken();
+            const resultAction = await dispatch(logoutCustomer());
+            if (logoutCustomer.rejected.match(resultAction)) {
+                throw new Error(resultAction.payload || 'Could not sign out. Please try again.');
             }
-            setUser(null);
             navigate(isAdmin ? '/admin' : '/', { replace: true });
         } catch (signOutError) {
             setError(signOutError.message || 'Could not sign out. Please try again.');

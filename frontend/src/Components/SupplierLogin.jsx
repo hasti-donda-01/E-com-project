@@ -1,3 +1,4 @@
+// Supplier login screen - authenticates seller credentials and redirects to Supplier Dashboard
 import { useState } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import { useNavigate } from 'react-router-dom'
@@ -5,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 const PURPLE = '#3d1fc4'
 const PINK = '#9f2089'
 
-
+// Password visibility toggle icon
 const EyeIcon = ({ off }) => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
@@ -14,6 +15,7 @@ const EyeIcon = ({ off }) => (
     </svg>
 )
 
+// Floating label text input component
 function FloatingInput({ id, type = 'text', label, value, onChange, rightSlot }) {
     const [focused, setFocused] = useState(false)
     const [hovered, setHovered] = useState(false)

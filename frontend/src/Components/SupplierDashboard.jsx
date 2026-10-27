@@ -1,3 +1,4 @@
+// Supplier dashboard overview - revenue chart, order status table, KPIs, and sidebar navigation
 import { useEffect, useState, useMemo } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import meeshoLogo from './Images/meeshoLogo.svg';
@@ -21,10 +22,7 @@ import {
     FiExternalLink
 } from 'react-icons/fi';
 
-/* ---------- Config & Static Data ---------- */
-
-/* KPI metrics are now computed dynamically from live order data */
-
+// Navigation sidebar sections and links
 const sidebarSections = [
     {
         title: 'MEESHO DASHBOARD',
@@ -52,9 +50,7 @@ const sidebarSections = [
     },
 ];
 
-/* ---------- Dynamic helpers ---------- */
-
-// Compute KPI summary from raw orders array
+// Helper to compute summary stats from order list
 function computeStats(orders) {
     const total = orders.length;
     const delivered = orders.filter(o => (o.orderStatus || '').toLowerCase() === 'delivered').length;
@@ -204,8 +200,7 @@ function SidebarNav({ onNavigate, sellerSession }) {
     );
 }
 
-/* ---------- Main Component ---------- */
-
+// Main dashboard component
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://e-com-project-b3ci.onrender.com/api').replace(/\/$/, '');
 
 export default function SupplierDashboard() {

@@ -1,21 +1,14 @@
+// Supplier pricing and commission details page (highlights 0% commission and payment terms)
 import { useState } from 'react'
 import meeshoLogo from './Images/meeshoLogo.svg'
 import commision from './Images/commision.jpg'
-
-/* 👇 import your real images and put them here (transparent PNG/WebP work best) */
-// import zeroCommission from './Images/zeroCommission.png'
-// import shippingImg from './Images/shipping.png'
-// import returnPolicyImg from './Images/returnPolicy.png'
-// import cancellationImg from './Images/cancellation.png'
-// import rtoImg from './Images/rto.png'
-
 
 const PINK = '#f43397'
 const INDIGO = '#3d1fc4'
 const FONT = "'Poppins', sans-serif"
 const WRAP = { maxWidth: 1140, margin: '0 auto', boxSizing: 'border-box' }
 
-/* ================= NAVBAR ================= */
+// Header navigation for seller pages
 const NAV_LINKS = [
     { label: 'Sell Online', href: '#' },
     { label: 'How it works', href: '#' },
@@ -49,7 +42,7 @@ function Navbar() {
     )
 }
 
-/* ================= ICONS ================= */
+// Benefit icons
 const NoFeeIcon = () => (
     <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
         <circle cx="26" cy="26" r="17" stroke="#7a5af0" strokeWidth="3" />
