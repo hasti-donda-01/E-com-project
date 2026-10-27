@@ -213,7 +213,7 @@ export default function ShoppingCart() {
         await loadRazorpayCheckout();
         const paymentResult = await new Promise((resolve, reject) => {
           const checkout = new window.Razorpay({
-            key: createPayload.data.keyId,
+            key: createPayload.data.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
             amount: createPayload.data.amount,
             currency: createPayload.data.currency,
             name: 'Meesho-like Store',
