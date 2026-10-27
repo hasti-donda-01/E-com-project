@@ -28,8 +28,8 @@ const orderSchema = new mongoose.Schema({
 
     paymentMethod: {
         type: String,
-        enum: ["COD", "upi", "bank_transfer"]
-        // required: true
+        enum: ["COD", "upi", "card", "netbanking", "wallet", "online", "bank_transfer"],
+        default: "COD"
     },
 
     paymentStatus: {

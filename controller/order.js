@@ -217,7 +217,8 @@ export const verifyRazorpayPayment = async (req, res) => {
         const products = await Product.find({ _id: { $in: productIds } });
         const productsById = new Map(products.map((productDoc) => [String(productDoc._id), productDoc]));
 
-        const resolvedPaymentMethod = payment.method || "online";
+        const allowedMethods = ["COD", "upi", "card", "netbanking", "wallet", "online", "bank_transfer"];
+        const resolvedPaymentMethod = allowedMethods.includes(payment.method) ? payment.method : "online";
 
         for (const item of attempt.items) {
             const productDoc = productsById.get(String(item.product));
