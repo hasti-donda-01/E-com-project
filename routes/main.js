@@ -21,6 +21,7 @@ router.use('/admin', admin)
 router.use('/cart', cart);
 router.use('/user', user);
 router.use('/customer', customer);
+router.use('/address', address);
 router.use('/subcat', subcategory)
 router.use('/wish', wish);
 router.use('/order', order)
