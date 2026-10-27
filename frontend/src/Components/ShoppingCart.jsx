@@ -187,7 +187,7 @@ export default function ShoppingCart() {
         goToLogin();
         return;
       }
-      if (paymentMethod === 'upi') {
+      if (paymentMethod === 'online' || paymentMethod === 'upi') {
         const createResponse = await fetch(`${API_BASE_URL}/order/razorpay/create`, {
           method: 'POST',
           credentials: 'include',
@@ -207,7 +207,7 @@ export default function ShoppingCart() {
           !createPayload.data?.orderId || !createPayload.data?.keyId ||
           !createPayload.data?.amount || !createPayload.data?.currency
         ) {
-          throw new Error(createPayload.message || `Could not start UPI payment (${createResponse.status}).`);
+          throw new Error(createPayload.message || `Could not start online payment (${createResponse.status}).`);
         }
 
         await loadRazorpayCheckout();
@@ -217,20 +217,8 @@ export default function ShoppingCart() {
             amount: createPayload.data.amount,
             currency: createPayload.data.currency,
             name: 'Meesho-like Store',
-            description: 'Cart checkout',
+            description: 'Order Payment',
             order_id: createPayload.data.orderId,
-            config: {
-              display: {
-                blocks: {
-                  upi: {
-                    name: 'Pay using UPI',
-                    instruments: [{ method: 'upi' }]
-                  }
-                },
-                sequence: ['block.upi'],
-                preferences: { show_default_blocks: false }
-              }
-            },
             handler: async (razorpayResponse) => {
               try {
                 const verifyResponse = await fetch(`${API_BASE_URL}/order/razorpay/verify`, {
@@ -266,12 +254,12 @@ export default function ShoppingCart() {
             theme: { color: '#9f2089' }
           });
           checkout.on('payment.failed', (event) => {
-            reject(new Error(event.error?.description || 'UPI payment failed. Please try again.'));
+            reject(new Error(event.error?.description || 'Payment failed. Please try again.'));
           });
           checkout.open();
         });
         if (paymentResult) {
-          setCompletedOrder({ ...paymentResult, paymentMethod: 'upi' });
+          setCompletedOrder({ ...paymentResult, paymentMethod: 'online' });
           setItems([]);
           setCheckoutMessage('');
         } else {
@@ -442,9 +430,9 @@ export default function ShoppingCart() {
             <span className="order-confirmation-icon"><FiCheck aria-hidden="true" /></span>
             <h1>Order placed successfully</h1>
             <p>
-              {completedOrder.paymentMethod === 'upi'
-                ? 'Your UPI payment was successful.'
-                : 'Your order has been placed with Cash on Delivery.'}
+              {completedOrder.paymentMethod === 'COD'
+                ? 'Your order has been placed with Cash on Delivery.'
+                : 'Your online payment was successful.'}
             </p>
             {completedOrder.orders?.length > 0 && (
               <p>Order reference: {completedOrder.orders.map((order) => order._id).join(', ')}</p>
@@ -524,15 +512,15 @@ export default function ShoppingCart() {
               )}
               <fieldset className="checkout-payment-options">
                 <legend>Choose payment method</legend>
-                <label className={paymentMethod === 'upi' ? 'is-selected' : ''}>
+                <label className={paymentMethod === 'online' || paymentMethod === 'upi' ? 'is-selected' : ''}>
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="upi"
-                    checked={paymentMethod === 'upi'}
-                    onChange={() => setPaymentMethod('upi')}
+                    value="online"
+                    checked={paymentMethod === 'online' || paymentMethod === 'upi'}
+                    onChange={() => setPaymentMethod('online')}
                   />
-                  <span><strong>UPI</strong><small>Pay securely with Razorpay</small></span>
+                  <span><strong>Online Payment</strong><small>UPI, Cards, Net Banking, Wallets via Razorpay</small></span>
                 </label>
                 <label className={paymentMethod === 'COD' ? 'is-selected' : ''}>
                   <input
@@ -639,7 +627,7 @@ export default function ShoppingCart() {
               : checkoutLoading
                 ? 'Please wait…'
                 : checkoutMode
-                  ? paymentMethod === 'upi' ? 'Pay with UPI' : 'Place Order (Cash on Delivery)'
+                  ? (paymentMethod === 'online' || paymentMethod === 'upi') ? 'Pay Online (Razorpay)' : 'Place Order (Cash on Delivery)'
                   : 'Continue'}
           </button>
         </aside>

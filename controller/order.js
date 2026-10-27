@@ -186,7 +186,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 
         if (!["authorized", "captured"].includes(payment.status)) {
             return res.status(400).json({
-                message: "UPI payment has not been captured. Please try again.",
+                message: "Payment has not been captured. Please try again.",
                 success: false
             });
         }
@@ -209,13 +209,15 @@ export const verifyRazorpayPayment = async (req, res) => {
             capturedPayment = await razorpay.payments.capture(paymentId, attempt.amountPaise, "INR");
         }
         if (capturedPayment.status !== "captured") {
-            throw new Error("UPI payment could not be captured. Please try again.");
+            throw new Error("Payment could not be captured. Please try again.");
         }
         paymentCaptured = true;
 
         const productIds = attempt.items.map((item) => item.product);
         const products = await Product.find({ _id: { $in: productIds } });
         const productsById = new Map(products.map((productDoc) => [String(productDoc._id), productDoc]));
+
+        const resolvedPaymentMethod = payment.method || "online";
 
         for (const item of attempt.items) {
             const productDoc = productsById.get(String(item.product));
@@ -240,7 +242,7 @@ export const verifyRazorpayPayment = async (req, res) => {
                 quantity: item.quantity,
                 totalAmount,
                 address: attempt.address,
-                paymentMethod: "upi",
+                paymentMethod: resolvedPaymentMethod,
                 paymentStatus: "paid",
                 orderStatus: "placed"
             });
@@ -251,7 +253,7 @@ export const verifyRazorpayPayment = async (req, res) => {
                 order: order._id,
                 user: req.user.id,
                 amount: totalAmount,
-                paymentMethod: "upi",
+                paymentMethod: resolvedPaymentMethod,
                 status: "success",
                 transactionId: paymentId,
                 gatewayOrderId: orderId
