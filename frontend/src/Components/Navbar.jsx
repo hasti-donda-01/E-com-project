@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { BsCart2 } from 'react-icons/bs';
 import { FiHeart } from 'react-icons/fi';
 import { CiSearch } from 'react-icons/ci';
-import meeshologo from './Images/meeshologo.svg'
+import meeshologo from './Images/meeshoLogo.svg'
 import headerimg from './Images/headerimg.jpg'
 import { GiReturnArrow } from 'react-icons/gi';
 import { IoMdCash } from 'react-icons/io';

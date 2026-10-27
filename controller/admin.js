@@ -353,9 +353,13 @@ export const updateorderstatus = async (req, res) => {
                 success: false
             });
         }
+        const updateData = { orderStatus: req.body.orderStatus };
+        if (req.body.orderStatus === "delivered") {
+            updateData.deliveredAt = new Date();
+        }
         const order = await Order.findByIdAndUpdate(
             req.params.id,
-            { $set: { orderStatus: req.body.orderStatus } },
+            { $set: updateData },
             { new: true, runValidators: true }
         );
         if (!order) {

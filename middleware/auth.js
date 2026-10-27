@@ -29,7 +29,9 @@ export const auth = (role) => async (req, res, next) => {
                 .split(",")
                 .map((origin) => origin.trim())
                 .filter(Boolean);
-            if (!allowedOrigins.includes(req.get("Origin"))) {
+            const origin = req.get("Origin") || "";
+            const isVercel = origin.endsWith('.vercel.app');
+            if (!allowedOrigins.includes(origin) && !isVercel) {
                 return res.status(403).json({
                     success: false,
                     message: "Request origin is not allowed"

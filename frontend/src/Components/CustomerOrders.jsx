@@ -208,9 +208,9 @@ export default function CustomerOrders() {
                                             </p>
                                         )}
                                         {/* Delivered date */}
-                                        {order.orderStatus === 'delivered' && order.deliveredAt && (
+                                        {order.orderStatus === 'delivered' && (
                                             <p style={{ fontSize: 12, color: '#065f46', fontWeight: 500, marginBottom: 4 }}>
-                                                ✅ Delivered on {new Date(order.deliveredAt).toLocaleDateString('en-IN')}
+                                                ✅ Delivered{order.deliveredAt ? ` on ${new Date(order.deliveredAt).toLocaleDateString('en-IN')}` : ''}
                                             </p>
                                         )}
                                         {/* Quantity */}

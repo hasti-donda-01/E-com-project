@@ -40,9 +40,19 @@ const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173,http:
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (url.hostname.endsWith('.vercel.app')) return true;
+  } catch {}
+  return false;
+};
+
 app.use(
   cors({
-    origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)),
+    origin: (origin, callback) => callback(null, isAllowedOrigin(origin)),
     credentials: true
   })
 );
