@@ -16,6 +16,30 @@ export default function CustomerOrders() {
     const [needsLogin, setNeedsLogin] = useState(false);
     const [refreshVersion, setRefreshVersion] = useState(0);
     const navigate = useNavigate();
+    // OrderCard component to display each order as a product-like card
+    const OrderCard = ({ order }) => {
+        const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : '';
+        const status = order.orderStatus || 'pending';
+        const amount = Number(order.totalAmount).toLocaleString('en-IN');
+        // Assuming order may have product details (image, name). Use fallback if not present.
+        const product = order.product || {};
+        const image = product.image || '';
+        const name = product.name || 'Order Item';
+        return (
+            <article className="rounded-lg border bg-white p-4 shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col h-full">
+                {image && (<img src={image} alt={name} className="w-full h-40 object-cover mb-3 rounded" loading="lazy" />)}
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-1 line-clamp-2" title={name}>{name}</h3>
+                    <p className="text-sm text-gray-500 mb-1">Order #{String(order._id).slice(-8).toUpperCase()}</p>
+                    <p className="text-sm text-gray-400 mb-2">{orderDate}</p>
+                </div>
+                <div className="mt-auto flex justify-between items-center">
+                    <span className="font-medium text-indigo-600">₹{amount}</span>
+                    <span className="text-xs uppercase font-medium rounded px-2 py-1 bg-gray-100 text-gray-700">{status}</span>
+                </div>
+            </article>
+        );
+    };
 
     useEffect(() => {
         const controller = new AbortController();
@@ -91,20 +115,11 @@ export default function CustomerOrders() {
                 {orders.length === 0 ? (
                     <p className="text-center text-slate-500">You haven't placed any orders yet.</p>
                 ) : (
-                    <ul className="space-y-4">
-                        {orders.map(order => (
-                            <li key={order._id} className="rounded-lg border bg-white p-4 shadow-sm">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-sm text-gray-500">Order #{String(order._id).slice(-8).toUpperCase()}</p>
-                                        <p className="text-sm text-gray-400">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : ''}</p>
-                                    </div>
-                                    <span className="font-semibold">₹{Number(order.totalAmount).toLocaleString('en-IN')}</span>
-                                </div>
-                                <p className="mt-2 text-sm capitalize text-gray-600">{order.orderStatus || 'pending'}</p>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {orders.map(order => (
+                        <OrderCard key={order._id} order={order} />
+                    ))}
+                </div>
                 )}
             </div>
         </main>

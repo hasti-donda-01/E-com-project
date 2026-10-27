@@ -931,7 +931,7 @@ export const revenue = async (req, res) => {
 export const getCustomerOrders = async (req, res) => {
     try {
         const customerId = req.user.id;
-        const orders = await Order.find({ userId: customerId }).sort({ createdAt: -1 });
+        const orders = await Order.find({ userId: customerId }).populate('product').sort({ createdAt: -1 });
         return res.status(200).json({ success: true, data: orders });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
