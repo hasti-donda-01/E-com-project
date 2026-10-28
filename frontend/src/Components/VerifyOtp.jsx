@@ -193,14 +193,14 @@ export default function VerifyOtp() {
                         <>
                             <h6 color="greyBase" className="sc-dOfePm bzKJDM">Enter OTP sent to {phoneNumber}</h6>
 
-                                <button
-                                    type="button"
+                            <button
+                                type="button"
                                 className="sc-dOfePm kcOfNW AuthWrapperstyled__StyledCaptionLink-sc-1plclw5-7 guLGkI"
-                                    style={{ display: 'block', marginTop: 16, fontSize: 15, fontWeight: 600, letterSpacing: 0.3, cursor: 'pointer', border: 0, background: 'none', padding: 0 }}
+                                style={{ display: 'block', marginTop: 16, fontSize: 15, fontWeight: 600, letterSpacing: 0.3, cursor: 'pointer', border: 0, background: 'none', padding: 0 }}
                                 onClick={() => setShowOtp(false)}
                             >
                                 CHANGE NUMBER
-                                </button>
+                            </button>
 
                             <div style={{ display: 'flex', gap: 16, marginTop: 52 }} onPaste={handleOtpPaste}>
                                 {otp.map((digit, i) => (

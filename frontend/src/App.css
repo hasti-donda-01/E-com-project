@@ -345,7 +345,7 @@ body {
 }
 
 .category-mega-column h2 a,
-.category-mega-column > a {
+.category-mega-column>a {
   display: block;
   margin-top: 10px;
   color: #66667a;
@@ -361,8 +361,8 @@ body {
 
 .category-mega-column h2 a:hover,
 .category-mega-column h2 a:focus-visible,
-.category-mega-column > a:hover,
-.category-mega-column > a:focus-visible {
+.category-mega-column>a:hover,
+.category-mega-column>a:focus-visible {
   color: #9f2089;
 }
 
@@ -780,7 +780,7 @@ body {
 .kxEhGu {
   margin: 0;
   height: 708px;
-  width: min(433px, 100%);
+  width: min(400px, 100%);
   position: relative;
 }
 
@@ -1542,9 +1542,11 @@ img {
   box-shadow: 0 12px 22px rgba(54, 10, 53, 0.18);
   transition: all 0.3s;
 }
-.promo-card:hover{
+
+.promo-card:hover {
   transform: translateY(-4px);
 }
+
 .promo-card img {
   width: 100%;
   height: auto;
@@ -1573,6 +1575,7 @@ img {
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-50%);
   }
@@ -3618,7 +3621,7 @@ body {
   border-bottom: 1px solid #e2e2ee;
 }
 
-.product-filter-group > summary {
+.product-filter-group>summary {
   position: relative;
   padding: 15px 20px 15px 0;
   color: #353543;
@@ -3628,11 +3631,11 @@ body {
   cursor: pointer;
 }
 
-.product-filter-group > summary::-webkit-details-marker {
+.product-filter-group>summary::-webkit-details-marker {
   display: none;
 }
 
-.product-filter-group > summary::after {
+.product-filter-group>summary::after {
   position: absolute;
   top: 50%;
   right: 1px;
@@ -3643,11 +3646,11 @@ body {
   transform: translateY(-55%);
 }
 
-.product-filter-group[open] > summary::after {
+.product-filter-group[open]>summary::after {
   content: '⌃';
 }
 
-.product-filter-group[open] > .category-search {
+.product-filter-group[open]>.category-search {
   margin-bottom: 12px;
 }
 
@@ -3698,7 +3701,7 @@ body {
   color: #85859d;
 }
 
-.category-search > span {
+.category-search>span {
   font-size: 24px;
   line-height: 1;
 }
@@ -3766,13 +3769,13 @@ body {
   font-size: 12px;
 }
 
-.gender-filter-options input:checked + span {
+.gender-filter-options input:checked+span {
   border-color: #9f2089;
   background: #fff4fb;
   color: #9f2089;
 }
 
-.gender-filter-options input:focus-visible + span {
+.gender-filter-options input:focus-visible+span {
   outline: 2px solid #9f2089;
   outline-offset: 2px;
 }
@@ -4972,7 +4975,7 @@ body {
   line-height: 1.5;
 }
 
-.admin-login-card > label {
+.admin-login-card>label {
   display: grid;
   gap: 7px;
   color: #444452;
@@ -4997,12 +5000,12 @@ body {
   box-shadow: 0 0 0 3px rgb(168 0 103 / 9%);
 }
 
-.admin-login-card > .admin-primary-btn {
+.admin-login-card>.admin-primary-btn {
   min-height: 42px;
   font-weight: 600;
 }
 
-.admin-login-card > .admin-primary-btn:disabled {
+.admin-login-card>.admin-primary-btn:disabled {
   cursor: not-allowed;
   opacity: 0.65;
 }
@@ -5392,7 +5395,7 @@ body {
   font-size: 19px;
 }
 
-.admin-category-modal-heading > button {
+.admin-category-modal-heading>button {
   width: 32px;
   height: 32px;
   border: 0;
@@ -5410,7 +5413,7 @@ body {
   padding: 20px 22px;
 }
 
-.admin-category-details > img {
+.admin-category-details>img {
   width: 100%;
   max-height: 210px;
   border-radius: 10px;
@@ -5418,7 +5421,7 @@ body {
   object-fit: contain;
 }
 
-.admin-category-details > p {
+.admin-category-details>p {
   display: grid;
   grid-template-columns: 110px minmax(0, 1fr);
   gap: 12px;
@@ -5433,7 +5436,7 @@ body {
   font-weight: 600;
 }
 
-.admin-category-edit-form > label {
+.admin-category-edit-form>label {
   display: grid;
   gap: 7px;
   color: #444452;
@@ -5474,7 +5477,7 @@ body {
   padding: 0 22px 20px;
 }
 
-.admin-category-modal-actions > button:not(.admin-primary-btn) {
+.admin-category-modal-actions>button:not(.admin-primary-btn) {
   border: 1px solid #e1e1e9;
   border-radius: 7px;
   padding: 10px 14px;
@@ -5486,7 +5489,7 @@ body {
 }
 
 .admin-category-modal-actions .admin-primary-btn:disabled,
-.admin-category-modal-actions > button:disabled {
+.admin-category-modal-actions>button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -5855,7 +5858,7 @@ body {
   font-size: 13px;
 }
 
-.product-detail-rating > span:first-child {
+.product-detail-rating>span:first-child {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -5882,7 +5885,7 @@ body {
   color: #5c5c6f;
 }
 
-.product-delivery > svg {
+.product-delivery>svg {
   flex: 0 0 auto;
   margin-top: 2px;
   color: #9f2089;
@@ -5913,7 +5916,7 @@ body {
   margin: 0;
 }
 
-.product-highlights dl > div {
+.product-highlights dl>div {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -6098,7 +6101,7 @@ body {
   font-weight: 600;
 }
 
-.wishlist-heading > span {
+.wishlist-heading>span {
   color: #777;
   font-size: 14px;
 }
@@ -6168,7 +6171,7 @@ body {
   font-size: 12px;
 }
 
-.wishlist-product-info > strong {
+.wishlist-product-info>strong {
   font-size: 16px;
 }
 
@@ -6254,12 +6257,12 @@ body {
   border-bottom: 1px solid #eee;
 }
 
-.shopping-cart-header > a {
+.shopping-cart-header>a {
   display: inline-flex;
   width: fit-content;
 }
 
-.shopping-cart-header > a img {
+.shopping-cart-header>a img {
   display: block;
   width: 88px;
   height: 28px;
@@ -6285,7 +6288,7 @@ body {
   font-size: 11px;
 }
 
-.checkout-steps li > span {
+.checkout-steps li>span {
   display: grid;
   width: 20px;
   height: 20px;
@@ -6299,7 +6302,7 @@ body {
   color: #9f2089;
 }
 
-.checkout-steps li.is-current > span {
+.checkout-steps li.is-current>span {
   border-color: #9f2089;
 }
 
@@ -6307,7 +6310,7 @@ body {
   color: #038d63;
 }
 
-.checkout-steps li.is-complete > span {
+.checkout-steps li.is-complete>span {
   border-color: #038d63;
 }
 
@@ -6359,7 +6362,7 @@ body {
   font-weight: 600;
 }
 
-.cart-section-heading > span {
+.cart-section-heading>span {
   color: #777;
   font-size: 13px;
 }
@@ -6424,7 +6427,7 @@ body {
   white-space: nowrap;
 }
 
-.cart-item-details > strong {
+.cart-item-details>strong {
   font-size: 14px;
 }
 
@@ -6503,7 +6506,7 @@ body {
   border-top: 1px solid #e5e5e5;
 }
 
-.cart-payment-card dl > div {
+.cart-payment-card dl>div {
   display: flex;
   min-height: 47px;
   align-items: center;
@@ -6603,7 +6606,7 @@ body {
   border-radius: 5px;
 }
 
-.checkout-address-panel > h2,
+.checkout-address-panel>h2,
 .checkout-address-form h3 {
   margin: 0 0 15px;
   font-size: 16px;
@@ -6631,7 +6634,7 @@ body {
   accent-color: #9f2089;
 }
 
-.checkout-address-option > span {
+.checkout-address-option>span {
   display: grid;
   gap: 5px;
   color: #626262;
@@ -6744,7 +6747,7 @@ body {
   accent-color: #9f2089;
 }
 
-.checkout-payment-options label > span {
+.checkout-payment-options label>span {
   display: grid;
   gap: 4px;
   color: #242424;
@@ -6937,8 +6940,8 @@ body {
   line-height: 1.3;
 }
 
-.customer-footer-brand > p,
-.customer-footer-contact > p {
+.customer-footer-brand>p,
+.customer-footer-contact>p {
   margin: 0;
   color: #71749b;
   font-size: 15px;
@@ -6971,7 +6974,7 @@ body {
   text-decoration: none;
 }
 
-.customer-footer-apps a > span:first-child {
+.customer-footer-apps a>span:first-child {
   font-size: 23px;
 }
 
@@ -7159,7 +7162,7 @@ body {
   background: #eb001b;
 }
 
-.payment-mastercard i + i {
+.payment-mastercard i+i {
   margin-left: -7px;
   background: #f79e1b;
   mix-blend-mode: multiply;
@@ -7386,7 +7389,7 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .sc-VHjGu > div > img {
+  .sc-VHjGu>div>img {
     display: block;
     width: 100% !important;
     height: auto;
@@ -7612,7 +7615,7 @@ button {
     padding-bottom: 6px;
   }
 
-  .custom-navbar .nav > a {
+  .custom-navbar .nav>a {
     flex: 0 0 auto;
   }
 
@@ -7636,8 +7639,8 @@ button {
     padding: 30px 18px;
   }
 
-  .insidesection > .flex,
-  .insidesection > div[class*="w-[41.66666667%]"] {
+  .insidesection>.flex,
+  .insidesection>div[class*="w-[41.66666667%]"] {
     width: 100% !important;
     max-width: 100%;
   }
@@ -7712,7 +7715,7 @@ button {
   }
 
   .Header__StyledProfileMenu-sc-1qdannb-2 span,
-  .Header__RightSection-sc-1qdannb-0 > a span {
+  .Header__RightSection-sc-1qdannb-0>a span {
     font-size: 11px;
   }
 
@@ -8039,7 +8042,7 @@ button {
   line-height: 1.2;
 }
 
-.investor-intro > p:last-child {
+.investor-intro>p:last-child {
   max-width: 600px;
   margin: 14px auto 0;
   color: #777681;
@@ -8082,26 +8085,26 @@ button {
   font-weight: 700;
 }
 
-.investor-presentation-cover > div:nth-of-type(1) {
+.investor-presentation-cover>div:nth-of-type(1) {
   padding: 82px 18px 24px;
   color: #fff;
   text-align: center;
 }
 
-.investor-presentation-cover > div:nth-of-type(1) p {
+.investor-presentation-cover>div:nth-of-type(1) p {
   margin: 0 0 18px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
 
-.investor-presentation-cover > div:nth-of-type(1) h2 {
+.investor-presentation-cover>div:nth-of-type(1) h2 {
   margin: 0;
   font-size: clamp(18px, 3vw, 27px);
   line-height: 1.15;
 }
 
-.investor-presentation-cover > div:nth-of-type(1) span {
+.investor-presentation-cover>div:nth-of-type(1) span {
   display: block;
   margin-top: 18px;
   color: #9f2089;
@@ -8449,7 +8452,7 @@ button {
   text-decoration: none;
 }
 
-.investor-footer-inner > p {
+.investor-footer-inner>p {
   grid-column: 1 / -1;
   margin: -14px 0 0;
   color: #aaa9ae;
@@ -8526,6 +8529,7 @@ button {
 }
 
 @media (max-width: 520px) {
+
   .investor-intro,
   .investor-presentation,
   .investor-stakeholders,
@@ -8560,7 +8564,7 @@ button {
     border-radius: 12px;
   }
 
-  .investor-presentation-cover > div:nth-of-type(1) {
+  .investor-presentation-cover>div:nth-of-type(1) {
     padding: 62px 10px 14px;
   }
 
@@ -8639,7 +8643,7 @@ button {
     grid-row: 1;
   }
 
-  .investor-footer-inner > p {
+  .investor-footer-inner>p {
     grid-column: 1 / -1;
     grid-row: 3;
     margin: 0;
@@ -8653,7 +8657,7 @@ button {
   padding: 30px 0 52px;
 }
 
-.investor-financials-page > h1 {
+.investor-financials-page>h1 {
   margin: 0 0 22px;
   color: #28272d;
   font-size: 30px;
@@ -8674,7 +8678,7 @@ button {
   font-size: 12px;
 }
 
-.financial-report-card > strong {
+.financial-report-card>strong {
   display: block;
   margin-top: 6px;
 }
@@ -8808,7 +8812,7 @@ button {
   scrollbar-width: thin;
 }
 
-.financial-results-tabs > span {
+.financial-results-tabs>span {
   flex: 0 0 auto;
   color: #777681;
 }
@@ -8921,7 +8925,7 @@ button {
     padding-bottom: 36px;
   }
 
-  .investor-financials-page > h1 {
+  .investor-financials-page>h1 {
     font-size: 25px;
   }
 
@@ -8979,7 +8983,7 @@ button {
   color: #302e35;
 }
 
-.investor-governance-page > h1 {
+.investor-governance-page>h1 {
   margin: 0 0 20px;
   font-size: 30px;
   line-height: 1.2;
@@ -9032,7 +9036,7 @@ button {
   content: "";
 }
 
-.governance-section-nav > button {
+.governance-section-nav>button {
   flex: 0 0 auto;
   width: 24px;
   height: 34px;
@@ -9045,7 +9049,7 @@ button {
   cursor: pointer;
 }
 
-.governance-section-nav > button:hover {
+.governance-section-nav>button:hover {
   color: #9f2089;
 }
 
@@ -9056,9 +9060,9 @@ button {
   scroll-margin-top: 75px;
 }
 
-.governance-board-section > h2,
-.governance-committee-section > h2,
-.governance-document-section > h2 {
+.governance-board-section>h2,
+.governance-committee-section>h2,
+.governance-document-section>h2 {
   margin: 0 0 17px;
   padding-bottom: 11px;
   border-bottom: 1px solid #e6e4e8;
@@ -9106,7 +9110,7 @@ button {
   margin-bottom: 26px;
 }
 
-.governance-committee > h3 {
+.governance-committee>h3 {
   margin: 0 0 10px;
   font-size: 15px;
 }
@@ -9117,7 +9121,7 @@ button {
   gap: 12px;
 }
 
-.governance-committee-members > div {
+.governance-committee-members>div {
   display: flex;
   min-height: 66px;
   flex-direction: column;
@@ -9187,7 +9191,7 @@ button {
     padding-bottom: 38px;
   }
 
-  .investor-governance-page > h1 {
+  .investor-governance-page>h1 {
     font-size: 25px;
   }
 
@@ -9234,7 +9238,7 @@ button {
   padding: 30px 0 54px;
 }
 
-.investor-announcements-page > h1 {
+.investor-announcements-page>h1 {
   margin: 0 0 20px;
   color: #24232a;
   font-size: 30px;
@@ -9381,7 +9385,7 @@ button {
     padding-bottom: 38px;
   }
 
-  .investor-announcements-page > h1 {
+  .investor-announcements-page>h1 {
     font-size: 25px;
   }
 
@@ -9420,14 +9424,14 @@ button {
   padding: 30px 0 32px;
 }
 
-.investor-resources-content > h1 {
+.investor-resources-content>h1 {
   margin: 0 0 24px;
   color: #24232a;
   font-size: 30px;
   line-height: 1.2;
 }
 
-.investor-resources-content > h2 {
+.investor-resources-content>h2 {
   margin: 0 0 20px;
   color: #45434b;
   font-size: 16px;
@@ -9494,7 +9498,7 @@ button {
     padding-bottom: 28px;
   }
 
-  .investor-resources-content > h1 {
+  .investor-resources-content>h1 {
     margin-bottom: 20px;
     font-size: 25px;
   }
@@ -9552,7 +9556,7 @@ button {
   padding: 42px 0 80px;
 }
 
-.investor-governance-page > h1 {
+.investor-governance-page>h1 {
   margin-bottom: 30px;
   font-size: clamp(38px, 4vw, 54px);
   letter-spacing: -1px;
@@ -9563,7 +9567,7 @@ button {
   padding: 0 8px;
 }
 
-.governance-section-nav > button {
+.governance-section-nav>button {
   width: 32px;
   height: 46px;
   font-size: 22px;
@@ -9591,8 +9595,8 @@ button {
   scroll-margin-top: 90px;
 }
 
-.governance-board-section > h2,
-.governance-committee-section > h2 {
+.governance-board-section>h2,
+.governance-committee-section>h2 {
   margin-bottom: 22px;
   padding: 0;
   border: 0;
@@ -9645,7 +9649,7 @@ button {
   margin-top: 40px;
 }
 
-.governance-committee-section > h2 {
+.governance-committee-section>h2 {
   margin-bottom: 28px;
 }
 
@@ -9653,7 +9657,7 @@ button {
   margin-bottom: 34px;
 }
 
-.governance-committee > h3 {
+.governance-committee>h3 {
   margin: 0 0 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid #dedde1;
@@ -9666,7 +9670,7 @@ button {
   gap: 22px;
 }
 
-.governance-committee-members > div {
+.governance-committee-members>div {
   display: block;
   min-height: 0;
   padding: 0;
@@ -9760,7 +9764,7 @@ button {
     font-size: 12px;
   }
 
-  .governance-committee > h3 {
+  .governance-committee>h3 {
     font-size: 16px;
   }
 }
